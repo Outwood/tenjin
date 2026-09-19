@@ -17,6 +17,8 @@ FactoryBot.define do
 
     factory :new_quiz do
       num_questions_asked { 0 }
+      streak { 0 }
+      answered_correct { 0 }
     end
   end
 end

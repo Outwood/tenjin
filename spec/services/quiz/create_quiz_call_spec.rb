@@ -179,4 +179,34 @@ RSpec.describe Quiz::CreateQuiz, :default_creates do
       expect(result.payload[:quiz]).to be_a(Quiz)
     end
   end
+  context "when deciding whether the quiz counts for the leaderboard" do
+    let(:result) { described_class.call(user: student, topic: topic.id, subject: quiz_subject) }
+
+    before { create(:question, topic: topic) }
+
+    it "counts the first attempt at a topic" do
+      expect(result.payload[:quiz].counts_for_leaderboard).to be true
+    end
+
+    context "with two attempts at the topic today" do
+      let!(:two_attempts_today) { create(:usage_statistic, user: student, topic: topic, quizzes_started: 2) }
+
+      it "counts the third attempt" do
+        expect(result.payload[:quiz].counts_for_leaderboard).to be true
+      end
+    end
+
+    context "with three attempts at the topic today" do
+      let!(:three_attempts_today) { create(:usage_statistic, user: student, topic: topic, quizzes_started: 3) }
+      let(:lucky_dip_result) { described_class.call(user: student, topic: "Lucky Dip", subject: quiz_subject) }
+
+      it "does not count the fourth attempt" do
+        expect(result.payload[:quiz].counts_for_leaderboard).to be false
+      end
+
+      it "still counts a lucky dip" do
+        expect(lucky_dip_result.payload[:quiz].counts_for_leaderboard).to be true
+      end
+    end
+  end
 end

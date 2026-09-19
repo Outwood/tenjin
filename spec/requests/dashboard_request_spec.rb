@@ -85,6 +85,38 @@ RSpec.describe "dashboard controller", :default_creates do
       end
     end
 
+    describe "as a student" do
+      before { sign_in student }
+
+      describe "the subject carousel" do
+        context "with a subject that has its own image" do
+          let(:computer_science) { create(:computer_science) }
+          let(:computer_science_classroom) { create(:classroom, subject: computer_science, school: school) }
+
+          before do
+            create(:enrollment, classroom: computer_science_classroom, user: student)
+            get dashboard_path
+          end
+
+          it "links the subject's image to its topic select page" do
+            expect(Capybara.string(response.body))
+              .to have_css("a[href='#{new_quiz_path(subject: "Computer Science")}'] img[src*='computer-science']")
+          end
+        end
+
+        context "with a subject that has no image of its own" do
+          before do
+            create(:enrollment, classroom: classroom, user: student)
+            get dashboard_path
+          end
+
+          it "shows the default subject image" do
+            expect(Capybara.string(response.body)).to have_css("img[src*='default-subject']")
+          end
+        end
+      end
+    end
+
     describe "as a student with an equipped dashboard style" do
       let!(:active_customisation) do
         create(:active_customisation, user: student,
