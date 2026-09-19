@@ -23,11 +23,12 @@
           thead
             tr
               th Username
-              th Email
-              th
-                span.visually-hidden Actions
-              th
-                span.visually-hidden Setup
+              - if current_admin.super?
+                th Email
+                th
+                  span.visually-hidden Actions
+                th
+                  span.visually-hidden Setup
               th Login As
           tbody
             - @school_admins.each do |sa|
