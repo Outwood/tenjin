@@ -193,6 +193,21 @@ hr.small {
   scroll-margin-top: 66px;
 }
 
+// Raleway, with the body stack behind it, for the headings and the navbar brand
+$font-family-raleway:
+  "Raleway",
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  Roboto,
+  "Helvetica Neue",
+  Arial,
+  sans-serif,
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol",
+  "Noto Color Emoji";
+
 h1,
 h2,
 h3,
@@ -206,26 +221,16 @@ h6,
 .h5,
 .h6 {
   margin-bottom: 0.5rem;
-  font-family:
-    "Raleway",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif,
-    "Apple Color Emoji",
-    "Segoe UI Emoji",
-    "Segoe UI Symbol",
-    "Noto Color Emoji";
+  font-family: $font-family-raleway;
   font-weight: 900;
   line-height: 1.2;
   color: inherit;
 }
 
-h1#branding-text {
-  margin-bottom: 0rem;
+// The brand is not a heading, so it asks for Raleway itself
+#branding-text {
+  font-family: $font-family-raleway;
+  font-weight: 900;
 }
 
 #navbar-main.bg-black {
