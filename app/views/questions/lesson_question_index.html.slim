@@ -1,5 +1,5 @@
 - content_for :title
-  title = ('Questions - ' + @lesson.title)
+  title = "Questions - #{@lesson.title}"
 .container
   h1.h1.mt-3.text-center = "Questions for #{@lesson.title}"
   ==render_small_separator

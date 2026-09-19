@@ -1,5 +1,5 @@
 - content_for :title
-  title = ('Leaderboard - ' + @subject.name)
+  title = "Leaderboard - #{@subject.name}"
 
 - alpine_data = { subjectId: @subject.id,
     topicId: @topic&.id,
