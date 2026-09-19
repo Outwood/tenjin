@@ -30,7 +30,7 @@ RSpec.describe "homeworks controller", :default_creates do
       end
 
       it "reports the class completion percentage" do
-        expect(Capybara.string(response.body)).to have_css("h3", text: "1 / 10 - 10%")
+        expect(Capybara.string(response.body)).to have_css(".display-4", text: "1 / 10 - 10%")
       end
     end
 

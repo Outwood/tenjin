@@ -1,6 +1,7 @@
+h1.visually-hidden Users
 section.page-section.text-center.pt-2#Users
   .container
-    h1.page-section-header.text-uppercase Students
+    h2.page-section-header.text-uppercase Students
     ==render_small_separator
     - students_table_options = { paginationSize: 10,
         initialSort: [{ column: 'reset_password', dir: 'asc' },
@@ -34,7 +35,7 @@ section.page-section.text-center.pt-2#Users
                 data: { controller: 'password-reset', action: 'click->password-reset#reset' })
     - if current_user.has_role? :school_admin
       = render('users/employee_table')
-    h1.page-section-header.text-uppercase.pt-5 Danger Zone
+    h2.page-section-header.text-uppercase.pt-5 Danger Zone
     ==render_small_separator
     button.btn.btn-danger.text-white#resetPrintModalButton(data-bs-toggle="modal"
       data-bs-target='#resetAllPasswordsModal') Reset and print all passwords

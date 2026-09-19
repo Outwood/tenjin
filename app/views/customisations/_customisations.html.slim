@@ -7,7 +7,7 @@
       - dashboard_styles.each do |style|
         .card.dashboard-style style=render_dashboard_style(style)
           .card-body
-            h2.page-section-header.text-uppercase.text-white = style.name
+            h4.page-section-header.text-uppercase.text-white = style.name
             ==render_small_separator(style)
           .m-5
           .m-3

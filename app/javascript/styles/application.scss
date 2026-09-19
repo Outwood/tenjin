@@ -164,6 +164,7 @@ hr.small {
   padding-bottom: 3.25rem;
 }
 
+// Sizes a heading whatever its level: a page's own heading is the h1, the sections below it h2
 .page-section-header {
   font-size: 3rem;
   @include media-breakpoint-down(md) {

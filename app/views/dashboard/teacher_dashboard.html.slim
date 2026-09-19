@@ -1,8 +1,9 @@
 - content_for :title
   title Dashboard
+h1.visually-hidden Dashboard
 section.page-section.text-center#myClassrooms
   .container
-    h1.page-section-header.text-uppercase My Classes
+    h2.page-section-header.text-uppercase My Classes
     ==render_small_separator
     .row.justify-content-center
       .table-responsive
@@ -26,7 +27,7 @@ section.page-section.text-center#myClassrooms
 - if @other_classrooms.present?
   section.page-section.text-center#otherClassrooms
     .container
-      h1.page-section-header.text-uppercase Other Classrooms
+      h2.page-section-header.text-uppercase Other Classrooms
       ==render_small_separator
       - other_classrooms_options = { paginationSize: 25, placeholder: 'No other classrooms have been found' }.to_json
       .row.justify-content-center

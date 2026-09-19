@@ -13,7 +13,7 @@ section.page-section.text-center.pt-2#HomeworkTitle
       => number_to_percentage(@homework.required, precision: 0)
       | required
     ==render_small_separator
-    h3.display-4 = report_progress(@homework_counts)
+    p.display-4 = report_progress(@homework_counts)
 section.page-section.text-center.pt-2#StudentProgress
   .container
     .row.col

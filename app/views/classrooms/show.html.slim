@@ -3,7 +3,7 @@
 .container
   h1.h1.mt-3.text-center = @classroom.name
   section.page-section.text-center.pt-2#homework
-    h1.page-section-header.text-uppercase Homework
+    h2.page-section-header.text-uppercase Homework
     ==render_small_separator
     .row.justify-content-center
       = link_to 'Set Homework', new_homework_path(classroom: {classroom_id: @classroom.id}), class: 'btn w-100 btn-primary'
@@ -27,7 +27,7 @@
                 td = report_progress(h)
                 td = h.due_date.strftime("%d/%m/%y %H:%M")
   section.page-section.text-center.pt-2#students
-    h1.page-section-header.text-uppercase Students
+    h2.page-section-header.text-uppercase Students
     ==render_small_separator
     .row.justify-content-center data-controller='datatable' data-datatable-options-value=({ pagination: false }.to_json)
       = render 'shared/table_search'
