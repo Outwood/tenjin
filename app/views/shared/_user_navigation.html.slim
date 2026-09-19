@@ -19,10 +19,12 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
           a.nav-link href=leaderboard_index_path
             | Leaderboard
         - if current_user.student?
-          li.nav-item.dropdown.active
-            a.nav-link.dropdown-toggle data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+          li.nav-item.dropdown
+            button#shopDropdown.nav-link.dropdown-toggle(type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false")
               | Shop
-            .dropdown-menu aria-labelledby='navbarDropdown'
+            .dropdown-menu aria-labelledby='shopDropdown'
               a.dropdown-item href=show_available_customisations_path(anchor: 'dashboard-styles')
                 | Styles
               a.dropdown-item href=show_available_customisations_path(anchor: 'icons')
@@ -38,7 +40,6 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
             li.nav-item
               a.nav-link href=users_path
                 | User Admin
-          - if current_user.has_role? :school_admin
             li.nav-item
               a.nav-link href=classrooms_path
                 | Setup Classrooms

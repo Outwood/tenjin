@@ -10,7 +10,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
 
   it "navigates from the shop dropdown to the styles page" do
     visit(dashboard_path)
-    find("a", text: "Shop").click
+    find("button", text: "Shop").click
     find("a", text: "Styles").click
     expect(page).to have_current_path(show_available_customisations_path)
   end
