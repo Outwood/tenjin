@@ -2,18 +2,23 @@
   title = ('Quiz - ' + @quiz.subject.name)
 = render('question_top')
 .container
-  - unless @lesson.blank? || @lesson.no_content?
-    .row.align-items-center
+  - if @lesson.blank? || @lesson.no_content?
+    = render_question
+  - else
+    .row.align-items-center data-controller='video-modal'
       .col-md-8
         = render_question
       .col-md-4.text-center#lesson
         h3.h3 = @lesson.title
-        .videoLink src=@lesson.video_url
-          img.img-fluid.card-img-top(video_id=@lesson.video_id
-            category=@lesson.category
-            src=@lesson.thumbnail_url
-            data-bs-toggle="modal"
-            data-bs-target="#videoModal")
-  - else
-    = render_question
+        button.videoLink.btn.p-0.w-100(type="button"
+          aria-label="Play #{@lesson.title}"
+          data-video-url=@lesson.video_url
+          data-bs-toggle="modal"
+          data-bs-target="#videoModal"
+          data-action="click->video-modal#open")
+          img.img-fluid.card-img-top(src=@lesson.thumbnail_url
+            alt=""
+            data-video-id=@lesson.video_id
+            data-video-modal-target=("vimeo" if @lesson.vimeo?))
+      = render 'shared/video_modal'
 = render('question_bottom')

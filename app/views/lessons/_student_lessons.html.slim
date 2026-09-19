@@ -1,16 +1,18 @@
 - @subjects.each do |s|
-  h1.py-4.h1.subject-title = s.name
+  h2.py-4.subject-title = s.name
   .row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-3
     - @lessons_by_subject.fetch(s.id, []).reject(&:no_content?).each do |l|
       .col
         .card.h-100
-          .card-body.videoLink(src=l.video_url
+          button.card-body.videoLink.btn.text-start.w-100(type="button"
+            aria-label="Play #{l.title}"
+            data-video-url=l.video_url
             data-bs-toggle="modal"
             data-bs-target="#videoModal"
             data-action="click->video-modal#open")
             h3.h4.lesson-title = l.title
             p.fw-light = l.topic.name
-            img.img-fluid.card-img-top(video_id=l.video_id
-              category=l.category
-              src=l.thumbnail_url
+            img.img-fluid.card-img-top(src=l.thumbnail_url
+              alt=""
+              data-video-id=l.video_id
               data-video-modal-target=("vimeo" if l.vimeo?))

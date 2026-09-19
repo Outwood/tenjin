@@ -15,7 +15,7 @@ export default class extends Controller {
 
   open(event) {
     this.iframeTarget.src =
-      event.currentTarget.getAttribute("src") + "?autoplay=1&rel=0";
+      event.currentTarget.dataset.videoUrl + "?autoplay=1&rel=0";
   }
 
   _stopVideo() {
@@ -26,7 +26,7 @@ export default class extends Controller {
   }
 
   async _loadVimeoThumbnail(img) {
-    const vidUrl = "https://vimeo.com/" + img.getAttribute("video_id");
+    const vidUrl = "https://vimeo.com/" + img.dataset.videoId;
     const res = await fetch(
       "https://vimeo.com/api/oembed.json?url=" + encodeURI(vidUrl),
     );

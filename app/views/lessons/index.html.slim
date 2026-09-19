@@ -11,14 +11,4 @@
     - else
       = render 'staff_lessons'
 
-  .modal.fade#videoModal data-video-modal-target='modal'
-    .modal-dialog.modal-dialog-centered.modal-lg role="document"
-      .modal-content
-        .modal-body.p-0.p-md-2
-          button.btn-close type="button" data-bs-dismiss="modal" aria-label="Close"
-          .ratio.ratio-16x9
-            iframe#video(data-video-modal-target='iframe'
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              allowscriptaccess="always"
-              src=""
-              allowfullscreen)
+  = render 'shared/video_modal'

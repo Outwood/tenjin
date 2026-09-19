@@ -174,8 +174,8 @@ RSpec.describe "lessons controller", :default_creates do
 
         it "offers to play only the lesson with a video" do
           expect(Capybara.string(response.body))
-            .to have_css("#topic_#{topic.id} button[src]", count: 1, visible: :all)
-            .and have_css("button[src='#{lesson.video_url}']", visible: :all)
+            .to have_css("#topic_#{topic.id} button[data-video-url]", count: 1, visible: :all)
+            .and have_css("button[data-video-url='#{lesson.video_url}']", visible: :all)
         end
       end
     end

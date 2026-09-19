@@ -18,7 +18,7 @@ details.lesson-topic.border-bottom id=dom_id(topic) open=opened data-controller=
           td.lesson-play
             - unless l.no_content?
               button.btn.btn-sm.btn-outline-secondary(type="button"
-                src=l.video_url
+                data-video-url=l.video_url
                 aria-label="Play #{l.title}"
                 data-bs-toggle="modal"
                 data-bs-target="#videoModal"
