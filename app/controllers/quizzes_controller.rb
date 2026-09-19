@@ -8,7 +8,7 @@ class QuizzesController < ApplicationController
   def index
     policy_scope(Quiz)
     quiz = Quiz.current_for(current_user)
-    redirect_to(quiz || "/quizzes/new")
+    redirect_to(quiz || new_quiz_path)
   end
 
   def show
@@ -35,16 +35,11 @@ class QuizzesController < ApplicationController
     @subject = Subject.find_by(name: params[:subject])
     authorize Quiz.new(subject: @subject)
 
-    if @subject.blank?
-      @subjects = current_user.subjects
-      render :new
-    else
-      @topics = @subject.topics.where(active: true)
-        .order(:name)
-        .pluck(:name, :id)
-      @topics.prepend([Quiz::LUCKY_DIP, Quiz::LUCKY_DIP])
-      render "select_topic"
-    end
+    @topics = @subject.topics.where(active: true)
+      .order(:name)
+      .pluck(:name, :id)
+    @topics.prepend([Quiz::LUCKY_DIP, Quiz::LUCKY_DIP])
+    render "select_topic"
   end
 
   def create
