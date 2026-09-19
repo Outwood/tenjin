@@ -3,7 +3,7 @@
     .card
       - @subjects.each do |s|
         - subject_id = s.name.parameterize
-        .card-header id="heading#{s.name}"
+        .card-header id="heading#{subject_id}"
           = link_to leaderboard_path(id: s.name), data: { turbo: false, bs_toggle: 'collapse', bs_target: "#body#{subject_id}" }
             p = s.name
         .collapse id="body#{subject_id}" aria-labelledby="heading#{subject_id}"
