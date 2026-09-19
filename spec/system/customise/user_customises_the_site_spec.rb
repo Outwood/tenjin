@@ -26,7 +26,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
 
     it "lists available customisations and their prices" do
       expect(page).to have_content(dashboard_customisation.name.upcase)
-        .and have_css("#cost", text: dashboard_customisation.cost)
+        .and have_css(".cost", text: dashboard_customisation.cost)
     end
 
     context "when not all customisations are purchasable" do

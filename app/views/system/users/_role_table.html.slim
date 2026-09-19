@@ -22,6 +22,8 @@ h2.admin-section-heading = role.humanize.pluralize
           - else
             td = select_tag 'user[subject]',
                 options_from_collection_for_select(Subject.authored_by(r, role), :id, :name),
+                id: "subject-select-#{role}-#{r.id}",
+                aria: {label: "Subject for #{r.forename} #{r.surname}"},
                 class: 'form-select form-select-sm',
                 form: "form-#{role}-#{r.id}"
           td = button_to 'Remove',
