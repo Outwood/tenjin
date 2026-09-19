@@ -193,9 +193,20 @@ RSpec.describe "questions controller", :default_creates do
       end
     end
 
-    context "with a multiple choice question" do
-      it "shows the correct answer toggle"
-      it "shows a remove link for each answer"
+    context "with a multiple choice question of three answers" do
+      let!(:extra_answers) { create_list(:answer, 2, question: question) }
+
+      before { get question_path(question) }
+
+      it "shows the correct answer toggle" do
+        expect(Capybara.string(response.body))
+          .to have_css("#table-answers th", text: "Correct?")
+          .and have_css("#table-answers tbody input.form-check-input", count: 3)
+      end
+
+      it "shows a remove link for each answer" do
+        expect(Capybara.string(response.body)).to have_link("Remove", count: 3)
+      end
     end
   end
 

@@ -35,9 +35,11 @@
           data: { action: 'change->reload-form#reload' })
   table.table#table-answers
     thead
-      th Answer Text
-      th = "Correct?" unless @question.short_answer?
-      th
+      tr
+        th Answer Text
+        th = "Correct?" unless @question.short_answer?
+        th
+          span.visually-hidden Actions
     tbody.fields data-nested-fields-target='fields'
       = f.fields_for :answers, answer_rows(@question) do |a|
         = render 'answer', f: a

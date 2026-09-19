@@ -10,7 +10,8 @@
         tr
           th Topic Name
           th Question #
-      - s.topics.select(&:active?).sort_by(&:name).each do |t|
-        tr
-          td = link_to t.name, topic_questions_path(topic_id: t)
-          td = @question_counts.fetch(t.id, 0)
+      tbody
+        - s.topics.select(&:active?).sort_by(&:name).each do |t|
+          tr
+            td = link_to t.name, topic_questions_path(topic_id: t)
+            td = @question_counts.fetch(t.id, 0)
