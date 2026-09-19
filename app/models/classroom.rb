@@ -22,14 +22,15 @@ class Classroom < ApplicationRecord
     c
   end
 
+  # Only homework with progress rows: the join drops any set before a pupil was enrolled
   def homework_counts
     h_count = HomeworkProgress.arel_table[:id].count
 
-    topic_name = Topic.arel_table[:name]
-    Homework.select(:id, h_count, homework_count_completed.sum.as("completed_count"), :due_date, :topic_id, topic_name)
-      .joins(:homework_progresses, :topic)
-      .group(:id, topic_name)
+    Homework.select(:id, h_count, homework_count_completed.sum.as("completed_count"), :due_date, :topic_id)
+      .joins(:homework_progresses)
+      .group(:id)
       .where(classroom: self)
+      .preload(:topic)
   end
 
   def homework_count_completed

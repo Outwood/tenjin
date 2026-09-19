@@ -48,4 +48,32 @@ RSpec.describe "classrooms controller", :default_creates do
         .to change { school.reload.sync_status }.to("needed")
     end
   end
+
+  describe "GET /classrooms/:id" do
+    # Homework only reaches the table once a pupil has progress on it
+    let!(:enrollment) { create(:enrollment, classroom: classroom, user: student) }
+    let!(:homeworks) do
+      Array.new(3) { create(:homework, classroom: classroom, topic: create(:topic, subject: quiz_subject)) }
+    end
+
+    before { sign_in school_admin }
+
+    it "names every homework's topic" do
+      get classroom_path(classroom)
+      expect(Capybara.string(response.body))
+        .to have_css("#homework-table tbody tr", count: 3)
+        .and have_link(homeworks.first.topic.name, href: homework_path(homeworks.first))
+    end
+
+    # Naming each topic from its own row would load one topic per homework
+    it "loads the homework topics in one query" do
+      topic_queries = []
+      recorder = ->(*, payload) { topic_queries << payload[:sql] if payload[:sql].include?('FROM "topics"') }
+      ActiveSupport::Notifications.subscribed(recorder, "sql.active_record") do
+        get classroom_path(classroom)
+      end
+
+      expect(topic_queries.size).to eq(1)
+    end
+  end
 end
