@@ -40,16 +40,4 @@ RSpec.describe System::AdminPolicy do
       it { is_expected.not_to be_manage_roles }
     end
   end
-
-  describe "#reset_year?" do
-    context "as a super admin" do
-      let(:admin) { build_stubbed(:super_admin) }
-      it { is_expected.to be_reset_year }
-    end
-
-    context "as a school group admin" do
-      let(:admin) { build_stubbed(:school_group_admin) }
-      it { is_expected.not_to be_reset_year }
-    end
-  end
 end

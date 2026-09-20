@@ -5,6 +5,5 @@ module System
     def show? = super?
     def new? = super?
     def manage_roles? = super?
-    def reset_year? = super?
   end
 end

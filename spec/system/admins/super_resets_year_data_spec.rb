@@ -2,12 +2,12 @@
 
 require "rails_helper"
 
-# confirm-text smoke; System::AdminsController#reset_year is covered in
-# spec/requests/system/admins_request_spec.rb
+# confirm-text smoke; System::Maintenance::YearResetsController#create is
+# covered in spec/requests/system/maintenance_request_spec.rb
 RSpec.describe "Super resets year data", :default_creates, :js do
   before do
     sign_in super_admin
-    visit system_admin_path(super_admin)
+    visit system_maintenance_path
   end
 
   it "keeps the reset disabled until the confirmation is typed" do

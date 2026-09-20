@@ -19,12 +19,13 @@ Rails.application.routes.draw do
         patch :sync
       end
     end
-    resource :impersonation, only: %i[create destroy]
-    resources :admins, only: [:show] do
-      member do
-        post :reset_year
+    resource :maintenance, only: [:show], controller: "maintenance" do
+      scope module: :maintenance do
+        resource :year_reset, only: [:create]
       end
     end
+    resource :impersonation, only: %i[create destroy]
+    resources :admins, only: [:show]
     resources :users, only: [] do
       collection do
         get :manage_roles

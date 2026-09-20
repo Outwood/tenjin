@@ -1,0 +1,29 @@
+- confirmation = System::Maintenance::YearResetsController::RESET_YEAR_CONFIRMATION
+.container
+  = admin_page_header 'Maintenance'
+
+  section.card.border-danger.mb-5 aria-labelledby='reset-year-heading' data-controller='confirm-text'
+    .card-body
+      h2.h4.card-title.text-danger#reset-year-heading Reset year data
+      p Deletes this year's activity for every school:
+      ul
+        li Classes, with their enrolments, homework and class winners
+        li Challenges and challenge progress
+        li Leaderboard scores and awards
+      p Accounts, subjects, questions, lessons and bought customisations are kept. This cannot be undone.
+      label.form-label for='reset-year-confirmation'
+        | Type
+        strong<> data-confirm-text-target='match' = confirmation
+        | to confirm
+      input.form-control.mb-3#reset-year-confirmation(
+        name='confirmation'
+        form='reset-year-form'
+        autocomplete='off'
+        data-confirm-text-target='input'
+        data-action='input->confirm-text#check')
+      = button_to 'Reset Year Data', system_maintenance_year_reset_path,
+        method: :post,
+        disabled: true,
+        class: 'btn btn-danger',
+        data: { confirm_text_target: 'button' },
+        form: { id: 'reset-year-form', data: { turbo: false } }

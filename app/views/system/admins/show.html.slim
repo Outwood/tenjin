@@ -1,30 +1,3 @@
-- confirmation = System::AdminsController::RESET_YEAR_CONFIRMATION
 .container
   = admin_page_header 'Settings' do
     = link_to 'Invite new admin', new_admin_invitation_path, class: 'btn btn-primary'
-
-  section.card.border-danger.mb-5 aria-labelledby='reset-year-heading' data-controller='confirm-text'
-    .card-body
-      h2.h4.card-title.text-danger#reset-year-heading Reset year data
-      p Deletes this year's activity for every school:
-      ul
-        li Classes, with their enrolments, homework and class winners
-        li Challenges and challenge progress
-        li Leaderboard scores and awards
-      p Accounts, subjects, questions, lessons and bought customisations are kept. This cannot be undone.
-      label.form-label for='reset-year-confirmation'
-        | Type
-        strong<> data-confirm-text-target='match' = confirmation
-        | to confirm
-      input.form-control.mb-3#reset-year-confirmation(
-        name='confirmation'
-        form='reset-year-form'
-        autocomplete='off'
-        data-confirm-text-target='input'
-        data-action='input->confirm-text#check')
-      = button_to 'Reset Year Data', reset_year_system_admin_path(current_admin),
-        method: :post,
-        disabled: true,
-        class: 'btn btn-danger',
-        data: { confirm_text_target: 'button' },
-        form: { id: 'reset-year-form', data: { turbo: false } }
