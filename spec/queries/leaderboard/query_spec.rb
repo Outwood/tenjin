@@ -53,6 +53,14 @@ RSpec.describe Leaderboard::Query, :default_creates do
           .find { |user| user["id"] == second_student.id }.icon).to be_nil
       end
     end
+
+    context "when the student has leaderboard awards" do
+      before { create_list(:leaderboard_award, 3, user: student, subject: quiz_subject, school: school) }
+
+      it "includes the award count" do
+        expect(leaderboard.awards).to eq(3)
+      end
+    end
   end
 
   describe "a subject leaderboard" do
@@ -81,6 +89,14 @@ RSpec.describe Leaderboard::Query, :default_creates do
 
       it "sums scores across all topics in the subject" do
         expect(leaderboard.first.score).to eq(TopicScore.all.sum(:score))
+      end
+    end
+
+    context "with a score in a topic from a different subject" do
+      let!(:other_subject_score) { create(:topic_score, user: student, topic: topic_different_subject) }
+
+      it "sums only the subject's topics" do
+        expect(leaderboard.first.score).to eq(TopicScore.find_by!(user: student, topic: topic).score)
       end
     end
   end
@@ -170,6 +186,31 @@ RSpec.describe Leaderboard::Query, :default_creates do
 
       it "uses all time topic scores instead of weekly scores" do
         expect(leaderboard.first.score).to eq(AllTimeTopicScore.all.sum(:score))
+      end
+    end
+
+    context "with all time scores across topics in the subject" do
+      let!(:all_time_score) { create(:all_time_topic_score, user: student, topic: topic) }
+      let!(:second_all_time_score) do
+        create(:all_time_topic_score, user: student, topic: create(:topic, subject: quiz_subject))
+      end
+
+      it "sums them" do
+        expect(leaderboard.first.score).to eq(all_time_score.score + second_all_time_score.score)
+      end
+    end
+
+    context "with a topic" do
+      let(:leaderboard) do
+        described_class.new(student, id: quiz_subject.name, topic: topic.id, all_time: "true").results
+      end
+      let!(:all_time_score) { create(:all_time_topic_score, user: student, topic: topic) }
+      let!(:other_topic_all_time_score) do
+        create(:all_time_topic_score, user: student, topic: create(:topic, subject: quiz_subject))
+      end
+
+      it "shows only that topic's all time score" do
+        expect(leaderboard.first.score).to eq(all_time_score.score)
       end
     end
   end
