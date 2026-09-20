@@ -13,7 +13,10 @@ RSpec.describe "the admin navigation", :default_creates, type: :request do
       it "reaches the overview through the brand link" do
         expect(Capybara.string(response.body))
           .to have_css("a.navbar-brand[href='#{system_root_path}'][aria-current='page']")
-          .and have_no_link("Statistics")
+      end
+
+      it "has no link to the removed Statistics page" do
+        expect(Capybara.string(response.body)).to have_no_link("Statistics")
       end
     end
 

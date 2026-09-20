@@ -5,6 +5,7 @@ require "rails_helper"
 RSpec.describe "Super views the overview", :default_creates, :js do
   let(:two_weeks_ago) { (Date.current - 2.weeks).beginning_of_week }
   let(:this_week) { Date.current.beginning_of_week }
+  let(:four_weeks_start) { 3.weeks.ago.to_date.beginning_of_week }
   let(:other_school) { create(:school) }
   let(:other_school_student) { create(:student, school: other_school) }
 
@@ -16,13 +17,13 @@ RSpec.describe "Super views the overview", :default_creates, :js do
     let!(:new_stat_other_school) { create(:user_statistic, user: other_school_student, week_beginning: this_week) }
     let!(:old_stat_other_school) { create(:user_statistic, user: other_school_student, week_beginning: two_weeks_ago) }
 
-    let(:total_answered) { UserStatistic.sum(:questions_answered) }
+    let(:four_week_answered) { UserStatistic.where(week_beginning: four_weeks_start..).sum(:questions_answered) }
     let(:weekly_answered) { UserStatistic.where(week_beginning: this_week).sum(:questions_answered) }
 
     before { visit(system_root_path) }
 
-    it "shows total questions answered" do
-      expect(page).to have_css("#asked_questions", exact_text: total_answered.to_fs(:delimited))
+    it "shows questions answered in the last four weeks" do
+      expect(page).to have_css("#asked_questions_last_four_weeks", exact_text: four_week_answered.to_fs(:delimited))
     end
 
     it "shows this week's questions answered" do
@@ -39,8 +40,9 @@ RSpec.describe "Super views the overview", :default_creates, :js do
       visit(system_root_path)
     end
 
-    it "shows total homeworks completed" do
-      expect(page).to have_css("#homeworks_completed", exact_text: HomeworkProgress.where(completed: true).count.to_s)
+    it "shows homeworks completed in the last four weeks" do
+      expect(page).to have_css("#homeworks_completed_last_four_weeks",
+        exact_text: HomeworkProgress.where(completed: true, updated_at: four_weeks_start..).count.to_s)
     end
 
     it "shows this week's completed homeworks" do

@@ -11,8 +11,8 @@ RSpec.describe "System::Overview", :default_creates, type: :request do
       end
 
       it "renders the platform activity table" do
-        expect(Capybara.string(response.body)).to have_css("#asked_questions")
-          .and have_css("#homeworks_completed")
+        expect(Capybara.string(response.body)).to have_css("#asked_questions_last_four_weeks")
+          .and have_css("#homeworks_completed_last_four_weeks")
       end
     end
 
@@ -23,7 +23,7 @@ RSpec.describe "System::Overview", :default_creates, type: :request do
       end
 
       it "renders the platform activity table" do
-        expect(Capybara.string(response.body)).to have_css("#asked_questions")
+        expect(Capybara.string(response.body)).to have_css("#asked_questions_last_four_weeks")
       end
     end
 
@@ -57,13 +57,13 @@ RSpec.describe "System::Overview", :default_creates, type: :request do
           .to have_css("#customisation-statistics tbody tr", count: 5)
       end
     end
+  end
 
-    describe "GET /system/schools/stats" do
-      before { sign_in super_admin }
+  describe "GET /system/schools/stats" do
+    before { sign_in super_admin }
 
-      it "no longer routes to statistics" do
-        expect { get "/system/schools/stats" }.to raise_error(ActiveRecord::RecordNotFound)
-      end
+    it "no longer routes to statistics" do
+      expect { get "/system/schools/stats" }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 end

@@ -3,17 +3,17 @@ table.table
     tr
       th
       th.text-end Weekly
-      th.text-end Overall
+      th.text-end Last 4 weeks
   tbody
     tr
       td Questions Asked
       td.text-end#asked_questions_weekly = number_with_delimiter(@school_statistics.asked_questions_weekly)
-      td.text-end#asked_questions = number_with_delimiter(@school_statistics.asked_questions)
+      td.text-end#asked_questions_last_four_weeks = number_with_delimiter(@school_statistics.asked_questions_last_four_weeks)
     tr
       td Homeworks Completed
       td.text-end#homeworks_completed_weekly = number_with_delimiter(@school_statistics.homeworks_completed_weekly)
-      td.text-end#homeworks_completed = number_with_delimiter(@school_statistics.homeworks_completed)
+      td.text-end#homeworks_completed_last_four_weeks = number_with_delimiter(@school_statistics.homeworks_completed_last_four_weeks)
     tr
       td Customisations Bought
-      td.text-end#customisations_bought_weekly = number_with_delimiter(@school_statistics.customisation_unlocks_weekly)
-      td.text-end#customisations_bought = number_with_delimiter(@school_statistics.customisation_unlocks)
+      td.text-end#customisation_unlocks_weekly = number_with_delimiter(@school_statistics.customisation_unlocks_weekly)
+      td.text-end#customisation_unlocks_last_four_weeks = number_with_delimiter(@school_statistics.customisation_unlocks_last_four_weeks)
