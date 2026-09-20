@@ -49,7 +49,7 @@
     "webpack-dev-server": "5"
   },
   "scripts": {
-    "lint": "eslint app",
+    "lint": "eslint app spec/javascript",
     "test:js": "jest"
   },
   "jest": {
