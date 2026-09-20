@@ -856,12 +856,24 @@ cannot fail as written — an `exact_text:` that is not a String (Rule
 21), a value that coincides with the one it is meant to exclude, a
 negative asserted before an asynchronous trigger lands (Rule 12) — has
 never tested anything, so what it *names* is the coverage to relocate.
-Give it data that discriminates and check the application does what the
-description says. If it does, write that example in the cheapest
-correct layer. If it does not, delete the example and report the defect
-to the user for an issue. Do not leave a pending, `xit`, `it.todo` or
-`test.todo` in any runner: Rule 18's ticket requirement applies to jest
-as much as to RSpec, and a comment naming the defect is not a ticket.
+Give it data that discriminates, write it in the cheapest correct
+layer, and run it unmarked. If it passes, it is done. If it fails,
+read the message before marking anything: a known-failure marker
+passes on any failure, so a broken mock or selector would hide behind
+it, and a failure anywhere but the description's own assertion is the
+new example's bug to fix first. When that assertion is what fails,
+because the application does not do what the description says, keep
+the example as a known failure — `pending "<what the app does
+instead>, see #N"` at the top of the block in RSpec, `test.failing`
+with the same comment in jest — and report the defect with a drafted
+issue. A known failure still runs its block, so the example fails the
+run the day the fix lands and retires itself; `xit`, `skip` and
+`test.todo` never run and never flip, so they are not substitutes.
+Never rewrite the assertion to match the wrong behaviour. The marker
+cites the issue (Rule 18b), and a comment naming the defect is not a
+ticket: ask for the number at Step 3, or for leave to open the issue.
+If the pass ends without one, delete the example and paste it verbatim
+into the report, so opening the issue and restoring it is one step.
 
 Borderline cases worth keeping: a single assertion-per-role that the
 page renders at all, as a smoke check, when the page is non-trivial
@@ -905,6 +917,12 @@ A pending is acceptable when it has either (a) a clear counterpart in
 the same describe block (Rule 11), or (b) a comment linking to a
 specific ticket with a concrete reason it is deferred. Anything else is
 rot.
+
+A `pending` with a body is a different thing from the bodiless
+placeholder above: RSpec runs the block and fails the run when it
+passes, so it pins a known defect until the fix retires it (Rule 17).
+It needs the ticket of (b), and its reason string names what the
+application does instead.
 
 ### Rule 19: Use `shared_examples` for repetition across describe blocks
 
@@ -1149,6 +1167,9 @@ In-scope changes:
   file or in `spec/support/`.
 - Pending examples added under Rule 11 — a description with no body —
   in any file the pass touches. They flag a gap; they invent nothing.
+- A known-failure example under Rule 17 — `pending` or `test.failing`
+  against an issue — in the cheapest correct layer for the behaviour
+  its description names.
 - The invalid-submit example Rule 17 calls for when a `new`/`edit`
   action has none: it is the request-layer home of coverage the system
   spec used to carry, not new coverage.
