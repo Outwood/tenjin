@@ -50,7 +50,9 @@ RSpec.describe "Author edits a question", :default_creates do
         .and have_field("answer-text-1", with: "True", readonly: true)
     end
 
-    # nested-fields#add smoke; answers_attributes handling is covered in spec/requests/question_request_spec.rb
+    # nested-fields#add smoke; the row template and its keying are in
+    # spec/javascript/controllers/nested_fields_controller.test.js, answers_attributes
+    # handling in spec/requests/question_request_spec.rb
     it "adds an answer", :js do
       click_link("Add Answer")
       find("#table-answers tbody tr:nth-of-type(2) .text-answer").set("Photosynthesis")

@@ -16,10 +16,7 @@ export default class extends Controller {
 
   removeRow(event) {
     event.preventDefault();
-    const trigger = event.currentTarget;
-    const destroyFlag = trigger.previousElementSibling;
-    if (destroyFlag) destroyFlag.value = "1";
-    trigger.closest("tr").remove();
+    event.currentTarget.closest("tr").remove();
   }
 
   removeRecord(event) {
