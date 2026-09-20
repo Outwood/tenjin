@@ -91,6 +91,10 @@ one of these changes, re-point the rule it names.
   `factory` from `Alpine.data.mock.calls[0][1]`; mock
   `channels/consumer` the same way where the component subscribes.
   → **Rule 16**'s client-side row, **Step 3**.
+- **Cable adapter.** `config/cable.yml` sets `adapter: test` for the
+  test environment; it inherits Async, which posts each delivery to the
+  event loop's thread pool. → **Rule 12**'s negative-after-trigger
+  ordering.
 - **Form param conventions.** Association choices post `*_id` from a
   `select` (`topic_id`, `classroom_id`, `lesson_id`), roles post the
   `role` enum, and question answers post `answers_attributes`; the
@@ -513,9 +517,12 @@ change — with a one-line comment naming what it guards.
 nothing.** `have_no_css` is satisfied the instant it runs, before the
 broadcast, stream or fetch has landed, so "does not update" passes
 whether or not the page would have updated. Send a second trigger on
-the same ordered channel that *should* change the page, wait for its
-positive, then assert the negative: messages on one stream arrive in
-order, so the first has landed by the time the second shows.
+the same stream that *should* change the page, wait for its positive,
+then assert the negative. The Redis and PostgreSQL adapters deliver a
+stream's messages in order; the test adapter hands each delivery to a
+thread pool, so there the order holds in practice — the second
+broadcast's own queries give the first a head start of milliseconds —
+not by guarantee.
 
 ```ruby
 # Before — passes before the broadcast arrives
@@ -687,10 +694,13 @@ is written under the same three steps as any other relocation: write it,
 break the function and watch it fail, then delete the browser example.
 Flagging it for a later pass is not a relocation: the browser example
 either stays at full cost or goes on a promise, and the promise is the
-suite-level hole Rule 16a warns about. The browser keeps exactly one
-example per component proving the wiring the jest test cannot — fetch
-→ JSON → rendered rows, or cable → `received` → DOM — annotated with the
-jest file that holds the branches. "Mocking `alpinejs` leaves the
+suite-level hole Rule 16a warns about. The browser keeps one example
+per component proving the wiring the jest test cannot, and it walks
+every wiring path the component has: the load (fetch → JSON → rendered
+rows) and then the push (cable → `received` → DOM) in one example,
+which is how Rule 16a's one smoke per mechanism is met without a
+second boot. Annotate it with the jest file that holds the branches.
+"Mocking `alpinejs` leaves the
 rendered ranks unproven" is not a reason to keep the branches in the
 browser: the wiring smoke proves rendering once; the branches need
 proving per branch, and jest is where that is cheap. If importing the
@@ -744,12 +754,13 @@ proving once — not once per resource.
   mechanism's branches from its code, then put each existing example
   against the branch its data actually reaches — not the branch its
   description names. Examples sharing a branch collapse to one; a branch
-  with no example gets one now, in the cheapest layer (jest for client
-  code). Writing that example is relocation, not invention: the
-  description already claimed the branch ("mid-table", "near the
-  bottom"); only the data missed it. "A refactor relocates, it doesn't
-  invent" and "flag, don't add" do not apply to a branch an existing
-  description names.
+  a description names but no example's data reaches gets one now, in
+  the cheapest layer (jest for client code). Writing that example is
+  relocation, not invention: the description already claimed the branch
+  ("mid-table", "near the bottom"); only the data missed it. "A refactor
+  relocates, it doesn't invent" and "flag, don't add" do not apply to a
+  branch an existing description names. A branch no description names
+  is a gap to flag, not to fill.
 
 Annotate the retained smoke test with a comment pointing to where the
 per-resource coverage now lives, so a later pass doesn't re-evaluate it.
