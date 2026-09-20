@@ -82,14 +82,38 @@ one of these changes, re-point the rule it names.
   with JSON (`request.xhr?`, `show.json.erb`) is asserted through
   `response.parsed_body` after `get path(format: :json), xhr: true`.
   → **Rules 10, 13, 16, 21**.
-- **JS test runner.** jest, run with `pnpm test:js`; `roots:
-  ["spec/javascript"]`, jsdom environment, `@swc/jest` transform.
-  `spec/javascript/controllers/*.test.js` instantiate a Stimulus
-  controller directly (`new FormController({ scope: { element } })`).
-  An Alpine component registered with `Alpine.data("name", factory)` is
-  reached by `jest.mock("alpinejs")`, importing the module, and taking
-  `factory` from `Alpine.data.mock.calls[0][1]`; mock
-  `channels/consumer` the same way where the component subscribes.
+- **JS test runner.** jest, `pnpm test:js`; `roots:
+  ["spec/javascript"]`, jsdom, `@swc/jest` (hoists `jest.mock` above
+  imports). CI's checks job runs it, and `pnpm lint` covers
+  `spec/javascript`. jsdom has no `fetch`: assign `global.fetch =
+  jest.fn().mockResolvedValue({ ok: true, json: async () => result })`
+  and delete it in `afterEach`.
+  - **Stimulus.** A controller that reads targets, values or outlets is
+    mounted through the runtime: `mountControllers(fixtureHtml, {
+    identifier: Controller })` in `spec/javascript/support/stimulus.js`
+    boots an `Application` over a fixture carrying the
+    `data-controller`, `data-*-target` and `data-action` attributes the
+    view renders, and resolves once `connect` has run; drive it with
+    DOM events and `unmount` it in `afterEach`
+    (`spec/javascript/controllers/confirm_text_controller.test.js`).
+    Only a controller that reads nothing from its scope is
+    instantiated directly (`new FormController({ scope: { element }
+    })`).
+  - **Alpine.** Pure logic (ranking, filtering, formatting) lives in
+    plain modules beside the component (`lib/leaderboard/`) and is
+    tested unmocked. The component itself is reached by factory-mocking
+    `alpinejs` (`() => ({ __esModule: true, default: { data: jest.fn()
+    } })`) and the modules it imports for side effects
+    (`channels/consumer`), importing it, and calling
+    `Alpine.data.mock.calls[0][1]` with the `x-data` arguments. Drive
+    it through its public methods with fetch stubbed, take the cable
+    callbacks from `consumer.subscriptions.create.mock.lastCall[1]`,
+    and render its HTML-returning method into a `tbody` so assertions
+    keep the browser's selectors
+    (`spec/javascript/lib/live_leaderboard.test.js`). The factory's
+    return is a plain object with no Alpine magics; a component using
+    `$refs`, `$watch` or `$nextTick` needs a real Alpine boot over a
+    fixture, which nothing here does yet.
   → **Rule 16**'s client-side row, **Step 3**.
 - **Cable adapter.** `config/cable.yml` sets `adapter: test` for the
   test environment; it inherits Async, which posts each delivery to the
