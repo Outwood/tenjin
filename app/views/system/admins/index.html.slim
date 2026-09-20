@@ -1,0 +1,21 @@
+.container.pb-5
+  = admin_page_header 'Admins' do
+    = link_to 'Invite an admin', new_admin_invitation_path, class: 'btn btn-primary'
+  .table-responsive
+    table.table#admins-table
+      thead
+        tr
+          th Email
+          th Role
+          th Invited
+          th Accepted
+          th
+            span.visually-hidden Actions
+      tbody
+        - @admins.each do |admin|
+          tr id=dom_id(admin)
+            td = admin.email
+            td = admin.role.humanize
+            td = admin.invitation_sent_at&.to_fs(:long) || '—'
+            td = admin.invitation_accepted_at&.to_fs(:long) || '—'
+            td.text-end

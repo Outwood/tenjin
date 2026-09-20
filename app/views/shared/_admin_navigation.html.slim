@@ -28,7 +28,7 @@ nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{break
       ul#account-links.navbar-nav.border-top.border-secondary.mt-2.pt-2 class="d-#{breakpoint}-none"
         li.navbar-text.small.text-truncate = current_admin.email
         - if current_admin.super?
-          li.nav-item = nav_link 'Settings', system_admin_path(current_admin), current: settings_current
+          li.nav-item = nav_link 'Admins', system_admins_path, current: settings_current
         li.nav-item
           = button_to 'Sign out', destroy_admin_session_path,
             method: :delete,
@@ -45,7 +45,7 @@ nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{break
           ul.dropdown-menu.dropdown-menu-end
             li.dropdown-header.text-truncate title=current_admin.email = current_admin.email
             - if current_admin.super?
-              li = nav_link 'Settings', system_admin_path(current_admin), css_class: 'dropdown-item', current: settings_current
+              li = nav_link 'Admins', system_admins_path, css_class: 'dropdown-item', current: settings_current
             li
               hr.dropdown-divider
             li

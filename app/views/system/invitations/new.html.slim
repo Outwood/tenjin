@@ -1,5 +1,5 @@
 .container
-  = admin_page_header 'Invite an Admin', breadcrumbs: [['Settings', system_admin_path(current_admin)]]
+  = admin_page_header 'Invite an Admin', breadcrumbs: [['Admins', system_admins_path]]
   = simple_form_for(resource, as: resource_name, url: invitation_path(resource_name), html: { method: :post }) do |f|
     = f.error_notification
     = f.input :email, hint: 'They join as a school group admin.'

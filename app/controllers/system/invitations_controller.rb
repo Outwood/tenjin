@@ -18,7 +18,7 @@ module System
     end
 
     def after_accept_path_for(_resource)
-      system_subjects_path
+      system_root_path
     end
 
     def pundit_user

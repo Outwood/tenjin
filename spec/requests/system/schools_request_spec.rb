@@ -36,11 +36,11 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
         expect(Capybara.string(response.body)).to have_no_css("nav[aria-label='Breadcrumb']")
       end
 
-      it "labels the account menu with the admin's initial and offers Settings" do
+      it "labels the account menu with the admin's initial and offers Admins" do
         expect(Capybara.string(response.body).find("#account-menu"))
           .to have_button(exact_text: admin.email.first.upcase, visible: :all)
           .and have_css("button[aria-label='Account menu for #{admin.email}']")
-          .and have_link("Settings", href: system_admin_path(admin), visible: :all)
+          .and have_link("Admins", href: system_admins_path, visible: :all)
           .and have_button("Sign out", visible: :all)
       end
 
@@ -51,10 +51,10 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
           .to have_css("#account-menu button.admin-avatar.#{colour}", visible: :all)
       end
 
-      it "lists the email, Settings and Sign out where the collapsed menu would hide the avatar" do
+      it "lists the email, Admins and Sign out where the collapsed menu would hide the avatar" do
         expect(Capybara.string(response.body).find("#account-links"))
           .to have_text(admin.email)
-          .and have_link("Settings", href: system_admin_path(admin))
+          .and have_link("Admins", href: system_admins_path)
           .and have_button("Sign out")
       end
 
@@ -72,13 +72,13 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
         expect(Capybara.string(response.body)).to have_no_button("Sync")
       end
 
-      it "keeps Settings, which only super admins may open, out of both account menus" do
+      it "keeps Admins, which only super admins may open, out of both account menus" do
         page = Capybara.string(response.body)
         expect(page.find("#account-menu"))
-          .to have_no_link("Settings", visible: :all)
+          .to have_no_link("Admins", visible: :all)
           .and have_button("Sign out", visible: :all)
         expect(page.find("#account-links"))
-          .to have_no_link("Settings")
+          .to have_no_link("Admins")
           .and have_button("Sign out")
       end
 
