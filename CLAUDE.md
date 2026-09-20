@@ -57,8 +57,11 @@ existing code does. That line says what the class *is*; the why/what
 rule governs the comments inside it.
 
 Directives are not comments: `# frozen_string_literal`, `# :nocov:`,
-`rubocop:disable`, YARD tags. In Slim, `/` is a code comment; `/!` is
-rendered into the page as an HTML comment.
+`rubocop:disable`, YARD tags, and the issue reference on a `pending`
+or `test.failing` marker — the number is what makes the marker legal
+under the `rspec-quality` skill's Rule 18, and it leaves with the
+marker. In Slim, `/` is a code comment; `/!` is rendered into the page
+as an HTML comment.
 
 A rejected alternative or a transitional setting is worth recording,
 but as a present-tense property of the design ("opt out of the 7.0
