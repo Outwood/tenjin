@@ -30,6 +30,17 @@ RSpec.describe "System::BaseController", type: :request do
   before do
     Rails.application.routes.draw do
       namespace :system do
+        root to: "overview#show"
+        resources :schools, only: [:index]
+        resources :subjects, only: [:index]
+        resources :customisations, only: [:index]
+        resources :school_groups, only: [:index]
+        resources :admins, only: [:show]
+        resources :users, only: [] do
+          collection do
+            get :manage_roles
+          end
+        end
         resources :pings, only: [:index]
       end
       devise_for :admins
@@ -51,6 +62,19 @@ RSpec.describe "System::BaseController", type: :request do
       sign_in super_admin
       get "/system/pings"
       expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "the main navigation", :default_creates do
+    before do
+      sign_in super_admin
+      get system_root_path
+    end
+
+    it "reaches the overview through the brand link, not a named one" do
+      expect(Capybara.string(response.body))
+        .to have_css("a.navbar-brand[href='#{system_root_path}']")
+        .and have_no_link("Statistics")
     end
   end
 end
