@@ -19,3 +19,8 @@
             td = admin.invitation_sent_at&.to_fs(:long) || '—'
             td = admin.invitation_accepted_at&.to_fs(:long) || '—'
             td.text-end
+              - if policy(admin).destroy?
+                = button_to 'Revoke', system_admin_path(admin),
+                  method: :delete,
+                  class: 'btn btn-sm btn-outline-danger',
+                  form: { class: 'd-inline', data: { turbo: true, turbo_confirm: "Revoke #{admin.email}?" } }

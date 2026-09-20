@@ -25,7 +25,7 @@ Rails.application.routes.draw do
       end
     end
     resource :impersonation, only: %i[create destroy]
-    resources :admins, only: [:index]
+    resources :admins, only: %i[index destroy]
     resources :users, only: [] do
       collection do
         get :manage_roles
