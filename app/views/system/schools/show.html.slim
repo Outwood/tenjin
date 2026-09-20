@@ -45,7 +45,7 @@
                   td = button_to 'Send Setup Email', send_welcome_email_system_user_path(sa),
                     class: 'btn btn-sm btn-outline-secondary',
                     form: { class: 'd-inline', data: { turbo: true } }
-                td = button_to 'Become User', become_system_admin_path(current_admin, user_id: sa.id),
+                td = button_to 'Become User', system_impersonation_path, params: { user_id: sa.id },
                   class: 'btn btn-sm btn-outline-secondary',
                   form: { class: 'd-inline', data: { turbo: false } }
 
@@ -69,6 +69,6 @@
                 => u.forename
                 = u.surname
               td = u.role.humanize
-              td = button_to 'Become User', become_system_admin_path(current_admin, user_id: u.id),
+              td = button_to 'Become User', system_impersonation_path, params: { user_id: u.id },
                 class: 'btn btn-sm btn-outline-secondary',
                 form: { data: { turbo: false } }

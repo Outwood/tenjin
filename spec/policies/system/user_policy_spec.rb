@@ -7,18 +7,6 @@ RSpec.describe System::UserPolicy, :default_creates do
 
   let(:target_user) { create(:teacher, school: school) }
 
-  describe "#become?" do
-    context "as a super admin" do
-      let(:actor) { build_stubbed(:super_admin) }
-      it { is_expected.to be_become }
-    end
-
-    context "as a school group admin" do
-      let(:actor) { build_stubbed(:school_group_admin) }
-      it { is_expected.to be_become }
-    end
-  end
-
   describe "#set_role?" do
     context "as a super admin against an employee" do
       let(:actor) { build_stubbed(:super_admin) }

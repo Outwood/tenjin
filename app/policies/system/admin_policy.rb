@@ -6,7 +6,5 @@ module System
     def new? = super?
     def manage_roles? = super?
     def reset_year? = super?
-    # Only drops the admin's own user session, so no level applies
-    def unbecome? = true
   end
 end

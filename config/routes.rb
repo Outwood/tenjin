@@ -19,10 +19,9 @@ Rails.application.routes.draw do
         patch :sync
       end
     end
+    resource :impersonation, only: %i[create destroy]
     resources :admins, only: [:show] do
       member do
-        post :become
-        delete :become, action: :unbecome
         post :reset_year
       end
     end

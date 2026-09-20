@@ -11,7 +11,7 @@ section#impersonation.bg-warning.text-dark.py-2 aria-label="Signed in as a user"
         = link_to 'Back to their pages', dashboard_path, class: 'btn btn-sm btn-outline-dark'
       - else
         = link_to 'Admin area', system_root_path, class: 'btn btn-sm btn-outline-dark'
-      = button_to (admin_area ? 'Sign them out' : 'Stop viewing'), become_system_admin_path(current_admin),
+      = button_to (admin_area ? 'Sign them out' : 'Stop viewing'), system_impersonation_path,
         method: :delete,
         class: 'btn btn-sm btn-dark',
         form: { data: { turbo: false } }

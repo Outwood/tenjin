@@ -2,8 +2,6 @@
 
 module System
   class UserPolicy < System::ApplicationPolicy
-    def become? = super? || school_group?
-
     def set_role? = super? && record.employee?
 
     alias_method :remove_role?, :set_role?
