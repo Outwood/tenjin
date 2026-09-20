@@ -8,6 +8,5 @@ module System
     def reset_year? = super?
     # Only drops the admin's own user session, so no level applies
     def unbecome? = true
-    def show_stats? = super? || school_group?
   end
 end

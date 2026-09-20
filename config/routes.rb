@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   devise_for :users, controllers: {omniauth_callbacks: "users/omniauth_callbacks"}
 
   namespace :system do
-    root to: "schools#index"
+    root to: "overview#show"
 
     resources :school_groups, except: %i[show]
     resources :subjects, except: %i[show] do
@@ -15,9 +15,6 @@ Rails.application.routes.draw do
     end
     resources :customisations, except: %i[show destroy]
     resources :schools do
-      collection do
-        get :stats
-      end
       member do
         patch :sync
       end

@@ -12,7 +12,7 @@
           tr
             td Employees
             td.text-end = number_with_delimiter(@role_counts["employee"].to_i)
-      = render('school_statistics_table')
+      = render('system/school_statistics_table')
   .row
     .col
       h2.admin-section-heading School admins

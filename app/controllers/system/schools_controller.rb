@@ -15,16 +15,6 @@ module System
         .group("users.school_id").sum(:questions_answered)
     end
 
-    def stats
-      authorize current_admin, :show_stats?
-      @school_statistics = School::Statistics.new
-      @customisation_statistics = Customisation.select(:id, :name, :customisation_type, "COUNT(customisation_unlocks.id) AS times_bought")
-        .left_joins(:customisation_unlocks)
-        .group(:id)
-        .order(times_bought: :desc, name: :asc)
-      render "overall_statistics"
-    end
-
     def show
       @school = authorize find_school
       @school_statistics = School::Statistics.new(@school)

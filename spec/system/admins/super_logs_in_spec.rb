@@ -9,6 +9,6 @@ RSpec.describe "Super logs in", :default_creates, :js do
     fill_in "Email", with: super_admin.email
     fill_in "Password", with: super_admin.password
     click_button "Log in"
-    expect(page).to have_content("Schools")
+    expect(page).to have_css("h1", text: "Overview")
   end
 end

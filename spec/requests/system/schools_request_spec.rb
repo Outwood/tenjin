@@ -99,35 +99,6 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
     end
   end
 
-  describe "GET /system/schools/stats" do
-    before { sign_in super_admin }
-
-    it "renders overall_statistics for super admins" do
-      get stats_system_schools_path
-      expect(response).to have_http_status(:ok)
-    end
-
-    context "with a customisation bought twice and one never bought" do
-      let!(:bought) { create(:customisation) }
-      let!(:unbought) { create(:customisation) }
-      let!(:unlocks) { create_list(:customisation_unlock, 2, customisation: bought) }
-
-      before { get stats_system_schools_path }
-
-      it "counts the purchases of each" do
-        page = Capybara.string(response.body)
-        expect(page).to have_css("#customisation_#{bought.id} td:last-child", exact_text: "2")
-          .and have_css("#customisation_#{unbought.id} td:last-child", exact_text: "0")
-      end
-    end
-
-    it "marks only Statistics as the current page, though its path is under Schools" do
-      get stats_system_schools_path
-      expect(Capybara.string(response.body)).to have_css("#navbar-main a.nav-link.active[aria-current='page']", count: 1)
-        .and have_css("a.nav-link.active", exact_text: "Statistics")
-    end
-  end
-
   describe "GET /system/schools/:id" do
     before do
       sign_in admin

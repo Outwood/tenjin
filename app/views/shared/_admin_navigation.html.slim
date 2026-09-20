@@ -3,7 +3,7 @@
 - settings_current = controller_path.in?(%w[system/admins system/invitations])
 nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{breakpoint}"
   .container-fluid
-    a.navbar-brand href=system_schools_path
+    a.navbar-brand href=system_root_path
       i.fas.fa-vihara.fa-2x.text-white
       span#branding-text.text-uppercase.text-white
         | Tenjin
@@ -18,8 +18,7 @@ nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{break
 
     #navbarSupportedContent.collapse.navbar-collapse
       ul.navbar-nav.me-auto
-        li.nav-item = nav_link 'Schools', system_schools_path, current: controller_path == 'system/schools' && action_name != 'stats'
-        li.nav-item = nav_link 'Statistics', stats_system_schools_path, current: action_name == 'stats'
+        li.nav-item = nav_link 'Schools', system_schools_path, current: controller_path == 'system/schools'
         li.nav-item = nav_link 'Subjects', system_subjects_path, current: controller_path == 'system/subjects'
         - if current_admin.super?
           li.nav-item = nav_link 'Customisations', system_customisations_path, current: controller_path == 'system/customisations'
