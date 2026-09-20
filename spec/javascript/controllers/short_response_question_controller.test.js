@@ -1,48 +1,80 @@
+// The short-response-question controller, mounted through Stimulus on the
+// markup the short answer question renders; the server's verdict arrives
+// through a stubbed fetch
+
 import ShortResponseQuestionController from "../../../app/javascript/controllers/short_response_question_controller";
+import { mountControllers, unmount } from "../support/stimulus";
 
-// Minimal Stimulus context: an unregistered controller has no target getters,
-// so the targets are plain properties set here.
-function makeController() {
-  const input = document.createElement("input");
-  const button = document.createElement("button");
-  const controller = new ShortResponseQuestionController({
-    scope: { element: document.body },
-  });
-  controller.inputTarget = input;
-  controller.submitButtonTarget = button;
-  return { controller, input, button };
-}
+const FIXTURE = `
+  <div data-controller="short-response-question"
+       data-short-response-question-quiz-stats-outlet="[data-controller~='quiz-stats']">
+    <input data-short-response-question-target="input"
+           data-action="keydown.enter->short-response-question#check">
+    <button data-short-response-question-target="submitButton"
+            data-action="click->short-response-question#check">Check Answer</button>
+    <button class="invisible" data-short-response-question-target="nextButton">Next</button>
+  </div>
+`;
 
-describe("ShortResponseQuestionController#_mark", () => {
-  it("paints the server's verdict rather than comparing the guess itself", () => {
-    const { controller, input, button } = makeController();
-    input.value = "the autumn";
+// Lets the click's fetch resolve and the verdict paint
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-    controller._mark({ correct: false, answer: [{ text: "the autumn" }] });
+describe("short-response-question", () => {
+  let application, input, submit, next;
 
-    expect(button.classList.contains("incorrect-answer")).toBe(true);
-    expect(button.textContent).toMatch(/^Incorrect/);
-  });
-
-  it("marks a correct verdict", () => {
-    const { controller, input, button } = makeController();
-    input.value = "anything";
-
-    controller._mark({ correct: true, answer: [{ text: "To Autumn" }] });
-
-    expect(button.classList.contains("correct-answer")).toBe(true);
-    expect(button.textContent).toMatch(/^Correct!/);
+  beforeEach(async () => {
+    application = await mountControllers(FIXTURE, {
+      "short-response-question": ShortResponseQuestionController,
+    });
+    input = document.querySelector("input");
+    [submit, next] = document.querySelectorAll("button");
   });
 
-  it("reveals every accepted answer after a miss", () => {
-    const { controller, input } = makeController();
-    input.value = "nope";
+  afterEach(() => {
+    unmount(application);
+    delete global.fetch;
+  });
 
-    controller._mark({
+  async function check(guess, verdict) {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => verdict });
+    input.value = guess;
+    submit.click();
+    await flush();
+  }
+
+  it("posts the guess and paints the server's verdict rather than comparing the guess itself", async () => {
+    await check("the autumn", {
+      correct: false,
+      answer: [{ text: "the autumn" }],
+    });
+
+    expect(global.fetch.mock.calls[0][1]).toMatchObject({
+      method: "PUT",
+      body: JSON.stringify({ answer: { short_answer: "the autumn" } }),
+    });
+    expect(submit.classList.contains("incorrect-answer")).toBe(true);
+    expect(submit.textContent).toMatch(/^Incorrect/);
+    expect(input.disabled).toBe(true);
+    expect(next.classList.contains("invisible")).toBe(false);
+  });
+
+  it("marks a correct verdict", async () => {
+    await check("anything", { correct: true, answer: [{ text: "To Autumn" }] });
+
+    expect(submit.classList.contains("correct-answer")).toBe(true);
+    expect(submit.textContent).toMatch(/^Correct!/);
+    expect(input.value).toBe("anything");
+  });
+
+  it("reveals every accepted answer after a miss", async () => {
+    await check("nope", {
       correct: false,
       answer: [{ text: "To Autumn" }, { text: "The Autumn" }],
     });
 
     expect(input.value).toBe("To Autumn or The Autumn");
+    expect(input.classList.contains("correct-answer")).toBe(true);
   });
 });
