@@ -26,6 +26,24 @@ RSpec.describe "System::Overview", :default_creates, type: :request do
         expect(Capybara.string(response.body)).to have_css("#asked_questions")
       end
     end
+
+    describe "customisation purchase counts" do
+      let(:bought) { create(:customisation, name: "Overview Bought Item") }
+      let(:unbought) { create(:customisation, name: "Overview Unbought Item") }
+
+      before do
+        sign_in super_admin
+        create_list(:customisation_unlock, 2, customisation: bought)
+        unbought
+        get system_root_path
+      end
+
+      it "counts times bought via a left join, including customisations with zero unlocks" do
+        page = Capybara.string(response.body)
+        expect(page).to have_css("#customisation_#{bought.id} td:last-child", text: "2")
+          .and have_css("#customisation_#{unbought.id} td:last-child", text: "0")
+      end
+    end
   end
 
   describe "GET /system/schools/stats" do
