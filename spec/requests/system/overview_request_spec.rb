@@ -40,16 +40,30 @@ RSpec.describe "System::Overview", :default_creates, type: :request do
 
       it "counts times bought via a left join, including customisations with zero unlocks" do
         page = Capybara.string(response.body)
-        expect(page).to have_css("#customisation_#{bought.id} td:last-child", text: "2")
-          .and have_css("#customisation_#{unbought.id} td:last-child", text: "0")
+        expect(page).to have_css("#customisation_#{bought.id} td:last-child", exact_text: "2")
+          .and have_css("#customisation_#{unbought.id} td:last-child", exact_text: "0")
       end
     end
-  end
 
-  describe "GET /system/schools/stats" do
-    it "no longer routes to statistics" do
-      sign_in super_admin
-      expect { get "/system/schools/stats" }.to raise_error(ActiveRecord::RecordNotFound)
+    describe "with more than five customisations" do
+      before do
+        sign_in super_admin
+        create_list(:customisation, 6)
+        get system_root_path
+      end
+
+      it "limits the table to the five most bought" do
+        expect(Capybara.string(response.body))
+          .to have_css("#customisation-statistics tbody tr", count: 5)
+      end
+    end
+
+    describe "GET /system/schools/stats" do
+      before { sign_in super_admin }
+
+      it "no longer routes to statistics" do
+        expect { get "/system/schools/stats" }.to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
   end
 end
