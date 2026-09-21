@@ -2,7 +2,7 @@
 
 module System
   class InvitationsController < Devise::InvitationsController
-    # The shared admin navigation asks the policies what this admin may reach
+    # A Devise controller, not a System::BaseController, so it needs the namespace too
     include System::PolicyNamespace
 
     before_action :authenticate_admin!
@@ -10,6 +10,11 @@ module System
     layout "system", only: %i[new create]
 
     def new
+      authorize current_admin
+      super
+    end
+
+    def create
       authorize current_admin
       super
     end

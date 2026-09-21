@@ -17,6 +17,18 @@ RSpec.describe System::AdminPolicy do
     end
   end
 
+  describe "#create?" do
+    context "as a super admin" do
+      let(:admin) { build_stubbed(:super_admin) }
+      it { is_expected.to be_create }
+    end
+
+    context "as a school group admin" do
+      let(:admin) { build_stubbed(:school_group_admin) }
+      it { is_expected.not_to be_create }
+    end
+  end
+
   describe "#new?" do
     context "as a super admin" do
       let(:admin) { build_stubbed(:super_admin) }
