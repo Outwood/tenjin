@@ -33,7 +33,6 @@ class LeaderboardController < ApplicationController
   end
 
   def set_leaderboard_ajax_response_variables
-    @subject = Subject.find_by(name: leaderboard_params[:id])
     return if @subject.blank?
 
     build_leaderboard

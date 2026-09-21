@@ -137,6 +137,14 @@ RSpec.describe "leaderboard controller", :default_creates do
       end
     end
 
+    context "with a subject name that matches nothing" do
+      before { get leaderboard_path("Alchemy", format: :json), xhr: true }
+
+      it "answers with an empty payload" do
+        expect(response.parsed_body.values).to all(be_nil)
+      end
+    end
+
     context "with classrooms in other subjects and schools" do
       let!(:second_classroom) { create(:classroom, subject: quiz_subject, school: school, name: "7 Beta") }
       let!(:third_classroom) { create(:classroom, subject: quiz_subject, school: school, name: "7 Alpha") }
