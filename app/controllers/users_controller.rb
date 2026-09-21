@@ -23,17 +23,28 @@ class UsersController < ApplicationController
 
   def update
     user = authorize find_user
-    user.password = update_password_params[:password]
-    user.save
-    redirect_to user, notice: "Password successfully updated"
+    password = update_password_params[:password]
+
+    # Devise's password= ignores a blank value, so an empty field saves cleanly
+    # while changing nothing
+    if password.blank?
+      redirect_to user, alert: "Password can't be blank"
+    elsif user.update(password: password)
+      redirect_to user, notice: "Password successfully updated"
+    else
+      redirect_to user, alert: user.errors.full_messages.to_sentence
+    end
   end
 
   def reset_password
     user = authorize find_user
     new_password = Devise.friendly_token(6)
-    user.reset_password(new_password, new_password)
-    user.save
-    render json: {id: user.id, password: new_password}
+
+    if user.reset_password(new_password, new_password)
+      render json: {id: user.id, password: new_password}
+    else
+      render json: {errors: user.errors.full_messages}, status: :unprocessable_content
+    end
   end
 
   def unlink_oauth_account
