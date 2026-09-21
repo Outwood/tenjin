@@ -5,13 +5,26 @@ export default class extends Controller {
   async reset(event) {
     event.preventDefault();
     const response = await csrfFetch(this.element.href, { method: "PATCH" });
-    if (!response.ok) {
-      console.error("Password reset failed", response.status);
-      return;
-    }
-    const { password } = await response.json();
+    const body = await response.json().catch(() => ({}));
     // Tabulator renders cells as `div.tabulator-cell` rather than `<td>`.
     const cell = this.element.closest("td, .tabulator-cell");
-    cell.innerHTML = `<div class="new-password">${password}</div>`;
+
+    if (response.ok) {
+      this.#replace(cell, "new-password", body.password);
+    } else {
+      this.#replace(
+        cell,
+        "reset-password-error text-danger small",
+        body.errors?.join(", ") || "Password reset failed",
+      );
+    }
+  }
+
+  // The message carries a record's own validation text, so it is written as text
+  #replace(cell, className, text) {
+    const result = document.createElement("div");
+    result.className = className;
+    result.textContent = text;
+    cell.replaceChildren(result);
   }
 }

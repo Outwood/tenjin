@@ -32,7 +32,7 @@ class UsersController < ApplicationController
     elsif user.update(password: password)
       redirect_to user, notice: "Password successfully updated"
     else
-      redirect_to user, alert: user.errors.full_messages.to_sentence
+      redirect_to user, alert: "Password not changed: #{user.errors.full_messages.to_sentence}"
     end
   end
 
