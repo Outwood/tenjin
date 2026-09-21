@@ -8,9 +8,9 @@ Rails.application.routes.draw do
     root to: "overview#show"
 
     resources :school_groups, except: %i[show]
-    resources :subjects, except: %i[show] do
-      member do
-        patch :reactivate
+    resources :subjects, except: %i[show destroy] do
+      scope module: :subjects do
+        resource :activation, only: %i[create destroy]
       end
     end
     resources :customisations, except: %i[show destroy]

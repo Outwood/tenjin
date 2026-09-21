@@ -42,21 +42,6 @@ module System
       end
     end
 
-    def destroy
-      subject = authorize find_subject
-      subject.update_attribute(:active, false)
-
-      enrollments_in(subject).destroy_all
-      Classroom.where(subject: subject).update_all(subject_id: nil)
-      redirect_to system_subjects_path
-    end
-
-    def reactivate
-      subject = authorize find_subject
-      subject.update!(active: true)
-      redirect_to system_subjects_path
-    end
-
     private
 
     def find_subject
@@ -67,13 +52,9 @@ module System
       params.require(:subject).permit(:name)
     end
 
-    def enrollments_in(subject)
-      Enrollment.joins(:classroom).where(classrooms: {subject_id: subject})
-    end
-
     def count_deactivation_losses
       @classroom_count = @subject.classrooms.count
-      @enrollment_count = enrollments_in(@subject).count
+      @enrollment_count = Enrollment.joins(:classroom).where(classrooms: {subject_id: @subject}).count
     end
   end
 end

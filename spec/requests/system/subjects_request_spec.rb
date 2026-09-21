@@ -121,20 +121,20 @@ RSpec.describe "System::Subjects", :default_creates, type: :request do
     end
   end
 
-  describe "DELETE /system/subjects/:id" do
+  describe "DELETE /system/subjects/:subject_id/activation" do
     it "deactivates the subject" do
       subject_record = create(:subject)
-      delete system_subject_path(subject_record)
+      delete system_subject_activation_path(subject_record)
       expect(subject_record.reload.active).to be(false)
     end
 
     it "redirects to the subjects index" do
-      delete system_subject_path(quiz_subject)
+      delete system_subject_activation_path(quiz_subject)
       expect(response).to redirect_to(system_subjects_path)
     end
 
     it "detaches the subject from its classrooms" do
-      expect { delete system_subject_path(quiz_subject) }
+      expect { delete system_subject_activation_path(quiz_subject) }
         .to change { classroom.reload.subject }.from(quiz_subject).to(nil)
     end
 
@@ -142,22 +142,22 @@ RSpec.describe "System::Subjects", :default_creates, type: :request do
       let!(:enrollment) { create(:enrollment, classroom: classroom, user: student) }
 
       it "destroys the enrollment" do
-        expect { delete system_subject_path(quiz_subject) }
+        expect { delete system_subject_activation_path(quiz_subject) }
           .to change { classroom.enrollments.count }.from(1).to(0)
       end
     end
   end
 
-  describe "PATCH /system/subjects/:id/reactivate" do
+  describe "POST /system/subjects/:subject_id/activation" do
     let(:deactivated_subject) { create(:subject, active: false) }
 
     it "reactivates the subject" do
-      expect { patch reactivate_system_subject_path(deactivated_subject) }
+      expect { post system_subject_activation_path(deactivated_subject) }
         .to change { deactivated_subject.reload.active }.from(false).to(true)
     end
 
     it "redirects to the subjects index" do
-      patch reactivate_system_subject_path(deactivated_subject)
+      post system_subject_activation_path(deactivated_subject)
       expect(response).to redirect_to(system_subjects_path)
     end
   end
