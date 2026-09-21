@@ -14,15 +14,22 @@ class TopicsController < ApplicationController
 
   def update
     topic = authorize find_topic
-    topic.update(topic_params)
-    head :no_content
+
+    if topic.update(topic_params)
+      head :no_content
+    else
+      refuse("Topic not renamed: #{topic.errors.full_messages.to_sentence}")
+    end
   end
 
   def destroy
     topic = authorize find_topic
 
-    topic.destroy
-    redirect_to questions_path
+    if topic.destroy
+      redirect_to questions_path
+    else
+      refuse("Topic not deleted")
+    end
   end
 
   private

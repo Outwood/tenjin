@@ -32,4 +32,24 @@ RSpec.describe "School admin sets up classrooms", :default_creates, :js do
       expect(page).to have_css("#syncStatus", exact_text: "Sync needed")
     end
   end
+
+  context "when the classroom refuses the change" do
+    # Only the model enforces client_id uniqueness, so a roster that reused an
+    # id leaves a row every later save refuses
+    let!(:twin) { create(:classroom, :sharing_a_client_id, school: school, client_id: classroom.client_id) }
+
+    before do
+      visit(classrooms_path)
+      select quiz_subject.name, from: "classroom-#{classroom.id}"
+    end
+
+    it "explains the refusal" do
+      expect(page).to have_content("Subject not changed: Client has already been taken")
+    end
+
+    it "puts the status back rather than leaving the class looking enrolled" do
+      expect(page).to have_css("#syncStatus", exact_text: "Synced")
+        .and have_no_content("School sync required")
+    end
+  end
 end

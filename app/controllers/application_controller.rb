@@ -26,6 +26,13 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # Reports a write a record refused to a Turbo-driven page, which keeps the
+  # state it is showing while the reason arrives in the flash container
+  def refuse(message)
+    flash.now[:alert] = message
+    render template: "shared/flash", status: :unprocessable_content
+  end
+
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."
     redirect_back fallback_location: root_path

@@ -10,6 +10,12 @@ FactoryBot.define do
     subject
     school
 
+    # Only the model enforces client_id uniqueness, so a roster that reused an
+    # id leaves two rows that every later save refuses
+    trait :sharing_a_client_id do
+      to_create { |instance| instance.save!(validate: false) }
+    end
+
     factory :classroom_with_students do
       transient do
         student_count { 2 }

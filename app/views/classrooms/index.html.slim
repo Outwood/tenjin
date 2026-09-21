@@ -2,7 +2,8 @@
   title Classrooms
 .container
   section.page-section.text-center.pt-2#classrooms(data-controller='sync-notice'
-    data-sync-notice-needed-label-value=t('school.sync_status.needed'))
+    data-sync-notice-needed-label-value=t('school.sync_status.needed')
+    data-action='turbo:submit-end->sync-notice#settle')
     p
       |Current school sync status:
       b.fw-bold#syncStatus data-sync-notice-target='status' = @school.sync_status_label

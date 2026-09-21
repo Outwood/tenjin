@@ -23,8 +23,16 @@ class ClassroomsController < ApplicationController
 
   def update
     classroom = authorize find_classroom
-    classroom.update(subject_id: update_classroom_params[:subject])
-    classroom.school.update(sync_status: "needed")
+
+    unless classroom.update(subject_id: update_classroom_params[:subject])
+      return refuse("Subject not changed: #{classroom.errors.full_messages.to_sentence}")
+    end
+
+    school = classroom.school
+    unless school.update(sync_status: "needed")
+      return refuse("Subject changed, but the school is not marked for a sync: #{school.errors.full_messages.to_sentence}")
+    end
+
     head :no_content
   end
 

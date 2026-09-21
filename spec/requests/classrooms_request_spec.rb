@@ -37,6 +37,7 @@ RSpec.describe "classrooms controller", :default_creates do
     before { sign_in school_admin }
 
     let(:new_subject) { create(:subject) }
+    let(:turbo_headers) { {"Accept" => "text/vnd.turbo-stream.html, text/html"} }
 
     it "assigns the chosen subject to the classroom" do
       expect { patch classroom_path(classroom), params: {subject: new_subject.id} }
@@ -46,6 +47,39 @@ RSpec.describe "classrooms controller", :default_creates do
     it "marks the school as needing a sync" do
       expect { patch classroom_path(classroom), params: {subject: new_subject.id} }
         .to change { school.reload.sync_status }.to("needed")
+    end
+
+    context "when the classroom refuses the change" do
+      let!(:twin) { create(:classroom, :sharing_a_client_id, school: school, client_id: classroom.client_id) }
+
+      before { patch classroom_path(classroom), params: {subject: new_subject.id}, headers: turbo_headers }
+
+      it "leaves the subject alone" do
+        expect { classroom.reload }.not_to change(classroom, :subject)
+      end
+
+      it "reports what the record refused" do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include("Subject not changed: Client has already been taken")
+      end
+    end
+
+    context "when the school refuses the sync flag" do
+      # schools.name is nullable, so a row its own validation refuses can exist
+      before do
+        school.update_column(:name, nil)
+        patch classroom_path(classroom), params: {subject: new_subject.id}, headers: turbo_headers
+      end
+
+      it "leaves the sync status alone" do
+        expect { school.reload }.not_to change(school, :sync_status)
+      end
+
+      it "says the school was not marked, rather than claiming it was" do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(CGI.unescapeHTML(response.body))
+          .to include("Subject changed, but the school is not marked for a sync: Name can't be blank")
+      end
     end
   end
 
