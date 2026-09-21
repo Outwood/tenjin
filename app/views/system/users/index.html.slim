@@ -33,9 +33,11 @@
           th School
           th Type
       tbody
-        - @directory.users.each do |user|
+        - @users.each do |user|
           tr id=dom_id(user)
             td = link_to user.full_name, system_user_path(user)
             td = user.username
             td = user.school&.name
             td = user.role.humanize
+
+  = render 'shared/pagination', pagy: @pagy, item_name: 'user'

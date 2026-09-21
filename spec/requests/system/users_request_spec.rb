@@ -39,6 +39,37 @@ RSpec.describe "System::Users", :default_creates, type: :request do
         .and have_no_link("Ada Lovelace", href: system_user_path(author))
     end
 
+    describe "with more users than fit on a page" do
+      let!(:second_pupil) { create(:student, school: school, forename: "Alan", surname: "Turing") }
+
+      before { stub_const("System::UsersController::PER_PAGE", 1) }
+
+      it "shows one page at a time, linking to the rest" do
+        get system_users_path
+
+        expect(Capybara.string(response.body))
+          .to have_link("Grace Hopper", href: system_user_path(pupil))
+          .and have_no_link("Ada Lovelace", href: system_user_path(author))
+          .and have_css("nav.pagy-bootstrap a", text: "2")
+      end
+
+      it "carries the filters into the page links" do
+        get system_users_path, params: {type: "student"}
+
+        expect(Capybara.string(response.body))
+          .to have_link("Grace Hopper", href: system_user_path(pupil))
+          .and have_no_link("Alan Turing", href: system_user_path(second_pupil))
+          .and have_css("nav.pagy-bootstrap a[href*='type=student']")
+      end
+
+      it "lands on the last page rather than erroring past the end" do
+        get system_users_path, params: {page: 99}
+
+        expect(response).to have_http_status(:ok)
+        expect(Capybara.string(response.body)).to have_link("Alan Turing", href: system_user_path(second_pupil))
+      end
+    end
+
     describe "as a school group admin" do
       before { sign_in create(:school_group_admin) }
 

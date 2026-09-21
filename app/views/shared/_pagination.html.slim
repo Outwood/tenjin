@@ -1,0 +1,5 @@
+nav.d-flex.flex-column.align-items-center.gap-2.mt-3 aria-label="Pagination"
+  - if pagy.pages > 1
+    == pagy_bootstrap_nav(pagy)
+  span.text-body-secondary.small
+    == pagy_info(pagy, item_name: item_name.pluralize(pagy.count))

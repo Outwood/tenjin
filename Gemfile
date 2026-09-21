@@ -67,6 +67,9 @@ gem "rolify"
 # Form builder
 gem "simple_form"
 
+# Pagination
+gem "pagy", "~> 9.3"
+
 # Bootstrap for emails
 gem "bootstrap-email"
 gem "sass-embedded", "~> 1"

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  include Pagy::Frontend
+
   FLASH_CLASSES = {
     "success" => "alert-success",
     "error" => "alert-danger",

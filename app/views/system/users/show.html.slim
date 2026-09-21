@@ -33,7 +33,7 @@
       form: { data: { turbo: false } }
 
   h2.admin-section-heading Roles
-  - if @user.roles.empty?
+  - if @roles.empty?
     p.text-body-secondary No roles held.
   - else
     table.table#roles-table
@@ -45,7 +45,7 @@
             th
               span.visually-hidden Actions
       tbody
-        - @user.roles.each do |role|
+        - @roles.each do |role|
           tr id=dom_id(role)
             td = role.name.humanize
             td = role.resource&.name
