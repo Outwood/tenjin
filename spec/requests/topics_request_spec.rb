@@ -67,6 +67,15 @@ RSpec.describe "topics controller", :default_creates do
         expect(flash[:alert]).to eq("Topic not renamed: Name can't be blank")
       end
     end
+
+    # Rails answers a bare */* with the first format refuse declares
+    context "when the caller accepts any format" do
+      before { patch topic_path(topic), params: {topic: {name: ""}}, headers: {"Accept" => "*/*"} }
+
+      it "redirects back rather than answering with a stream" do
+        expect(response).to redirect_to(root_path)
+      end
+    end
   end
 
   describe "DELETE /topics/:id" do
