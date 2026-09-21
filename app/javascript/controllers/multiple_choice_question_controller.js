@@ -20,8 +20,10 @@ export default class extends Controller {
         answer: { id: button.id.slice("response-".length) },
       }),
     });
+    // A refusal leaves the server on this question, so the page is stale:
+    // show it as it now stands rather than a dead set of buttons
     if (!response.ok) {
-      console.error("Quiz answer PUT failed", response.status);
+      this.reload();
       return;
     }
     const payload = await response.json();
@@ -31,6 +33,10 @@ export default class extends Controller {
 
     this.nextButtonTarget.classList.remove("invisible");
     this.nextButtonTarget.focus();
+  }
+
+  reload() {
+    location.reload();
   }
 
   _mark(correctAnswers, guess) {
