@@ -3,6 +3,7 @@
 module System
   class SchoolGroupsController < BaseController
     def index
+      authorize SchoolGroup, :index?
       @school_groups = policy_scope(SchoolGroup)
     end
 

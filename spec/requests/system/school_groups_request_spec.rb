@@ -16,6 +16,18 @@ RSpec.describe "System::SchoolGroups", :default_creates, type: :request do
       get system_school_groups_path
       expect(Capybara.string(response.body)).to have_text("No school groups yet.")
     end
+
+    describe "as a school group admin" do
+      before do
+        sign_in create(:school_group_admin)
+        get system_school_groups_path
+      end
+
+      it "refuses" do
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eq("You are not authorized to perform this action.")
+      end
+    end
   end
 
   describe "GET /system/school_groups/:id/edit" do
