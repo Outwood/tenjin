@@ -23,6 +23,32 @@ RSpec.describe "dashboard controller", :default_creates do
       it "does not show a link to school admin" do
         expect(Capybara.string(response.body)).to have_no_link("User Admin", href: users_path)
       end
+
+      it "lists the classroom under My Classes" do
+        expect(Capybara.string(response.body)).to have_css("#classroomTable tr[data-classroom='#{classroom.id}']")
+      end
+
+      it "links to the set homework form for the classroom" do
+        expect(Capybara.string(response.body))
+          .to have_link("Set Homework", href: new_homework_path(classroom: {classroom_id: classroom.id}))
+      end
+
+      it "does not show challenge points" do
+        expect(Capybara.string(response.body)).to have_no_css("#challenge-points")
+      end
+
+      context "with a classroom in the school the teacher is not enrolled in" do
+        let!(:other_classroom) { create(:classroom, school: school) }
+
+        before { get dashboard_path }
+
+        it "splits the classrooms between My Classes and Other Classrooms" do
+          expect(Capybara.string(response.body))
+            .to have_css("#otherClassroomTable tr[data-classroom='#{other_classroom.id}']")
+            .and have_no_css("#otherClassroomTable tr[data-classroom='#{classroom.id}']")
+            .and have_no_css("#classroomTable tr[data-classroom='#{other_classroom.id}']")
+        end
+      end
     end
 
     describe "as a school admin" do
@@ -112,6 +138,164 @@ RSpec.describe "dashboard controller", :default_creates do
 
           it "shows the default subject image" do
             expect(Capybara.string(response.body)).to have_css("img[src*='default-subject']")
+          end
+        end
+      end
+
+      context "with challenge points" do
+        before do
+          student.update!(challenge_points: 25)
+          get dashboard_path
+        end
+
+        it "shows them in the nav bar" do
+          expect(Capybara.string(response.body)).to have_css("#challenge-points", exact_text: "25")
+        end
+      end
+
+      describe "the challenge table" do
+        let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
+        let!(:challenge) { create(:challenge, topic: topic) }
+        let(:challenge_row) { "#challenge-table tr[data-challenge='#{challenge.id}']" }
+        let(:progress_cell) { "#{challenge_row} td:nth-child(2)" }
+
+        context "with no challenge progress" do
+          before { get dashboard_path }
+
+          it "lists the challenge without a tick" do
+            expect(Capybara.string(response.body)).to have_css(challenge_row)
+              .and have_no_css("#{progress_cell} i.fa-check")
+          end
+        end
+
+        context "with a progressed challenge" do
+          let!(:progress) { create(:challenge_progress, user: student, challenge: challenge, progress: 70) }
+
+          before { get dashboard_path }
+
+          it "shows the progress" do
+            expect(Capybara.string(response.body)).to have_css(progress_cell, exact_text: "70")
+          end
+        end
+
+        context "with a completed challenge" do
+          let!(:progress) do
+            create(:challenge_progress, user: student, challenge: challenge, progress: 100, completed: true)
+          end
+
+          before { get dashboard_path }
+
+          it "shows a tick" do
+            expect(Capybara.string(response.body)).to have_css("#{progress_cell} i.fa-check")
+          end
+        end
+
+        context "with a challenge in a subject the student is not enrolled in" do
+          let!(:other_challenge) { create(:challenge) }
+
+          before { get dashboard_path }
+
+          it "hides that challenge" do
+            expect(Capybara.string(response.body)).to have_css(challenge_row)
+              .and have_no_css("#challenge-table tr[data-challenge='#{other_challenge.id}']")
+          end
+        end
+      end
+
+      describe "the homework table" do
+        let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
+        let!(:homework) { create(:homework, classroom: classroom, topic: topic) }
+        let(:homework_row) { ".homework-row[data-homework='#{homework.id}']" }
+        let(:name_cell) { "#{homework_row} td:nth-child(2)" }
+        let(:status_cell) { "#{homework_row} td:last-child" }
+
+        context "with an active homework" do
+          before { get dashboard_path }
+
+          it "names the row after the topic" do
+            expect(Capybara.string(response.body)).to have_css(name_cell, exact_text: topic.name)
+          end
+
+          it "shows a cross icon" do
+            expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-times")
+              .and have_no_css("#{status_cell} i.fa-exclamation")
+          end
+        end
+
+        context "when the homework is completed" do
+          before do
+            homework.homework_progresses.find_by!(user: student).update!(completed: true)
+            get dashboard_path
+          end
+
+          it "shows a tick icon" do
+            expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-check")
+          end
+        end
+
+        context "when the homework is overdue" do
+          let!(:homework) { create(:homework, :overdue, classroom: classroom, topic: topic) }
+
+          before { get dashboard_path }
+
+          it "shows an exclamation icon" do
+            expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-exclamation")
+          end
+        end
+
+        context "when the homework was completed more than a week ago" do
+          let!(:homework) { create(:homework, :overdue, classroom: classroom, topic: topic, due_date: 2.weeks.ago) }
+
+          before do
+            homework.homework_progresses.find_by!(user: student).update!(completed: true)
+            get dashboard_path
+          end
+
+          it "hides the homework" do
+            expect(Capybara.string(response.body)).to have_no_css(homework_row)
+          end
+        end
+
+        context "with a second homework due later" do
+          let!(:later_homework) { create(:homework, due_date: 8.days.from_now, classroom: classroom, topic: topic) }
+
+          before { get dashboard_path }
+
+          it "orders the rows by due date" do
+            expect(Capybara.string(response.body)).to have_css(".homework-row:first-child[data-homework='#{homework.id}']")
+              .and have_css(".homework-row:nth-child(2)[data-homework='#{later_homework.id}']")
+          end
+        end
+
+        context "with 16 outstanding homeworks" do
+          let!(:more_homeworks) { create_list(:homework, 15, classroom: classroom, topic: topic) }
+
+          before { get dashboard_path }
+
+          it "lists 15" do
+            expect(Capybara.string(response.body)).to have_css("tr.homework-row", count: 15)
+          end
+        end
+
+        context "when the homework is for a lesson" do
+          let(:lesson) { create(:lesson, topic: topic, title: "Cell division") }
+          let!(:homework) { create(:homework, classroom: classroom, topic: topic, lesson: lesson) }
+
+          before { get dashboard_path }
+
+          it "names the row after the lesson" do
+            expect(Capybara.string(response.body)).to have_css(name_cell, exact_text: "Cell division")
+          end
+        end
+
+        context "with a homework in another classroom" do
+          let!(:other_homework) { create(:homework) }
+
+          before { get dashboard_path }
+
+          it "hides that homework" do
+            expect(Capybara.string(response.body)).to have_css(homework_row)
+              .and have_no_css(".homework-row[data-homework='#{other_homework.id}']")
           end
         end
       end
