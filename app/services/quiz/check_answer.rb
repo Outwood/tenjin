@@ -9,7 +9,7 @@ class Quiz::CheckAnswer < ApplicationCommand
   end
 
   def call
-    return failure(:no_answer_provided) if blank_answer?
+    return failure(:no_answer_provided) if no_answer?
 
     check_answer_correct unless already_answered?
 
@@ -27,8 +27,13 @@ class Quiz::CheckAnswer < ApplicationCommand
 
   private
 
-  def blank_answer?
-    !@question.short_answer? && @answer_given[:id].blank?
+  # Only one of the question's own answers counts as an answer
+  def no_answer?
+    !@question.short_answer? && chosen_answer.nil?
+  end
+
+  def chosen_answer
+    @chosen_answer ||= @question.answers.find_by(id: @answer_given[:id])
   end
 
   def already_answered?
@@ -57,10 +62,7 @@ class Quiz::CheckAnswer < ApplicationCommand
   end
 
   def check_multiple_choice
-    answer = Answer.where(id: @answer_given[:id]).pick(:correct)
-    return if answer.nil?
-
-    answer ? process_correct_answer : process_incorrect_answer
+    chosen_answer.correct ? process_correct_answer : process_incorrect_answer
   end
 
   def process_correct_answer

@@ -363,5 +363,20 @@ RSpec.describe "using a quiz" do
           .and have_css(".progress-bar[aria-valuenow='50.0']")
       end
     end
+
+    context "with a correct answer to another question" do
+      let(:other_question) { create(:question, topic: topic) }
+      let(:foreign_answer) { other_question.answers.find_by!(correct: true) }
+
+      it "refuses it" do
+        put quiz_path(quiz), params: {answer: {id: foreign_answer.id}}
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+
+      it "awards no leaderboard point" do
+        expect { put quiz_path(quiz), params: {answer: {id: foreign_answer.id}} }
+          .not_to change { TopicScore.find_by(user: student, topic: topic)&.score }.from(nil)
+      end
+    end
   end
 end

@@ -50,6 +50,27 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
     expect(result.error).to eq :no_answer_provided
   end
 
+  context "with a correct answer to another question" do
+    subject(:check) { described_class.call(quiz: quiz, question: question, answer_given: {id: foreign_answer.id}) }
+
+    let(:other_question) { create(:question, topic: topic) }
+    let(:foreign_answer) { other_question.answers.find_by!(correct: true) }
+
+    it "refuses it as no answer" do
+      expect(check).to be_failure
+      expect(check.error).to eq :no_answer_provided
+    end
+
+    it "leaves the question unanswered" do
+      check
+      expect(quiz.asked_questions.where(question: question).pluck(:correct)).to all(be_nil)
+    end
+
+    it "does not move the quiz on" do
+      expect { check }.not_to change { quiz.reload.num_questions_asked }
+    end
+  end
+
   context "with a short-answer question" do
     let(:short_answer_question) { create(:short_answer_question, topic: topic) }
     let(:quiz) { create(:quiz, user: user, question_order: [short_answer_question.id], num_questions_asked: 1) }
