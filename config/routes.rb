@@ -26,15 +26,14 @@ Rails.application.routes.draw do
     end
     resource :impersonation, only: %i[create destroy]
     resources :admins, only: %i[index destroy]
-    resources :users, only: [] do
+    resources :users, only: %i[index show] do
       collection do
         get :manage_roles
       end
-      member do
-        patch :set_role
-        delete :remove_role
-        patch :update_email
-        post :send_welcome_email
+      scope module: :users do
+        resources :roles, only: %i[create destroy]
+        resource :email, only: [:update]
+        resource :welcome_email, only: [:create]
       end
     end
   end

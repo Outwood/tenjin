@@ -1,0 +1,41 @@
+.container.pb-5
+  = admin_page_header 'Users'
+
+  = form_with url: system_users_path, method: :get, data: { turbo: false } do
+    .row.g-2.align-items-end.mb-4
+      .col-md-4
+        = label_tag :search, 'Search', class: 'form-label'
+        = search_field_tag :search, params[:search], class: 'form-control'
+      .col-md-2
+        = label_tag :type, 'Type', class: 'form-label'
+        = select_tag :type,
+          options_for_select(User.roles.keys.map { |r| [r.humanize, r] }, params[:type]),
+          include_blank: 'Any', class: 'form-select'
+      .col-md-2
+        = label_tag :role, 'Role', class: 'form-label'
+        = select_tag :role,
+          options_for_select(User::ChangeUserRole::ROLES.map { |r| [r.humanize, r] }, params[:role]),
+          include_blank: 'Any', class: 'form-select'
+      .col-md-3
+        = label_tag :school, 'School', class: 'form-label'
+        = select_tag :school,
+          options_from_collection_for_select(@schools, :id, :name, params[:school]),
+          include_blank: 'Any', class: 'form-select'
+      .col-md-1
+        = submit_tag 'Filter', class: 'btn btn-primary w-100'
+
+  .table-responsive
+    table.table#users-table
+      thead
+        tr
+          th Name
+          th Username
+          th School
+          th Type
+      tbody
+        - @directory.users.each do |user|
+          tr id=dom_id(user)
+            td = link_to user.full_name, system_user_path(user)
+            td = user.username
+            td = user.school&.name
+            td = user.role.humanize

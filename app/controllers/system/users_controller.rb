@@ -1,17 +1,22 @@
 # frozen_string_literal: true
 
 module System
+  # The platform's users, searchable as a directory and shown one at a time.
   class UsersController < BaseController
-    def set_role
-      user = authorize find_user
-      result = User::ChangeUserRole.call(user: user, role: set_user_role_params[:role], action: :add, subject: set_user_role_params[:subject])
-      handle_role_result(result, user)
+    def index
+      @directory = User::Directory.new(
+        scope: policy_scope(User),
+        search: params[:search],
+        type: params[:type],
+        role: params[:role],
+        school: params[:school]
+      )
+      @schools = policy_scope(School).order(:name)
     end
 
-    def remove_role
-      user = authorize find_user
-      result = User::ChangeUserRole.call(user: user, role: set_user_role_params[:role], action: :remove, subject: set_user_role_params[:subject])
-      handle_role_result(result, user)
+    def show
+      @user = authorize find_user
+      @subjects = Subject.where(active: true).order(:name)
     end
 
     def manage_roles
@@ -20,54 +25,14 @@ module System
         @school = School.find(manage_roles_params[:school])
         @employees = User.where(school: @school, role: "employee")
       end
-      @school_admins = User.includes(:school).holding_role(:school_admin)
-      @lesson_authors = User.holding_role(:lesson_author)
-      @question_authors = User.holding_role(:question_author)
       @all_subjects = Subject.where(active: true)
       render "manage_roles"
     end
 
-    def update_email
-      @user = authorize find_user
-      @user.email = update_email_params[:email]
-      @user.save
-      flash.now[:notice] = "Updated email to #{@user.full_name}"
-      render template: "shared/flash"
-    end
-
-    def send_welcome_email
-      @user = authorize find_user
-      flash.now[:notice] = "Setup email sent to #{@user.full_name} (#{@user.email})"
-      UserMailer.with(user: @user).setup_email.deliver_later
-      @user.send_reset_password_instructions
-      render template: "shared/flash"
-    end
-
     private
 
-    def handle_role_result(result, user)
-      case result
-      in {success: true}
-        redirect_to manage_roles_system_users_path(school: user.school)
-      in {success: false, error:}
-        redirect_to manage_roles_system_users_path(school: user.school), alert: error
-      end
-    end
+    def find_user = User.find(params[:id])
 
-    def find_user
-      User.find(params[:id])
-    end
-
-    def set_user_role_params
-      params.require(:user).permit(:role, :subject, :id)
-    end
-
-    def update_email_params
-      params.require(:user).permit(:email)
-    end
-
-    def manage_roles_params
-      params.permit(:school)
-    end
+    def manage_roles_params = params.permit(:school)
   end
 end

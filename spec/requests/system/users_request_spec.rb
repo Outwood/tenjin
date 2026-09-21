@@ -3,6 +3,111 @@
 require "rails_helper"
 
 RSpec.describe "System::Users", :default_creates, type: :request do
+  let!(:author) { create(:teacher, school: school, forename: "Ada", surname: "Lovelace") }
+  let!(:pupil) { create(:student, school: school, forename: "Grace", surname: "Hopper") }
+
+  describe "GET /system/users" do
+    before { sign_in super_admin }
+
+    it "lists every user, linking each to their page" do
+      get system_users_path
+      expect(Capybara.string(response.body))
+        .to have_link("Ada Lovelace", href: system_user_path(author))
+        .and have_link("Grace Hopper", href: system_user_path(pupil))
+    end
+
+    it "filters by search term" do
+      get system_users_path, params: {search: "lovel"}
+      expect(Capybara.string(response.body))
+        .to have_link("Ada Lovelace", href: system_user_path(author))
+        .and have_no_link("Grace Hopper", href: system_user_path(pupil))
+    end
+
+    it "filters by held role" do
+      author.add_role(:lesson_author, quiz_subject)
+      get system_users_path, params: {role: "lesson_author"}
+      expect(Capybara.string(response.body))
+        .to have_link("Ada Lovelace", href: system_user_path(author))
+        .and have_no_link("Grace Hopper", href: system_user_path(pupil))
+    end
+
+    it "filters by school" do
+      elsewhere = create(:student, school: create(:school), forename: "Alan", surname: "Turing")
+      get system_users_path, params: {school: elsewhere.school_id}
+      expect(Capybara.string(response.body))
+        .to have_link("Alan Turing", href: system_user_path(elsewhere))
+        .and have_no_link("Ada Lovelace", href: system_user_path(author))
+    end
+
+    describe "as a school group admin" do
+      before { sign_in create(:school_group_admin) }
+
+      it "lists the same users" do
+        get system_users_path
+        expect(Capybara.string(response.body))
+          .to have_link("Ada Lovelace", href: system_user_path(author))
+          .and have_link("Grace Hopper", href: system_user_path(pupil))
+      end
+    end
+  end
+
+  describe "GET /system/users/:id" do
+    describe "as a super admin" do
+      before do
+        sign_in super_admin
+        author.add_role(:lesson_author, quiz_subject)
+        get system_user_path(author)
+      end
+
+      it "names the user and their school" do
+        expect(Capybara.string(response.body))
+          .to have_css("h1", text: "Ada Lovelace")
+          .and have_content(school.name)
+      end
+
+      it "lists the roles they hold with the subject each is granted on" do
+        expect(Capybara.string(response.body))
+          .to have_css("#roles-table", text: "Lesson author")
+          .and have_css("#roles-table", text: quiz_subject.name)
+      end
+
+      it "offers the email and setup-email controls" do
+        expect(Capybara.string(response.body))
+          .to have_field("user[email]", with: author.email)
+          .and have_button("Send Setup Email")
+      end
+    end
+
+    describe "as a school group admin" do
+      before do
+        sign_in create(:school_group_admin)
+        get system_user_path(author)
+      end
+
+      it "shows the user without the email or role controls" do
+        expect(Capybara.string(response.body))
+          .to have_css("h1", text: "Ada Lovelace")
+          .and have_no_field("user[email]")
+          .and have_no_button("Send Setup Email")
+      end
+
+      it "still offers impersonation" do
+        expect(Capybara.string(response.body)).to have_button("Become User")
+      end
+    end
+
+    describe "for a student" do
+      before do
+        sign_in super_admin
+        get system_user_path(pupil)
+      end
+
+      it "offers no role controls, since roles are granted to employees only" do
+        expect(Capybara.string(response.body)).to have_no_select("user[role]")
+      end
+    end
+  end
+
   describe "GET /system/users/manage_roles" do
     before { sign_in super_admin }
 
@@ -12,8 +117,6 @@ RSpec.describe "System::Users", :default_creates, type: :request do
     end
 
     context "with a school selected" do
-      let!(:teacher) { super() }
-
       before { get manage_roles_system_users_path(school: school) }
 
       it "renders every id once" do
@@ -26,83 +129,6 @@ RSpec.describe "System::Users", :default_creates, type: :request do
           .to have_css("select[name='user[role]'][required] option:first-child[value='']", exact_text: "Choose role…")
           .and have_no_css("select[name='user[role]'] option[selected]")
       end
-    end
-
-    context "with an author on two subjects" do
-      let(:author) { create(:question_author, subject: quiz_subject) }
-
-      before do
-        author.add_role(:question_author, create(:subject))
-        get manage_roles_system_users_path
-      end
-
-      it "lists the author once" do
-        expect(Capybara.string(response.body)).to have_css("#question_author-table tbody tr", count: 1)
-      end
-    end
-  end
-
-  describe "PATCH /system/users/:id/set_role" do
-    context "as a super admin" do
-      before { sign_in super_admin }
-
-      it "adds a role" do
-        employee = create(:user, school: school, role: :employee)
-        expect {
-          patch set_role_system_user_path(employee), params: {user: {role: "school_admin"}}
-        }.to change { employee.reload.has_role?(:school_admin) }.from(false).to(true)
-      end
-
-      context "with no role chosen" do
-        before { patch set_role_system_user_path(teacher), params: {user: {role: ""}} }
-
-        it "adds no role" do
-          expect(teacher.reload.roles).to be_empty
-        end
-
-        it "explains the refusal" do
-          expect(response).to redirect_to(manage_roles_system_users_path(school: school))
-          expect(flash[:alert]).to eq("Role not found")
-        end
-      end
-
-      it "does not allow roles to be added to students" do
-        patch set_role_system_user_path(student), params: {user: {role: "school_admin", subject: school}}
-        expect(response).to redirect_to(root_path)
-      end
-    end
-
-    context "as a student" do
-      before { sign_in student }
-
-      it "requires admin authentication" do
-        patch set_role_system_user_path(teacher), params: {user: {role: "school_admin", subject: school}}
-        expect(response).to redirect_to(new_admin_session_path)
-      end
-    end
-  end
-
-  describe "DELETE /system/users/:id/remove_role" do
-    before { sign_in super_admin }
-
-    it "removes a role" do
-      employee = create(:user, school: school, role: :employee)
-      employee.add_role(:school_admin)
-      expect {
-        delete remove_role_system_user_path(employee), params: {user: {role: "school_admin"}}
-      }.to change { employee.reload.has_role?(:school_admin) }.from(true).to(false)
-    end
-  end
-
-  describe "PATCH /system/users/:id/update_email" do
-    let(:turbo_headers) { {"Accept" => "text/vnd.turbo-stream.html, text/html"} }
-
-    before { sign_in super_admin }
-
-    it "updates the email" do
-      employee = create(:user, school: school, role: :employee)
-      patch update_email_system_user_path(employee), params: {user: {email: "new@example.com"}}, headers: turbo_headers
-      expect(employee.reload.email).to eq("new@example.com")
     end
   end
 end

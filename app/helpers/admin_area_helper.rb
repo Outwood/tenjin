@@ -28,8 +28,12 @@ module AdminAreaHelper
   private
 
   # The public layout renders the admin navigation for a signed-in admin, where
-  # `policy` reaches neither the System:: policies nor current_admin
-  def admin_policy(record)
+  # `policy` reaches neither the System:: policies nor current_admin. Naming a
+  # policy_class mirrors the controllers, for the nested resources whose policy
+  # does not follow from their record class
+  def admin_policy(record, policy_class: nil)
+    return policy_class.new(current_admin, record) if policy_class
+
     Pundit.policy!(current_admin, [:system, record])
   end
 end

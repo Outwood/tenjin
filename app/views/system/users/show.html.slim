@@ -1,0 +1,73 @@
+- may_manage_roles = admin_policy(@user, policy_class: System::Users::RolePolicy).create?
+- may_edit_email = admin_policy(@user, policy_class: System::Users::EmailPolicy).update?
+.container.pb-5
+  = admin_page_header @user.full_name, breadcrumbs: [['Users', system_users_path]] do
+    = button_to 'Become User', system_impersonation_path,
+      params: { user_id: @user.id },
+      class: 'btn btn-outline-secondary',
+      form: { data: { turbo: false } }
+
+  table.table
+    tbody
+      tr
+        td Username
+        td = @user.username
+      tr
+        td Type
+        td = @user.role.humanize
+      tr
+        td School
+        td = @user.school&.name
+
+  - if may_edit_email
+    h2.admin-section-heading Email
+    = form_with url: system_user_email_path(@user), method: :patch, data: { turbo: false } do
+      .row.g-2.align-items-end.mb-4
+        .col-md-6
+          = label_tag 'user[email]', 'Email address', class: 'form-label'
+          = text_field_tag 'user[email]', @user.email, class: 'form-control'
+        .col-md-3
+          = submit_tag 'Save Email', class: 'btn btn-outline-secondary'
+    = button_to 'Send Setup Email', system_user_welcome_email_path(@user),
+      class: 'btn btn-outline-secondary mb-5',
+      form: { data: { turbo: false } }
+
+  h2.admin-section-heading Roles
+  - if @user.roles.empty?
+    p.text-body-secondary No roles held.
+  - else
+    table.table#roles-table
+      thead
+        tr
+          th Role
+          th Subject
+          - if may_manage_roles
+            th
+              span.visually-hidden Actions
+      tbody
+        - @user.roles.each do |role|
+          tr id=dom_id(role)
+            td = role.name.humanize
+            td = role.resource&.name
+            - if may_manage_roles
+              td.text-end = button_to 'Revoke', system_user_role_path(@user, role),
+                method: :delete,
+                class: 'btn btn-sm btn-outline-danger',
+                form: { class: 'd-inline', data: { turbo: false } }
+
+  - if may_manage_roles
+    h2.admin-section-heading Grant a role
+    = form_with url: system_user_roles_path(@user), data: { turbo: false } do
+      .row.g-2.align-items-end
+        .col-md-4
+          = label_tag 'user[role]', 'Role', class: 'form-label'
+          = select_tag 'user[role]',
+            options_for_select(User::ChangeUserRole::ROLES.map { |r| [r.humanize, r] }),
+            prompt: 'Choose role…', required: true, class: 'form-select'
+        .col-md-4
+          = label_tag 'user[subject]', 'Subject', class: 'form-label'
+          = select_tag 'user[subject]',
+            options_from_collection_for_select(@subjects, :id, :name),
+            include_blank: 'None', class: 'form-select'
+        .col-md-2
+          = submit_tag 'Grant', class: 'btn btn-outline-secondary'

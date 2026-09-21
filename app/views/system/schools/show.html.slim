@@ -1,7 +1,7 @@
 .container
   = admin_page_header @school.name, breadcrumbs: [['Schools', system_schools_path]] do
     - if current_admin.super?
-      = link_to 'Manage User Roles', manage_roles_system_users_path(school: @school), class: 'btn btn-outline-secondary'
+      = link_to 'Staff', manage_roles_system_users_path(school: @school), class: 'btn btn-outline-secondary'
   .row
     .col
       table.table
@@ -23,28 +23,11 @@
           thead
             tr
               th Username
-              - if current_admin.super?
-                th Email
-                th
-                  span.visually-hidden Actions
-                th
-                  span.visually-hidden Setup
               th Login As
           tbody
             - @school_admins.each do |sa|
-              - form_id = "edit-school-admin-#{sa.id}"
               tr.school-admin-data
-                td = sa.username
-                - if current_admin.super?
-                  td = text_field_tag 'user[email]', sa.email, form: form_id, class: 'form-control', id: ('user-email-' + sa.id.to_s)
-                  td = button_to 'Save Email', update_email_system_user_path(sa),
-                    method: :patch,
-                    class: 'btn btn-sm btn-outline-secondary',
-                    id: ('save-email-' + sa.id.to_s),
-                    form: { id: form_id, class: 'd-inline', data: { turbo: true } }
-                  td = button_to 'Send Setup Email', send_welcome_email_system_user_path(sa),
-                    class: 'btn btn-sm btn-outline-secondary',
-                    form: { class: 'd-inline', data: { turbo: true } }
+                td = link_to sa.username, system_user_path(sa)
                 td = button_to 'Become User', system_impersonation_path, params: { user_id: sa.id },
                   class: 'btn btn-sm btn-outline-secondary',
                   form: { class: 'd-inline', data: { turbo: false } }
@@ -64,7 +47,7 @@
         tbody
           - @users.each do |u|
             tr.user-data id="user-#{u.id}"
-              td = u.username
+              td = link_to u.username, system_user_path(u)
               td
                 => u.forename
                 = u.surname
