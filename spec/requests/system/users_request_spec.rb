@@ -62,6 +62,13 @@ RSpec.describe "System::Users", :default_creates, type: :request do
           .and have_css("nav.pagy-bootstrap a[href*='type=student']")
       end
 
+      it "lands on the first page rather than erroring before the start" do
+        get system_users_path, params: {page: 0}
+
+        expect(response).to have_http_status(:ok)
+        expect(Capybara.string(response.body)).to have_link("Grace Hopper", href: system_user_path(pupil))
+      end
+
       it "lands on the last page rather than erroring past the end" do
         get system_users_path, params: {page: 99}
 

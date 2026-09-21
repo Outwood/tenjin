@@ -16,6 +16,18 @@ RSpec.describe "System::Users::Emails", :default_creates, type: :request do
       expect(flash[:notice]).to eq("Updated email to #{employee.full_name}")
     end
 
+    context "when the record refuses the change" do
+      let!(:employee) { create(:teacher, :without_upi, school: school) }
+
+      it "says so rather than reporting a change it did not make" do
+        expect {
+          patch system_user_email_path(employee), params: {user: {email: "new-address@example.test"}}
+        }.not_to change { employee.reload.email }
+
+        expect(flash[:alert]).to include("Upi")
+      end
+    end
+
     describe "as a school group admin" do
       before { sign_in create(:school_group_admin) }
 

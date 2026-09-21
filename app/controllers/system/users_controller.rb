@@ -15,7 +15,7 @@ module System
         role: params[:role],
         school: params[:school]
       )
-      @pagy, @users = pagy(directory.users, limit: PER_PAGE)
+      @pagy, @users = pagy(directory.users, limit: PER_PAGE, page: requested_page)
       @schools = policy_scope(School).order(:name)
     end
 
@@ -36,6 +36,10 @@ module System
     end
 
     private
+
+    # Pagy refuses a page below the first; like one past the end, it is a typed
+    # URL or a stale link rather than an error
+    def requested_page = [params[:page].to_i, 1].max
 
     def find_user = User.find(params[:id])
 

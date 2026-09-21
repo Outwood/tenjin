@@ -1,5 +1,6 @@
 - may_manage_roles = admin_policy(@user, policy_class: System::Users::RolePolicy).create?
 - may_edit_email = admin_policy(@user, policy_class: System::Users::EmailPolicy).update?
+- may_send_setup_email = admin_policy(@user, policy_class: System::Users::WelcomeEmailPolicy).create?
 .container.pb-5
   = admin_page_header @user.full_name, breadcrumbs: [['Users', system_users_path]] do
     = button_to 'Become User', system_impersonation_path,
@@ -28,6 +29,7 @@
           = text_field_tag 'user[email]', @user.email, class: 'form-control'
         .col-md-3
           = submit_tag 'Save Email', class: 'btn btn-outline-secondary'
+  - if may_send_setup_email
     = button_to 'Send Setup Email', system_user_welcome_email_path(@user),
       class: 'btn btn-outline-secondary mb-5',
       form: { data: { turbo: false } }
