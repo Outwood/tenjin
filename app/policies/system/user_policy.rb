@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 module System
+  # Decides who may look up the platform's users.
   class UserPolicy < System::ApplicationPolicy
-    def set_role? = super? && record.employee?
+    # Either tier can already reach every user through the school pages
+    def index? = true
 
-    alias_method :remove_role?, :set_role?
-    alias_method :update_email?, :set_role?
-    alias_method :send_welcome_email?, :set_role?
+    alias_method :show?, :index?
 
     class Scope < Scope
       def resolve = scope.all
