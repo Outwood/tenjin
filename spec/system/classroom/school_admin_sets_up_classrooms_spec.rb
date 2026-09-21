@@ -51,5 +51,9 @@ RSpec.describe "School admin sets up classrooms", :default_creates, :js do
       expect(page).to have_css("#syncStatus", exact_text: "Synced")
         .and have_no_content("School sync required")
     end
+
+    it "puts the select back to the subject the class still has" do
+      expect(page).to have_select("classroom-#{classroom.id}", selected: classroom.subject.name)
+    end
   end
 end

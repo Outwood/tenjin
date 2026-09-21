@@ -56,6 +56,17 @@ RSpec.describe "topics controller", :default_creates do
         expect(CGI.unescapeHTML(response.body)).to include("Topic not renamed: Name can't be blank")
       end
     end
+
+    # The refusal reaches a caller that cannot process a stream, which only
+    # this shared branch of ApplicationController#refuse answers
+    context "when the refusal is not asked for as a stream" do
+      before { patch topic_path(topic), params: {topic: {name: ""}}, headers: {"Accept" => "text/html"} }
+
+      it "redirects back with the reason" do
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eq("Topic not renamed: Name can't be blank")
+      end
+    end
   end
 
   describe "DELETE /topics/:id" do

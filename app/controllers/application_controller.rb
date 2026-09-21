@@ -27,10 +27,16 @@ class ApplicationController < ActionController::Base
   private
 
   # Reports a write a record refused to a Turbo-driven page, which keeps the
-  # state it is showing while the reason arrives in the flash container
+  # state it is showing while the reason arrives in the flash container. A
+  # caller that cannot process a stream is sent back to read the same reason.
   def refuse(message)
-    flash.now[:alert] = message
-    render template: "shared/flash", status: :unprocessable_content
+    respond_to do |format|
+      format.turbo_stream do
+        flash.now[:alert] = message
+        render template: "shared/flash", status: :unprocessable_content
+      end
+      format.any { redirect_back fallback_location: root_path, alert: message }
+    end
   end
 
   def user_not_authorized

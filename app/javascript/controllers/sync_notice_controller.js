@@ -5,8 +5,11 @@ export default class extends Controller {
   static values = { neededLabel: String };
 
   // Flips the page to "sync needed" before the write has been answered
-  notify() {
-    this.before ||= this.#snapshot();
+  notify(event) {
+    this.pending ??= new Set();
+    this.before ??= this.#snapshot();
+    this.pending.add(event.target.form);
+
     this.statusTarget.textContent = this.neededLabelValue;
     if (!this.hasButtonTarget) return; // sync-status helper renders text instead of a button mid-sync
     this.buttonTarget.classList.remove("btn-primary");
@@ -15,10 +18,16 @@ export default class extends Controller {
       "School sync required. Click here to start.";
   }
 
-  // A refused write leaves the school as it was, so the notice goes back too
+  // The notice belongs to every form it was flipped for, so it goes back only
+  // once all of them have answered and none of them landed
   settle(event) {
-    if (!event.detail.success && this.before) this.#restore(this.before);
+    if (!this.pending?.delete(event.target)) return;
+    this.landed ||= event.detail.success;
+    if (this.pending.size) return;
+
+    if (!this.landed) this.#restore(this.before);
     this.before = null;
+    this.landed = false;
   }
 
   #snapshot() {
