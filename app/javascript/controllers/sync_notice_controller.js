@@ -6,9 +6,9 @@ export default class extends Controller {
 
   // Flips the page to "sync needed" before the write has been answered
   notify(event) {
-    this.pending ??= new Set();
+    this.pending ??= [];
     this.before ??= this.#snapshot();
-    this.pending.add(event.target.form);
+    this.pending.push(event.target.form);
 
     this.statusTarget.textContent = this.neededLabelValue;
     if (!this.hasButtonTarget) return; // sync-status helper renders text instead of a button mid-sync
@@ -18,16 +18,25 @@ export default class extends Controller {
       "School sync required. Click here to start.";
   }
 
-  // The notice belongs to every form it was flipped for, so it goes back only
-  // once all of them have answered and none of them landed
+  // The notice belongs to every submission it was flipped for, so it goes back
+  // only once all of them have answered and none of them landed. A form
+  // resubmitted before its answer is counted once per submission, since Turbo
+  // answers the abandoned one too
   settle(event) {
-    if (!this.pending?.delete(event.target)) return;
+    if (!this.#retire(event.target)) return;
     this.landed ||= event.detail.success;
-    if (this.pending.size) return;
+    if (this.pending.length) return;
 
     if (!this.landed) this.#restore(this.before);
     this.before = null;
     this.landed = false;
+  }
+
+  #retire(form) {
+    const index = this.pending?.indexOf(form) ?? -1;
+    if (index < 0) return false;
+    this.pending.splice(index, 1);
+    return true;
   }
 
   #snapshot() {

@@ -54,6 +54,16 @@ describe("sync-notice", () => {
     );
   }
 
+  // Turbo abandons the submission in flight when a newer one starts, and its
+  // submit-end carries no verdict
+  function submitAbandoned(id) {
+    document
+      .querySelector(`#${id}`)
+      .dispatchEvent(
+        new CustomEvent("turbo:submit-end", { bubbles: true, detail: {} }),
+      );
+  }
+
   it("reads as sync needed as soon as a subject changes", () => {
     changeSubject("first");
 
@@ -105,6 +115,16 @@ describe("sync-notice", () => {
     submitEnds("second-form", false);
 
     expect(status.textContent).toBe("Synced");
+  });
+
+  it("keeps the notice a later write earned when the same form's earlier one is abandoned", () => {
+    changeSubject("first");
+    changeSubject("first");
+    submitAbandoned("first-form");
+    submitEnds("first-form", true);
+
+    expect(status.textContent).toBe(NEEDED_LABEL);
+    expect(button.classList.contains("btn-danger")).toBe(true);
   });
 
   it("leaves a refusal from the sync button's own form alone", () => {

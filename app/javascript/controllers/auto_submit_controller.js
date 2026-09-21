@@ -11,12 +11,11 @@ export default class extends Controller {
     this.element.requestSubmit();
   }
 
+  // A submission Turbo abandoned for a newer one answers with no verdict, so
+  // the fields stay as they are for the newer write to settle
   settle(event) {
-    if (event.detail.success) {
-      this.accepted = this.#snapshot();
-    } else {
-      this.#restore(this.accepted);
-    }
+    if (event.detail.success === true) this.accepted = this.#snapshot();
+    if (event.detail.success === false) this.#restore(this.accepted);
   }
 
   #snapshot() {

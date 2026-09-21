@@ -11,6 +11,7 @@ const FIXTURE = `
     <select name="subject" data-action="change->auto-submit#submit">
       <option value="1" selected>Maths</option>
       <option value="2">Physics</option>
+      <option value="3">Chemistry</option>
     </select>
     <input type="checkbox" name="active" checked data-action="change->auto-submit#submit">
   </form>
@@ -45,6 +46,14 @@ describe("auto-submit", () => {
         bubbles: true,
         detail: { success },
       }),
+    );
+  }
+
+  // Turbo abandons the submission in flight when a newer one starts, and its
+  // submit-end carries no verdict
+  function submitAbandoned() {
+    form.dispatchEvent(
+      new CustomEvent("turbo:submit-end", { bubbles: true, detail: {} }),
     );
   }
 
@@ -91,5 +100,23 @@ describe("auto-submit", () => {
     submitEnds(false);
 
     expect(select.value).toBe("2");
+  });
+
+  it("keeps the value a later write landed when the earlier one is abandoned", () => {
+    choose("2");
+    choose("3");
+    submitAbandoned();
+    submitEnds(true);
+
+    expect(select.value).toBe("3");
+  });
+
+  it("does not take an abandoned write as accepted", () => {
+    choose("2");
+    choose("3");
+    submitAbandoned();
+    submitEnds(false);
+
+    expect(select.value).toBe("1");
   });
 });
