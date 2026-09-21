@@ -19,9 +19,9 @@ nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{break
       ul.navbar-nav.me-auto
         li.nav-item = nav_link 'Schools', system_schools_path, current: controller_path == 'system/schools'
         li.nav-item = nav_link 'Subjects', system_subjects_path, current: controller_path == 'system/subjects'
+        li.nav-item = nav_link 'Users', system_users_path, current: controller_path == 'system/users'
         - if current_admin.super?
           li.nav-item = nav_link 'Customisations', system_customisations_path, current: controller_path == 'system/customisations'
-          li.nav-item = nav_link 'Roles', manage_roles_system_users_path, current: current_page?(manage_roles_system_users_path)
         / #account-links carries these below the breakpoint, where the navbar collapses
         - if settings_menu_items.any?
           li.nav-item.dropdown.d-none#settings-menu class="d-#{breakpoint}-block"

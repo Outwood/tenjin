@@ -19,6 +19,12 @@ RSpec.describe "the admin navigation", :default_creates, type: :request do
         expect(Capybara.string(response.body)).to have_no_link("Statistics")
       end
 
+      it "links to the user directory in place of the role registry" do
+        expect(Capybara.string(response.body))
+          .to have_link("Users", href: system_users_path)
+          .and have_no_link("Roles")
+      end
+
       it "gathers configuration under a Settings menu" do
         expect(Capybara.string(response.body).find("#settings-menu"))
           .to have_link("Admins", href: system_admins_path)
@@ -33,13 +39,13 @@ RSpec.describe "the admin navigation", :default_creates, type: :request do
         get system_root_path
       end
 
-      it "shows Schools and Subjects, not the super admin's links" do
+      it "shows Schools, Subjects and Users, not the super admin's links" do
         expect(Capybara.string(response.body))
           .to have_link("Schools")
           .and have_link("Subjects")
+          .and have_link("Users", href: system_users_path)
           .and have_no_link("Customisations")
           .and have_no_link("School Groups")
-          .and have_no_link("Roles")
       end
 
       it "has no Settings menu" do
