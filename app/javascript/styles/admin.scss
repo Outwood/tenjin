@@ -19,8 +19,9 @@
   }
 }
 
-// Links share the body text colour, so an underline is what sets them apart from plain text
-.admin-area main a:not(.btn) {
+// Links share the body text colour, so an underline is what sets them apart from plain text.
+// A link already drawn as a control carries its own border and needs none
+.admin-area main a:not(.btn):not(.page-link) {
   text-decoration: underline;
   text-decoration-color: rgba(var(--bs-body-color-rgb), 0.35);
   text-underline-offset: 0.2em;
