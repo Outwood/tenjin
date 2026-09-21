@@ -9,6 +9,8 @@ class Enrollment < ApplicationRecord
 
   validates :user, uniqueness: {scope: :classroom_id}
 
+  scope :in_subject, ->(subject) { joins(:classroom).where(classrooms: {subject_id: subject}) }
+
   # Enrolls the users the sync has just saved from one class. start_sync has emptied the school's
   # enrollments, so the rows go in with one insert; the count is then read back rather than taken
   # from the insert, which reports nothing for a row already present.

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Ranks every customisation by how often pupils have bought it.
-# Constructed cheaply; the query runs once and memoizes its result.
+# Constructed cheaply; #customisations runs its query once and memoizes the rows.
 class Customisation::PurchaseCounts
   def customisations
     @customisations ||= ranked.to_a

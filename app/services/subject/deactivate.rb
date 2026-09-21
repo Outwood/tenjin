@@ -9,14 +9,9 @@ class Subject::Deactivate < ApplicationService
   def call
     Subject.transaction do
       @subject.update!(active: false)
-      enrollments.destroy_all
+      # Unenrol before detaching the classes, which is what the enrolments are found through
+      Enrollment.in_subject(@subject).destroy_all
       Classroom.where(subject: @subject).update_all(subject_id: nil)
     end
-  end
-
-  private
-
-  def enrollments
-    Enrollment.joins(:classroom).where(classrooms: {subject_id: @subject})
   end
 end

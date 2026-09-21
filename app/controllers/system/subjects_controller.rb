@@ -54,7 +54,7 @@ module System
 
     def count_deactivation_losses
       @classroom_count = @subject.classrooms.count
-      @enrollment_count = Enrollment.joins(:classroom).where(classrooms: {subject_id: @subject}).count
+      @enrollment_count = Enrollment.in_subject(@subject).count
     end
   end
 end
