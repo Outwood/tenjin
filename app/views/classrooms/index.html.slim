@@ -26,7 +26,9 @@
                 td = c.name
                 td.d-none.d-lg-table-cell = c.enrollments.size
                 td
-                  = form_with url: classroom_path(c.id), method: :patch, data: { turbo: true, controller: 'auto-submit', action: 'turbo:submit-end->auto-submit#settle' } do
+                  = form_with url: classroom_path(c.id),
+                    method: :patch,
+                    data: { turbo: true, controller: 'auto-submit', action: 'turbo:submit-end->auto-submit#settle' } do
                     = select_tag :subject,
                       options_from_collection_for_select(@subjects, :id, :name, c.subject_id),
                       include_blank: '',
