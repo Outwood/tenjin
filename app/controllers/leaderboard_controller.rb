@@ -70,11 +70,11 @@ class LeaderboardController < ApplicationController
   def set_filter_data
     school_group = current_user.school.school_group
     @schools = if school_group.present?
-      school_group.schools.pluck(:name)
+      school_group.schools.order(:name).pluck(:name)
     else
       [current_user.school.name]
     end
-    @classrooms = Classroom.where(school: current_user.school, subject: @subject).pluck(:name)
+    @classrooms = Classroom.where(school: current_user.school, subject: @subject).order(:name).pluck(:name)
   end
 
   def set_user_data

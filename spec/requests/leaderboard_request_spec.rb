@@ -91,14 +91,21 @@ RSpec.describe "leaderboard controller", :default_creates do
     end
 
     context "with a school group" do
-      let(:second_school) { create(:school, school_group: school.school_group) }
+      let(:second_school) { create(:school, school_group: school.school_group, name: "Westbrook High") }
       let!(:second_school_score) { create(:topic_score, topic: topic, school: second_school, score: 20) }
+      let!(:third_school) { create(:school, school_group: school.school_group, name: "Ashfield High") }
 
       context "when only the school is requested" do
         before { get leaderboard_path(quiz_subject.name, format: :json), xhr: true }
 
         it "offers every school in the group as a filter" do
-          expect(response.parsed_body["schools"]).to contain_exactly(school.name, second_school.name)
+          expect(response.parsed_body["schools"])
+            .to contain_exactly(school.name, "Ashfield High", "Westbrook High")
+        end
+
+        # default_creates names the student's school randomly, so only the pinned pair can be positioned
+        it "orders the school filters by name" do
+          expect(response.parsed_body["schools"] - [school.name]).to eq(["Ashfield High", "Westbrook High"])
         end
 
         it "lists only the school's entries" do
@@ -131,14 +138,20 @@ RSpec.describe "leaderboard controller", :default_creates do
     end
 
     context "with classrooms in other subjects and schools" do
-      let!(:second_classroom) { create(:classroom, subject: quiz_subject, school: school) }
+      let!(:second_classroom) { create(:classroom, subject: quiz_subject, school: school, name: "7 Beta") }
+      let!(:third_classroom) { create(:classroom, subject: quiz_subject, school: school, name: "7 Alpha") }
       let!(:other_subject_classroom) { create(:classroom, school: school) }
       let!(:other_school_classroom) { create(:classroom, subject: quiz_subject) }
 
       before { get leaderboard_path(quiz_subject.name, format: :json), xhr: true }
 
       it "offers only the school's classrooms for the subject as filters" do
-        expect(response.parsed_body["classrooms"]).to contain_exactly(classroom.name, second_classroom.name)
+        expect(response.parsed_body["classrooms"]).to contain_exactly(classroom.name, "7 Alpha", "7 Beta")
+      end
+
+      # default_creates names the student's classroom randomly, so only the pinned pair can be positioned
+      it "orders the classroom filters by name" do
+        expect(response.parsed_body["classrooms"] - [classroom.name]).to eq(["7 Alpha", "7 Beta"])
       end
     end
 
