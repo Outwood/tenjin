@@ -50,4 +50,14 @@ class ApplicationController < ActionController::Base
   def pundit_user
     current_user
   end
+
+  # The namespace a record's policy is looked up in; namespaced controllers
+  # override this rather than each of the three lookups below
+  def pundit_namespace(record) = record
+
+  def authorize(record, ...) = super(pundit_namespace(record), ...)
+
+  def policy_scope(scope, ...) = super(pundit_namespace(scope), ...)
+
+  def policy(record) = super(pundit_namespace(record))
 end
