@@ -28,7 +28,6 @@ class LeaderboardController < ApplicationController
     @entries = Leaderboard::Query.new(current_user,
       leaderboard_params).results
     @awards = LeaderboardAward.where(school: current_user.school, subject: @subject).group(:user_id).count
-    @classrooms = Classroom.where(school: current_user.school, subject: @subject)
     set_subject_or_topic_name
     set_classroom_winners
   end
@@ -46,9 +45,13 @@ class LeaderboardController < ApplicationController
     @name = @topic.present? ? @topic.name : @subject.name
   end
 
+  def subject_classrooms
+    @subject_classrooms ||= Classroom.where(school: current_user.school, subject: @subject)
+  end
+
   def set_classroom_winners
     @classroom_winners = ClassroomWinner.joins(:classroom, :user)
-      .where(classroom: @classrooms)
+      .where(classroom: subject_classrooms)
       .pluck("classrooms.name", "users.forename", "users.surname", :score)
     @classroom_winners.map! { |w| [w[0], "#{w[1]} #{w[2][0]}", w[3]] }
   end
@@ -74,7 +77,7 @@ class LeaderboardController < ApplicationController
     else
       [current_user.school.name]
     end
-    @classrooms = Classroom.where(school: current_user.school, subject: @subject).order(:name).pluck(:name)
+    @classrooms = subject_classrooms.order(:name).pluck(:name)
   end
 
   def set_user_data
