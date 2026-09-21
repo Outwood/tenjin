@@ -2,12 +2,15 @@
 
 module System
   class InvitationsController < Devise::InvitationsController
+    # The shared admin navigation asks the policies what this admin may reach
+    include System::PolicyNamespace
+
     before_action :authenticate_admin!
     # Accepting an invitation happens signed out, on the public layout
     layout "system", only: %i[new create]
 
     def new
-      authorize current_admin, policy_class: System::AdminPolicy
+      authorize current_admin
       super
     end
 
@@ -19,10 +22,6 @@ module System
 
     def after_accept_path_for(_resource)
       system_root_path
-    end
-
-    def pundit_user
-      current_admin
     end
   end
 end

@@ -2,6 +2,7 @@
 
 module System
   class SchoolGroupPolicy < System::ApplicationPolicy
+    def index? = super?
     def new? = super?
     def create? = super?
     def update? = super?

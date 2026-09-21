@@ -7,6 +7,18 @@ RSpec.describe System::SchoolGroupPolicy, :default_creates do
 
   let(:school_group) { create(:school_group) }
 
+  describe "#index?" do
+    context "as a super admin" do
+      let(:actor) { build_stubbed(:super_admin) }
+      it { is_expected.to be_index }
+    end
+
+    context "as a school group admin" do
+      let(:actor) { build_stubbed(:school_group_admin) }
+      it { is_expected.not_to be_index }
+    end
+  end
+
   describe "#new?" do
     context "as a super admin" do
       let(:actor) { build_stubbed(:super_admin) }

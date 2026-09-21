@@ -1,6 +1,5 @@
 / Super admins' extra links crowd a single row below lg
 - breakpoint = current_admin.super? ? 'lg' : 'sm'
-- settings_current = controller_path.in?(%w[system/admins system/invitations])
 nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{breakpoint}"
   .container-fluid
     a.navbar-brand href=system_root_path aria-current=('page' if current_page?(system_root_path))
@@ -22,13 +21,20 @@ nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{break
         li.nav-item = nav_link 'Subjects', system_subjects_path, current: controller_path == 'system/subjects'
         - if current_admin.super?
           li.nav-item = nav_link 'Customisations', system_customisations_path, current: controller_path == 'system/customisations'
-          li.nav-item = nav_link 'School Groups', system_school_groups_path, current: controller_path == 'system/school_groups'
           li.nav-item = nav_link 'Roles', manage_roles_system_users_path, current: current_page?(manage_roles_system_users_path)
+        - if settings_menu_items.any?
+          li.nav-item.dropdown#settings-menu
+            button.nav-link.dropdown-toggle(type='button'
+              data-bs-toggle='dropdown'
+              aria-expanded='false') Settings
+            ul.dropdown-menu
+              - settings_menu_items.each do |label, path|
+                li = link_to label, path, class: 'dropdown-item'
       / The collapsed menu lists the account items as links rather than hiding them behind the avatar
       ul#account-links.navbar-nav.border-top.border-secondary.mt-2.pt-2 class="d-#{breakpoint}-none"
         li.navbar-text.small.text-truncate = current_admin.email
-        - if current_admin.super?
-          li.nav-item = nav_link 'Admins', system_admins_path, current: settings_current
+        - settings_menu_items.each do |label, path|
+          li.nav-item = nav_link label, path, current: current_page?(path)
         li.nav-item
           = button_to 'Sign out', destroy_admin_session_path,
             method: :delete,
@@ -44,10 +50,6 @@ nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{break
             = current_admin.email.first.upcase
           ul.dropdown-menu.dropdown-menu-end
             li.dropdown-header.text-truncate title=current_admin.email = current_admin.email
-            - if current_admin.super?
-              li = nav_link 'Admins', system_admins_path, css_class: 'dropdown-item', current: settings_current
-            li
-              hr.dropdown-divider
             li
               = button_to 'Sign out', destroy_admin_session_path,
                 method: :delete,

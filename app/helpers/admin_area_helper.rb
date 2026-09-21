@@ -15,4 +15,13 @@ module AdminAreaHelper
     content_for(:title) { tag.title("#{title} · Tenjin admin") }
     render "system/page_header", title: title, breadcrumbs: breadcrumbs, actions: actions && capture(&actions)
   end
+
+  # The Settings menu's [label, path] pairs, limited to what this admin may reach
+  def settings_menu_items
+    items = []
+    items << ["Admins", system_admins_path] if policy(Admin).index?
+    items << ["School Groups", system_school_groups_path] if policy(SchoolGroup).index?
+    items << ["Maintenance", system_maintenance_path] if policy(:maintenance).show?
+    items
+  end
 end
