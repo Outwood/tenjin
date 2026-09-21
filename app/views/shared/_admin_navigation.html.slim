@@ -22,8 +22,9 @@ nav#navbar-main.navbar.bg-dark data-bs-theme="dark" class="navbar-expand-#{break
         - if current_admin.super?
           li.nav-item = nav_link 'Customisations', system_customisations_path, current: controller_path == 'system/customisations'
           li.nav-item = nav_link 'Roles', manage_roles_system_users_path, current: current_page?(manage_roles_system_users_path)
+        / #account-links carries these below the breakpoint, where the navbar collapses
         - if settings_menu_items.any?
-          li.nav-item.dropdown#settings-menu
+          li.nav-item.dropdown.d-none#settings-menu class="d-#{breakpoint}-block"
             button.nav-link.dropdown-toggle(type='button'
               data-bs-toggle='dropdown'
               aria-expanded='false') Settings

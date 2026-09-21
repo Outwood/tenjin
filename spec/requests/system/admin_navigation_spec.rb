@@ -47,4 +47,18 @@ RSpec.describe "the admin navigation", :default_creates, type: :request do
       end
     end
   end
+
+  # The public layout renders this same navigation for a signed-in admin
+  describe "GET / as a super admin" do
+    before do
+      sign_in super_admin
+      get root_path
+    end
+
+    it "builds the Settings menu outside the admin area" do
+      expect(response).to have_http_status(:ok)
+      expect(Capybara.string(response.body).find("#settings-menu"))
+        .to have_link("Admins", href: system_admins_path)
+    end
+  end
 end

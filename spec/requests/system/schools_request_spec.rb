@@ -58,10 +58,11 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
           .and have_button("Sign out")
       end
 
-      it "collapses the navbar and swaps the account menus below the large breakpoint" do
+      it "collapses the navbar and swaps the account and settings menus below the large breakpoint" do
         expect(Capybara.string(response.body))
           .to have_css("#navbar-main.navbar-expand-lg #account-links.d-lg-none")
           .and have_css("#navbar-main.navbar-expand-lg .d-lg-flex > #account-menu")
+          .and have_css("#navbar-main.navbar-expand-lg #settings-menu.d-none.d-lg-block")
       end
     end
 
