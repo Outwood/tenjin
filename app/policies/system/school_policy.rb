@@ -7,7 +7,6 @@ module System
     def create? = super?
     def update? = super?
     def destroy? = super?
-    def sync? = super?
 
     class Scope < Scope
       def resolve = scope.all

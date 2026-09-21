@@ -37,7 +37,6 @@
                     class: 'form-select form-select-sm',
                     aria: { label: 'School group' },
                     data: { action: 'change->auto-submit#submit' }
-                td.text-end = button_to 'Sync', sync_system_school_path(school),
+                td.text-end = button_to 'Sync', system_school_sync_path(school),
                   class: 'btn btn-sm btn-outline-secondary',
-                  method: :patch,
                   form: { class: 'd-inline', data: { turbo: true } }

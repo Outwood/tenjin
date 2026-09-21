@@ -65,18 +65,6 @@ RSpec.describe System::SchoolPolicy, :default_creates do
     end
   end
 
-  describe "#sync?" do
-    context "as a super admin" do
-      let(:actor) { build_stubbed(:super_admin) }
-      it { is_expected.to be_sync }
-    end
-
-    context "as a school group admin" do
-      let(:actor) { build_stubbed(:school_group_admin) }
-      it { is_expected.not_to be_sync }
-    end
-  end
-
   describe "Scope" do
     subject(:resolved) { described_class::Scope.new(actor, School).resolve }
 

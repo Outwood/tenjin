@@ -45,13 +45,6 @@ module System
       respond_to_row_change
     end
 
-    def sync
-      @school = authorize find_school
-      @school.update_attribute(:sync_status, "queued")
-      SyncSchoolJob.perform_later @school
-      respond_to_row_change
-    end
-
     private
 
     # The Turbo Stream redraws the changed cell of the schools table

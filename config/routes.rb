@@ -17,9 +17,7 @@ Rails.application.routes.draw do
     resources :schools do
       scope module: :schools do
         resources :staff, only: [:index]
-      end
-      member do
-        patch :sync
+        resource :sync, only: [:create]
       end
     end
     resource :maintenance, only: [:show], controller: "maintenance" do

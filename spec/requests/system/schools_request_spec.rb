@@ -138,21 +138,6 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
       end
     end
   end
-
-  describe "PATCH /system/schools/:id/sync" do
-    before { sign_in super_admin }
-
-    it "queues a sync as admin" do
-      expect { patch sync_system_school_path(school), headers: turbo_headers }
-        .to change { school.reload.sync_status }.from("successful").to("queued")
-        .and have_enqueued_job(SyncSchoolJob).with(school)
-    end
-
-    it "redraws the sync status as queued" do
-      patch sync_system_school_path(school), headers: turbo_headers
-      expect(stream_update("sync_status_school_#{school.id}")).to have_css(".badge", exact_text: "Queued")
-    end
-  end
 end
 
 RSpec.describe "Schools (user-side)", :default_creates, type: :request do
