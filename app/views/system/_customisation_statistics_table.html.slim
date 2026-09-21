@@ -1,0 +1,12 @@
+table.table#customisation-statistics
+  thead
+    tr
+      th scope='col' Customisation
+      th scope='col' Type
+      th.text-end scope='col' Times bought
+  tbody
+    - customisations.each do |customisation|
+      tr id=dom_id(customisation)
+        td = customisation.name
+        td = customisation.customisation_type.humanize
+        td.text-end = number_with_delimiter(customisation.times_bought)

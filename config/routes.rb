@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       end
     end
     resources :customisations, except: %i[show destroy]
+    resource :customisation_statistics, only: [:show], path: "customisations/statistics"
     resources :schools do
       scope module: :schools do
         resources :staff, only: [:index]

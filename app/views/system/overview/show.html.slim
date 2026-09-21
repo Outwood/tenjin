@@ -4,15 +4,5 @@
   = render('system/school_statistics_table')
 
   h2.admin-section-heading Most bought customisations
-  table.table#customisation-statistics
-    thead
-      tr
-        th scope='col' Customisation
-        th scope='col' Type
-        th.text-end scope='col' Times bought
-    tbody
-      - @customisation_statistics.each do |c|
-        tr id=dom_id(c)
-          td = c.name
-          td = c.customisation_type.humanize
-          td.text-end = number_with_delimiter(c.times_bought)
+  = render 'system/customisation_statistics_table', customisations: @customisations
+  p = link_to 'All customisation purchases', system_customisation_statistics_path
