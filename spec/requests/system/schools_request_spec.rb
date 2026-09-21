@@ -106,8 +106,8 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
     context "as a super admin" do
       let(:admin) { super_admin }
 
-      it "links to role management for the school" do
-        expect(response.body).to include(manage_roles_system_users_path(school: school))
+      it "links to the school's staff page" do
+        expect(response.body).to include(system_school_staff_index_path(school))
       end
 
       context "with pupils and staff on the roll" do
@@ -133,8 +133,8 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
     context "as a school group admin" do
       let(:admin) { school_group_admin }
 
-      it "does not link to role management" do
-        expect(response.body).not_to include(manage_roles_system_users_path(school: school))
+      it "does not link to the staff page" do
+        expect(response.body).not_to include(system_school_staff_index_path(school))
       end
     end
   end

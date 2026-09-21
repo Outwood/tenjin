@@ -15,6 +15,9 @@ Rails.application.routes.draw do
     end
     resources :customisations, except: %i[show destroy]
     resources :schools do
+      scope module: :schools do
+        resources :staff, only: [:index]
+      end
       member do
         patch :sync
       end
@@ -27,9 +30,6 @@ Rails.application.routes.draw do
     resource :impersonation, only: %i[create destroy]
     resources :admins, only: %i[index destroy]
     resources :users, only: %i[index show] do
-      collection do
-        get :manage_roles
-      end
       scope module: :users do
         resources :roles, only: %i[create destroy]
         resource :email, only: [:update]

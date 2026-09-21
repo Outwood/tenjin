@@ -25,16 +25,6 @@ module System
       @subjects = Subject.where(active: true).order(:name)
     end
 
-    def manage_roles
-      authorize current_admin
-      if manage_roles_params[:school].present?
-        @school = School.find(manage_roles_params[:school])
-        @employees = User.where(school: @school, role: "employee")
-      end
-      @all_subjects = Subject.where(active: true)
-      render "manage_roles"
-    end
-
     private
 
     # Pagy refuses a page below the first; like one past the end, it is a typed
@@ -42,7 +32,5 @@ module System
     def requested_page = [params[:page].to_i, 1].max
 
     def find_user = User.find(params[:id])
-
-    def manage_roles_params = params.permit(:school)
   end
 end

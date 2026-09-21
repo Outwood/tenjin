@@ -6,9 +6,6 @@ module System
     def index? = super?
     def create? = super?
 
-    # Guards System::UsersController#manage_roles, which has no policy of its own
-    def manage_roles? = super?
-
     # Refusing self-revocation is also what keeps a last super admin in place:
     # only a super admin may revoke, and revoking anyone else leaves them behind
     def destroy? = super? && record != admin

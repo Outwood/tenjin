@@ -1,7 +1,7 @@
 .container
   = admin_page_header @school.name, breadcrumbs: [['Schools', system_schools_path]] do
-    - if current_admin.super?
-      = link_to 'Staff', manage_roles_system_users_path(school: @school), class: 'btn btn-outline-secondary'
+    - if admin_policy(@school, policy_class: System::Schools::StaffPolicy).index?
+      = link_to 'Staff', system_school_staff_index_path(@school), class: 'btn btn-outline-secondary'
   .row
     .col
       table.table

@@ -2,13 +2,13 @@
 
 require "rails_helper"
 
-RSpec.describe "Super manages user roles", :default_creates, :js do
+RSpec.describe "Super manages school staff", :default_creates, :js do
   before { sign_in super_admin }
 
   shared_examples "a manageable role" do |role_name:, requires_subject:|
     let!(:quiz_subject) { create(:subject) } if requires_subject
 
-    before { visit(manage_roles_system_users_path(school: teacher.school)) }
+    before { visit(system_school_staff_index_path(teacher.school)) }
 
     it "adds the role to the user" do
       select quiz_subject.name, from: "user[subject]" if requires_subject
@@ -45,7 +45,7 @@ RSpec.describe "Super manages user roles", :default_creates, :js do
   describe "employees list" do
     before do
       teacher
-      visit(manage_roles_system_users_path(school: school))
+      visit(system_school_staff_index_path(school))
     end
 
     it "lists employees from the school" do

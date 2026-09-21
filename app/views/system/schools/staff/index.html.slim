@@ -1,0 +1,42 @@
+.container.pb-5
+  = admin_page_header 'Staff',
+    breadcrumbs: [['Schools', system_schools_path], [@school.name, system_school_path(@school)]]
+
+  - if @employees.blank?
+    p.text-body-secondary No employees at this school.
+  - else
+    .table-responsive
+      table.table#employees-table
+        thead
+          tr
+            th Name
+            th Username
+            th Subject
+            th Role
+            th Add Role
+        tbody
+          - @employees.each do |e|
+            tr.employee-row data-user=e.id
+              td = link_to e.full_name, system_user_path(e)
+              td = e.username
+              td
+                = select_tag 'user[subject]',
+                  options_from_collection_for_select(@subjects, :id, :name),
+                  id: "subject-select-user-#{e.id}",
+                  form: "form-#{e.id}",
+                  aria: { label: "Subject for #{e.full_name}" },
+                  class: 'form-select form-select-sm'
+              td
+                = select_tag 'user[role]',
+                  options_for_select(User::ChangeUserRole::ROLES.map { |role| [role.humanize, role] }),
+                  prompt: 'Choose role…',
+                  required: true,
+                  id: "role-select-user-#{e.id}",
+                  form: "form-#{e.id}",
+                  aria: { label: "Role for #{e.full_name}" },
+                  class: 'form-select form-select-sm'
+              td = button_to 'Add Role',
+                system_user_roles_path(e),
+                id: "add-role-#{e.id}",
+                class: 'btn btn-sm btn-outline-secondary add-role-button',
+                form: { id: "form-#{e.id}", data: { turbo: false } }

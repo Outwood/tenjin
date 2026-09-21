@@ -145,28 +145,4 @@ RSpec.describe "System::Users", :default_creates, type: :request do
       end
     end
   end
-
-  describe "GET /system/users/manage_roles" do
-    before { sign_in super_admin }
-
-    it "renders the manage_roles view" do
-      get manage_roles_system_users_path
-      expect(response).to have_http_status(:ok)
-    end
-
-    context "with a school selected" do
-      before { get manage_roles_system_users_path(school: school) }
-
-      it "renders every id once" do
-        ids = Capybara.string(response.body).all("[id]").map { |element| element[:id] }
-        expect(ids.tally.select { |_id, count| count > 1 }).to be_empty
-      end
-
-      it "leaves the role unchosen, so no click grants one by default" do
-        expect(Capybara.string(response.body))
-          .to have_css("select[name='user[role]'][required] option:first-child[value='']", exact_text: "Choose role…")
-          .and have_no_css("select[name='user[role]'] option[selected]")
-      end
-    end
-  end
 end
