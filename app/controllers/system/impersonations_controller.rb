@@ -4,9 +4,10 @@ module System
   # The admin's session as one of the platform's users.
   class ImpersonationsController < BaseController
     def create
-      authorize :impersonation
+      user = User.find(params.require(:user_id))
+      authorize user, policy_class: System::ImpersonationPolicy
 
-      sign_in(:user, User.find(params.require(:user_id)))
+      sign_in(:user, user)
       redirect_to root_url
     end
 
