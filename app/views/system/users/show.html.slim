@@ -1,6 +1,7 @@
-- may_manage_roles = admin_policy(@user, policy_class: System::Users::RolePolicy).create?
-- may_edit_email = admin_policy(@user, policy_class: System::Users::EmailPolicy).update?
-- may_send_setup_email = admin_policy(@user, policy_class: System::Users::WelcomeEmailPolicy).create?
+ruby:
+  may_manage_roles = admin_policy(@user, policy_class: System::Users::RolePolicy).create?
+  may_edit_email = admin_policy(@user, policy_class: System::Users::EmailPolicy).update?
+  may_send_setup_email = admin_policy(@user, policy_class: System::Users::WelcomeEmailPolicy).create?
 .container.pb-5
   = admin_page_header @user.full_name, breadcrumbs: [['Users', system_users_path]] do
     = button_to 'Become User', system_impersonation_path,
