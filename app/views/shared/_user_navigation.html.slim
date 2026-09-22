@@ -30,7 +30,7 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
         - if current_user.employee?
           li.nav-item = nav_link 'My Classes', dashboard_path, current: controller_name == 'dashboard'
           - if current_user.has_role? :school_admin
-            - school_pages = [['Users', users_path], ['Classrooms', classrooms_path]]
+            - school_pages = [['Overview', school_path(current_user.school)], ['Users', users_path], ['Classrooms', classrooms_path]]
             - on_school_page = school_pages.any? { |_, path| current_page?(path) }
             li.nav-item.dropdown#school-menu
               button.nav-link.dropdown-toggle(type='button'

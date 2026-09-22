@@ -7,7 +7,7 @@
     p
       |Current school sync status:
       b.fw-bold#syncStatus data-sync-notice-target='status' = @school.sync_status_label
-    ==sync_status_button
+    ==sync_status_button(@school)
     h1.page-section-header.text-uppercase Classrooms
     ==render_small_separator
     - datatable_options = { paginationSize: 25, placeholder: 'No classrooms have been found' }.to_json

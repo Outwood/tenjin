@@ -38,7 +38,7 @@ Rails.application.routes.draw do
   end
 
   resources :quizzes
-  resources :schools, only: [] do
+  resources :schools, only: [:show] do
     member do
       patch :sync
       patch :reset_all_passwords

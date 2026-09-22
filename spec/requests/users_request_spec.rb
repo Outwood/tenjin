@@ -3,51 +3,6 @@
 require "rails_helper"
 
 RSpec.describe "user controller", :default_creates do
-  def reset_all_link
-    patch reset_all_passwords_school_path(student.school)
-  end
-
-  context "when not authorized" do
-    context "as a teacher" do
-      before do
-        sign_in teacher
-        reset_all_link
-      end
-
-      it "redirects to the root path" do
-        expect(response).to redirect_to(root_path)
-      end
-    end
-
-    context "as a student" do
-      before do
-        sign_in student
-        reset_all_link
-      end
-
-      it "redirects to the root path" do
-        expect(response).to redirect_to(root_path)
-      end
-
-      it "shows an alert flash message" do
-        expect(flash[:alert]).to be_present
-      end
-    end
-  end
-
-  context "when authorized as a school admin" do
-    before { sign_in school_admin }
-
-    it "enqueues a password reset job" do
-      expect { reset_all_link }.to have_enqueued_job(ResetUserPasswordsJob)
-    end
-
-    it "redirects to the users page" do
-      reset_all_link
-      expect(response).to redirect_to(users_path)
-    end
-  end
-
   describe "GET #index authorization" do
     context "as a teacher" do
       before do

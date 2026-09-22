@@ -65,7 +65,8 @@ RSpec.describe "dashboard controller", :default_creates do
 
       it "lists the school pages under the School menu" do
         expect(Capybara.string(response.body).find("#school-menu"))
-          .to have_link("Users", href: users_path)
+          .to have_link("Overview", href: school_path(school))
+          .and have_link("Users", href: users_path)
           .and have_link("Classrooms", href: classrooms_path)
       end
 

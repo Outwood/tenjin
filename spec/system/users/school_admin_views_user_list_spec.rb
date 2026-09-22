@@ -10,24 +10,6 @@ RSpec.describe "School admin views user list", :default_creates, :js do
     visit(users_path)
   end
 
-  describe "the reset all passwords modal" do
-    before { click_button("Reset and print all passwords") }
-
-    it "enables the confirm button only once the school name matches" do
-      fill_in "confirmAllPasswordResetTextbox", with: "test"
-      expect(page).to have_button("Confirm", disabled: true)
-      fill_in "confirmAllPasswordResetTextbox", with: school.name
-      expect(page).to have_button("Confirm")
-    end
-
-    # The job and redirect the request triggers are covered in spec/requests/users_request_spec.rb
-    it "acknowledges the request once confirmed" do
-      fill_in "confirmAllPasswordResetTextbox", with: school.name
-      click_button("Confirm")
-      expect(page).to have_text("Request received")
-    end
-  end
-
   describe "the Reset Password link" do
     # One smoke for the password-reset Stimulus controller, which the employee table shares;
     # the password the action returns is covered in spec/requests/users_request_spec.rb

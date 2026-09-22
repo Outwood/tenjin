@@ -15,7 +15,7 @@ RSpec.describe "classrooms controller", :default_creates do
       before { get classrooms_path }
 
       it "asks for a refresh rather than offering a retry" do
-        expect(Capybara.string(response.body)).to have_text(ClassroomsHelper::SYNC_REFRESH_MESSAGE)
+        expect(Capybara.string(response.body)).to have_text(SchoolsHelper::SYNC_REFRESH_MESSAGE)
           .and have_no_button("Last Sync Timed Out. Press here to try again.")
       end
     end
@@ -28,7 +28,7 @@ RSpec.describe "classrooms controller", :default_creates do
 
       it "offers a retry" do
         expect(Capybara.string(response.body)).to have_button("Last Sync Timed Out. Press here to try again.")
-          .and have_no_text(ClassroomsHelper::SYNC_REFRESH_MESSAGE)
+          .and have_no_text(SchoolsHelper::SYNC_REFRESH_MESSAGE)
       end
     end
   end

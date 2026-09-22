@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-# Renders a school's roster sync state for the admin schools table
+# Renders a school's roster sync state and the button that starts a sync
 module SchoolsHelper
+  SYNC_REFRESH_MESSAGE = "Refresh the page to see the current sync status"
+
   # Badge colour and icon for each sync status; the wording is School#sync_status_label
   SYNC_STATUS_BADGES = {
     "never" => ["secondary", nil],
@@ -23,5 +25,29 @@ module SchoolsHelper
     return badge if school.never? || school.last_sync.nil?
 
     safe_join([badge, tag.small("Last synced #{school.last_sync.strftime("%-d %b %Y")}", class: "d-block text-body-secondary mt-1")])
+  end
+
+  def sync_status_button(school)
+    case school.sync_status
+    when "never", "successful"
+      sync_button(school, "Sync Classrooms & Users", "btn-primary")
+    when "failed", "needed"
+      sync_button(school, "School sync required. Click here to start.", "btn-danger")
+    when "syncing"
+      school.sync_stalled? ? sync_button(school, "Last Sync Timed Out.  Press here to try again.", "btn-secondary") : SYNC_REFRESH_MESSAGE
+    else
+      SYNC_REFRESH_MESSAGE
+    end
+  end
+
+  private
+
+  def sync_button(school, label, colour)
+    button_to label, sync_school_path(school),
+      method: :patch,
+      id: "syncButton",
+      class: "btn #{colour} btn-block my-3",
+      data: {"sync-notice-target": "button"},
+      form: {class: "d-inline", data: {turbo: true}}
   end
 end

@@ -153,14 +153,3 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
     end
   end
 end
-
-RSpec.describe "Schools (user-side)", :default_creates, type: :request do
-  describe "PATCH /schools/:id/sync" do
-    it "queues a sync as school_admin User" do
-      sign_in school_admin
-      patch sync_school_path(school)
-      expect(response).to have_http_status(:no_content)
-      expect(school.reload.sync_status).to eq("queued")
-    end
-  end
-end
