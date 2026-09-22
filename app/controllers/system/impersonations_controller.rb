@@ -7,6 +7,8 @@ module System
       user = User.find(params.require(:user_id))
       authorize user, policy_class: System::ImpersonationPolicy
 
+      # Trackable would otherwise record the admin's visit as the user's own sign-in
+      request.env["devise.skip_trackable"] = true
       sign_in(:user, user)
       redirect_to root_url
     end

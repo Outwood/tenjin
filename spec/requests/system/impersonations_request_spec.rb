@@ -16,6 +16,10 @@ RSpec.describe "System::Impersonations", :default_creates, type: :request do
       get system_schools_path
       expect(response).to have_http_status(:ok)
     end
+
+    it "leaves the user's own sign-in record untouched" do
+      expect(student.reload).to have_attributes(sign_in_count: 0, current_sign_in_at: nil)
+    end
   end
 
   describe "DELETE /system/impersonation" do
