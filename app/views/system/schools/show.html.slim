@@ -28,9 +28,11 @@
             - @school_admins.each do |sa|
               tr.school-admin-data
                 td = link_to sa.username, system_user_path(sa)
-                td = button_to 'Become User', system_impersonation_path, params: { user_id: sa.id },
-                  class: 'btn btn-sm btn-outline-secondary',
-                  form: { class: 'd-inline', data: { turbo: false } }
+                td
+                  - if admin_policy(sa, policy_class: System::ImpersonationPolicy).create?
+                    = button_to 'Become User', system_impersonation_path, params: { user_id: sa.id },
+                      class: 'btn btn-sm btn-outline-secondary',
+                      form: { class: 'd-inline', data: { turbo: false } }
 
   .row
     .col
@@ -52,6 +54,8 @@
                 => u.forename
                 = u.surname
               td = u.role.humanize
-              td = button_to 'Become User', system_impersonation_path, params: { user_id: u.id },
-                class: 'btn btn-sm btn-outline-secondary',
-                form: { data: { turbo: false } }
+              td
+                - if admin_policy(u, policy_class: System::ImpersonationPolicy).create?
+                  = button_to 'Become User', system_impersonation_path, params: { user_id: u.id },
+                    class: 'btn btn-sm btn-outline-secondary',
+                    form: { data: { turbo: false } }

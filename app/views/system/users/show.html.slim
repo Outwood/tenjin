@@ -1,13 +1,15 @@
 ruby:
+  may_impersonate = admin_policy(@user, policy_class: System::ImpersonationPolicy).create?
   may_manage_roles = admin_policy(@user, policy_class: System::Users::RolePolicy).create?
   may_edit_email = admin_policy(@user, policy_class: System::Users::EmailPolicy).update?
   may_send_setup_email = admin_policy(@user, policy_class: System::Users::WelcomeEmailPolicy).create?
 .container.pb-5
   = admin_page_header @user.full_name, breadcrumbs: [['Users', system_users_path]] do
-    = button_to 'Become User', system_impersonation_path,
-      params: { user_id: @user.id },
-      class: 'btn btn-outline-secondary',
-      form: { data: { turbo: false } }
+    - if may_impersonate
+      = button_to 'Become User', system_impersonation_path,
+        params: { user_id: @user.id },
+        class: 'btn btn-outline-secondary',
+        form: { data: { turbo: false } }
 
   table.table
     tbody

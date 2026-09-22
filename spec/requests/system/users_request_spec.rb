@@ -144,5 +144,18 @@ RSpec.describe "System::Users", :default_creates, type: :request do
         expect(Capybara.string(response.body)).to have_no_select("user[role]")
       end
     end
+
+    context "with a disabled user" do
+      let!(:pupil) { create(:student, school: school, forename: "Grace", surname: "Hopper", disabled: true) }
+
+      before do
+        sign_in super_admin
+        get system_user_path(pupil)
+      end
+
+      it "offers no impersonation, which their sign-in would refuse" do
+        expect(Capybara.string(response.body)).to have_no_button("Become User")
+      end
+    end
   end
 end

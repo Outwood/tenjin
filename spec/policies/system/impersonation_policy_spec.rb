@@ -4,7 +4,9 @@ require "rails_helper"
 
 RSpec.describe System::ImpersonationPolicy do
   describe "#create?" do
-    subject(:policy) { described_class.new(admin, build_stubbed(:student)) }
+    subject(:policy) { described_class.new(admin, user) }
+
+    let(:user) { build_stubbed(:student) }
 
     context "as a super admin" do
       let(:admin) { build_stubbed(:super_admin) }
@@ -16,6 +18,13 @@ RSpec.describe System::ImpersonationPolicy do
       let(:admin) { build_stubbed(:school_group_admin) }
 
       it { is_expected.to be_create }
+    end
+
+    context "with a disabled user, whose sign-in would be refused" do
+      let(:admin) { build_stubbed(:super_admin) }
+      let(:user) { build_stubbed(:student, disabled: true) }
+
+      it { is_expected.not_to be_create }
     end
   end
 

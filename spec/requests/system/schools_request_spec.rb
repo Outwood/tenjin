@@ -123,6 +123,20 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
         end
       end
 
+      context "with a leaver on the roll" do
+        let!(:pupil) { create(:student, school: school) }
+        let!(:leaver) { create(:student, school: school, disabled: true) }
+
+        # The outer GET ran before these records existed
+        before { get system_school_path(school) }
+
+        it "offers impersonation of the current pupil but not the leaver" do
+          expect(Capybara.string(response.body))
+            .to have_css("tr#user-#{pupil.id} button", exact_text: "Become User")
+            .and have_no_css("tr#user-#{leaver.id} button")
+        end
+      end
+
       it "titles the tab after the school and leads back to Schools" do
         expect(Capybara.string(response.body)).to have_title("#{school.name} · Tenjin admin")
           .and have_css("nav[aria-label='Breadcrumb'] a[href='#{system_schools_path}']", exact_text: "Schools")

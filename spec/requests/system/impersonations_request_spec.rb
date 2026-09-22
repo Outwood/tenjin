@@ -22,6 +22,16 @@ RSpec.describe "System::Impersonations", :default_creates, type: :request do
     end
   end
 
+  describe "POST /system/impersonation for a disabled user" do
+    let(:leaver) { create(:student, school: school, disabled: true) }
+
+    before { post system_impersonation_path, params: {user_id: leaver.id} }
+
+    it "refuses, since their sign-in would only bounce the admin" do
+      expect(flash[:alert]).to eq("You are not authorized to perform this action.")
+    end
+  end
+
   describe "DELETE /system/impersonation" do
     let(:admin) { super_admin }
 
