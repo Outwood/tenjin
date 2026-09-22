@@ -4,32 +4,19 @@ require "rails_helper"
 
 RSpec.describe "classrooms controller", :default_creates do
   describe "GET /classrooms" do
-    include ActiveSupport::Testing::TimeHelpers
+    let(:school) { create(:school, last_sync: Date.new(2026, 9, 3)) }
 
     before do
       sign_in school_admin
-      school.update!(sync_status: :syncing)
+      get classrooms_path
     end
 
-    context "while a sync is running" do
-      before { get classrooms_path }
-
-      it "asks for a refresh rather than offering a retry" do
-        expect(Capybara.string(response.body)).to have_text(SchoolsHelper::SYNC_REFRESH_MESSAGE)
-          .and have_no_button("Last Sync Timed Out. Press here to try again.")
-      end
-    end
-
-    context "when the sync has run past its timeout" do
-      before do
-        travel School::SYNC_TIMEOUT + 1.minute
-        get classrooms_path
-      end
-
-      it "offers a retry" do
-        expect(Capybara.string(response.body)).to have_button("Last Sync Timed Out. Press here to try again.")
-          .and have_no_text(SchoolsHelper::SYNC_REFRESH_MESSAGE)
-      end
+    # The wording of every sync state is covered in spec/helpers/classrooms_helper_spec.rb
+    it "points to the school page for the sync instead of offering it" do
+      expect(Capybara.string(response.body))
+        .to have_css("#syncStatus", exact_text: "Last synced 3 Sep 2026.")
+        .and have_link("School overview", href: school_path(school))
+        .and have_no_css("form[action='#{sync_school_path(school)}']")
     end
   end
 

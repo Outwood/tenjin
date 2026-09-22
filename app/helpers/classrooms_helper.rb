@@ -1,7 +1,23 @@
 # frozen_string_literal: true
 
 module ClassroomsHelper
-  SYNC_REFRESH_MESSAGE = "Refresh the page to see the current sync status"
+  # The page flips to this sentence itself the moment a subject changes
+  SYNC_NEEDED_NOTICE = "Sync needed: pupils join a mapped class on the next sync."
+  SYNC_RUNNING_NOTICE = "Sync running. Refresh the page to see its progress."
+
+  # One sentence on the roster sync for the classrooms page, which sends the admin to
+  # the school page to run it
+  def sync_notice(school)
+    case school.sync_status
+    when "never" then "Never synced. Run the first sync from the school page."
+    when "successful" then school.last_sync ? "Last synced #{school.last_sync.strftime("%-d %b %Y")}." : "Synced."
+    when "needed" then SYNC_NEEDED_NOTICE
+    when "failed" then "Last sync failed."
+    when "queued" then SYNC_RUNNING_NOTICE
+    when "syncing" then school.sync_stalled? ? "Last sync timed out." : SYNC_RUNNING_NOTICE
+    else "Sync status unknown."
+    end
+  end
 
   def student_homeworks(student, homework_progress)
     entries = homework_progress.select { |hp| hp.user_id == student.id }

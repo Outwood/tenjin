@@ -2,12 +2,12 @@
   title Classrooms
 .container
   section.page-section.text-center.pt-2#classrooms(data-controller='sync-notice'
-    data-sync-notice-needed-label-value=t('school.sync_status.needed')
+    data-sync-notice-needed-label-value=ClassroomsHelper::SYNC_NEEDED_NOTICE
     data-action='turbo:submit-end->sync-notice#settle')
     p
-      |Current school sync status:
-      b.fw-bold#syncStatus data-sync-notice-target='status' = @school.sync_status_label
-    ==sync_status_button(@school)
+      span#syncStatus data-sync-notice-target='status' = sync_notice(@school)
+      / Public-site links share the body colour, so the underline is what marks this as one
+      =< link_to 'School overview', school_path(@school), class: 'text-decoration-underline'
     h1.page-section-header.text-uppercase Classrooms
     ==render_small_separator
     - datatable_options = { paginationSize: 25, placeholder: 'No classrooms have been found' }.to_json

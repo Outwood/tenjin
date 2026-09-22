@@ -45,9 +45,7 @@ module SchoolsHelper
   def sync_button(school, label, colour)
     button_to label, sync_school_path(school),
       method: :patch,
-      id: "syncButton",
       class: "btn #{colour} btn-block my-3",
-      data: {"sync-notice-target": "button"},
       form: {class: "d-inline", data: {turbo: true}}
   end
 end
