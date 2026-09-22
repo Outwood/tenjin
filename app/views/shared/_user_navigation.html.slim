@@ -14,9 +14,7 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
 
     #navbarSupportedContent.collapse.navbar-collapse
       ul.navbar-nav.me-auto
-        li.nav-item
-          a.nav-link href=leaderboard_index_path
-            | Leaderboard
+        li.nav-item = nav_link 'Leaderboard', leaderboard_index_path, current: controller_name == 'leaderboard'
         - if current_user.student?
           li.nav-item.dropdown
             button#shopDropdown.nav-link.dropdown-toggle(type="button"
@@ -28,24 +26,22 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
                 | Styles
               a.dropdown-item href=show_available_customisations_path(anchor: 'icons')
                 | Leaderboard Icons
-        li.nav-item
-          a.nav-link href=lessons_path
-            | Lessons
+        li.nav-item = nav_link 'Lessons', lessons_path, current: controller_name == 'lessons'
         - if current_user.employee?
-          li.nav-item
-            a.nav-link href=dashboard_path
-              | Classrooms
+          li.nav-item = nav_link 'My Classes', dashboard_path, current: controller_name == 'dashboard'
           - if current_user.has_role? :school_admin
-            li.nav-item
-              a.nav-link href=users_path
-                | User Admin
-            li.nav-item
-              a.nav-link href=classrooms_path
-                | Setup Classrooms
+            - school_pages = [['Users', users_path], ['Classrooms', classrooms_path]]
+            - on_school_page = school_pages.any? { |_, path| current_page?(path) }
+            li.nav-item.dropdown#school-menu
+              button.nav-link.dropdown-toggle(type='button'
+                class=('active' if on_school_page)
+                data-bs-toggle='dropdown'
+                aria-expanded='false') School
+              ul.dropdown-menu
+                - school_pages.each do |label, path|
+                  li = nav_link label, path, current: current_page?(path), css_class: 'dropdown-item'
           - if current_user.has_role? :question_author, :any
-            li.nav-item
-              a.nav-link href=questions_path
-                | Edit Questions
+            li.nav-item = nav_link 'Edit Questions', questions_path, current: controller_name == 'questions'
 
       - if current_user.student?
         a.d-inline-flex.align-items-center.me-3 href=show_available_customisations_path

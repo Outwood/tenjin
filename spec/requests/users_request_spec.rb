@@ -109,6 +109,12 @@ RSpec.describe "user controller", :default_creates do
         .and have_css("#employees-table .employee-row[data-id='#{school_admin.id}']")
     end
 
+    it "marks the School menu and its Users item as current" do
+      expect(Capybara.string(response.body))
+        .to have_css("#school-menu .dropdown-toggle.active")
+        .and have_css("#school-menu a.active[aria-current='page'][href='#{users_path}']", exact_text: "Users")
+    end
+
     it "hides employees from other schools"
   end
 

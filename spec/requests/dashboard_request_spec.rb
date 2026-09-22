@@ -11,8 +11,9 @@ RSpec.describe "dashboard controller", :default_creates do
         get dashboard_path
       end
 
-      it "shows a link to the classrooms" do
-        expect(Capybara.string(response.body)).to have_link("Classrooms", href: dashboard_path)
+      it "marks My Classes as the current page" do
+        expect(Capybara.string(response.body))
+          .to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{dashboard_path}']", exact_text: "My Classes")
       end
 
       it "holds the page, but not the navbar, in the main landmark" do
@@ -20,8 +21,8 @@ RSpec.describe "dashboard controller", :default_creates do
           .and have_no_css("main #navbar-main")
       end
 
-      it "does not show a link to school admin" do
-        expect(Capybara.string(response.body)).to have_no_link("User Admin", href: users_path)
+      it "does not show the School menu" do
+        expect(Capybara.string(response.body)).to have_no_css("#school-menu")
       end
 
       it "lists the classroom under My Classes" do
@@ -58,12 +59,18 @@ RSpec.describe "dashboard controller", :default_creates do
         get dashboard_path
       end
 
-      it "shows a link to the classrooms" do
-        expect(Capybara.string(response.body)).to have_link("Classrooms", href: dashboard_path)
+      it "links to My Classes" do
+        expect(Capybara.string(response.body)).to have_link("My Classes", href: dashboard_path)
       end
 
-      it "shows a link to school admin" do
-        expect(Capybara.string(response.body)).to have_link("User Admin", href: users_path)
+      it "lists the school pages under the School menu" do
+        expect(Capybara.string(response.body).find("#school-menu"))
+          .to have_link("Users", href: users_path)
+          .and have_link("Classrooms", href: classrooms_path)
+      end
+
+      it "leaves the School menu unmarked" do
+        expect(Capybara.string(response.body)).to have_no_css("#school-menu .dropdown-toggle.active")
       end
     end
 
