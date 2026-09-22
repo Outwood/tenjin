@@ -18,11 +18,14 @@ section.page-section.text-center.pt-2#set_homework
         input_html: { class:'col-sm-9 form-control', data: { action:'change->homework#loadLessons' } },
         label_html: { class: 'col-sm-3 col-form-label' },
         wrapper_html: { class: 'row mb-3' }
+      / A re-rendered form already has a topic, and no change event will fill its lessons
+      - topic_lessons = @lessons.select { |lesson| lesson.topic_id == @homework.topic_id }
       = f.input :lesson_id,
         as: :select,
-        disabled: true,
+        collection: topic_lessons,
+        label_method: :title,
         label: 'Lesson (Optional)',
-        input_html: { class:'col-sm-9 form-control', data: { 'homework-target':'lessonSelect' } },
+        input_html: { class:'col-sm-9 form-control', disabled: topic_lessons.empty?, data: { 'homework-target':'lessonSelect' } },
         label_html: {class: 'col-sm-3 col-form-label'},
         wrapper_html: {class: 'row mb-3'}
       = f.association :classroom, as: :hidden

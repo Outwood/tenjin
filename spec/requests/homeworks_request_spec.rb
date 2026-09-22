@@ -21,8 +21,7 @@ RSpec.describe "homeworks controller", :default_creates do
       before { get new_homework_path(classroom: {classroom_id: classroom.id}) }
 
       it "lists no lessons before a topic is chosen" do
-        expect(page).to have_select("Lesson (Optional)", disabled: true)
-          .and have_no_css("#homework_lesson_id option", text: full_lesson.title)
+        expect(page).to have_select("Lesson (Optional)", disabled: true, options: [""])
       end
 
       it "offers only lessons with at least ten questions" do
@@ -67,6 +66,19 @@ RSpec.describe "homeworks controller", :default_creates do
         expect { post homeworks_path, params: {homework: homework_params.merge(due_date: 1.day.ago)} }
           .not_to change(Homework, :count)
         expect(Capybara.string(response.body)).to have_css("form", text: "can't be in the past")
+      end
+    end
+
+    context "with a lesson homework and a due date in the past" do
+      let(:lesson) { create(:lesson, topic: topic, title: "Equivalent fractions", questions_count: 10) }
+      let!(:sibling_lesson) { create(:lesson, topic: topic, title: "Mixed numbers", questions_count: 10) }
+
+      before { post homeworks_path, params: {homework: homework_params.merge(lesson_id: lesson.id, due_date: 1.day.ago)} }
+
+      it "keeps the chosen lesson among the topic's lessons" do
+        expect(Capybara.string(response.body))
+          .to have_select("Lesson (Optional)", disabled: false, selected: "Equivalent fractions",
+            options: ["", "Equivalent fractions", "Mixed numbers"])
       end
     end
   end
