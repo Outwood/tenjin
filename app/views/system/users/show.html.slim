@@ -21,10 +21,40 @@ ruby:
         td = @user.role.humanize
       tr
         td School
-        td = @user.school&.name
+        td = link_to @user.school.name, system_school_path(@user.school)
+      tr
+        td Email
+        td#email = @user.email.presence || '—'
+      tr
+        td Google account
+        td#google-account = @user.oauth_provider.present? ? @user.oauth_email : 'Not linked'
+      tr
+        td Status
+        td#status = user_status_badge(@user)
+      tr
+        td Last sign in
+        td#last-sign-in = last_sign_in(@user)
+      tr
+        td Sign-ins
+        td#sign-in-count = @user.sign_in_count
+
+  h2.admin-section-heading Classrooms
+  - if @classrooms.empty?
+    p.text-body-secondary No classrooms.
+  - else
+    table.table#classrooms-table
+      thead
+        tr
+          th Name
+          th Subject
+      tbody
+        - @classrooms.each do |classroom|
+          tr id=dom_id(classroom)
+            td = classroom.name
+            td = classroom.subject&.name
 
   - if may_edit_email
-    h2.admin-section-heading Email
+    h2.admin-section-heading Change email
     = form_with url: system_user_email_path(@user), method: :patch, data: { turbo: false } do
       .row.g-2.align-items-end.mb-4
         .col-md-6

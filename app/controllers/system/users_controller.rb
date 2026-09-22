@@ -22,6 +22,7 @@ module System
     def show
       @user = authorize find_user
       @roles = @user.roles.includes(:resource)
+      @classrooms = @user.classrooms.includes(:subject).order(:name)
       @subjects = Subject.where(active: true).order(:name)
     end
 
