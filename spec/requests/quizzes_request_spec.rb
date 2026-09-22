@@ -248,6 +248,18 @@ RSpec.describe "using a quiz" do
       end
     end
 
+    context "with a lesson quiz" do
+      let(:lesson) { create(:lesson, topic: topic, title: "Cell division") }
+      let(:question) { create(:question, topic: topic, lesson: lesson) }
+      let(:quiz) { create(:new_quiz, user: student, lesson: lesson, question_order: [question.id]) }
+
+      before { get quiz_path(quiz) }
+
+      it "names the quiz after the lesson" do
+        expect(Capybara.string(response.body)).to have_css("#quiz-name", exact_text: "Cell division")
+      end
+    end
+
     context "when the question's lesson has no content" do
       let(:lesson) { create(:lesson, topic: topic, category: "no_content", video_id: "") }
       let(:question) { create(:question, topic: topic, lesson: lesson) }

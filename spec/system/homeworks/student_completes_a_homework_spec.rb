@@ -16,45 +16,13 @@ RSpec.describe "Student completes a homework", :default_creates, :js do
 
     before { visit(dashboard_path) }
 
+    # End-to-end smoke from the dashboard row through a quiz and back; the row's
+    # quiz start is in quiz_starter_controller.test.js, the icons in dashboard_request_spec.rb
     it "shows a tick next to the homework row on completion" do
       find(".homework-row[data-homework='#{homework.id}']").click
       find(".question-button", match: :first).click
       find(".next-button", match: :first).click
-      expect(page).to have_css(".homework-row > td > i.fa-check")
-    end
-
-    context "with the homework not yet started" do
-      it "does not show a tick next to the homework row" do
-        expect(page).to have_no_css(".homework-row[data-homework='#{homework.id}'] > td > i.fa-check")
-      end
-    end
-  end
-
-  context "with a lesson homework" do
-    let(:lesson) { create(:lesson, topic: topic) }
-    let!(:homework) { create(:homework, lesson: lesson, topic: topic, classroom: classroom, required: 10) }
-
-    before do
-      create_list(:question, 10, topic: topic, lesson: lesson)
-      visit(dashboard_path)
-    end
-
-    it "names the quiz after the lesson" do
-      find(".homework-row[data-homework='#{homework.id}']").click
-      expect(page).to have_css("#quiz-name", exact_text: lesson.title)
-    end
-
-    context "when the student has already started the lesson today" do
-      let!(:usage_statistic) do
-        create(:usage_statistic, lesson: lesson, topic: topic, user: student,
-          quizzes_started: 1, date: Date.current)
-      end
-      before { visit(dashboard_path) }
-
-      it "warns that the quiz will not count toward leaderboard points" do
-        find(".homework-row[data-homework='#{homework.id}']").click
-        expect(page).to have_content("This quiz is currently not counting towards your leaderboard points")
-      end
+      expect(page).to have_css(".homework-row[data-homework='#{homework.id}'] > td > i.fa-check")
     end
   end
 end

@@ -106,6 +106,18 @@ RSpec.describe Quiz::CreateQuiz, :default_creates do
     it "assigns the lesson to the quiz" do
       expect(result.payload[:quiz].lesson).to eq(lesson)
     end
+
+    it "counts the first attempt at the lesson" # pending — counterpart missing
+
+    context "with the lesson already started today" do
+      let!(:lesson_started_today) do
+        create(:usage_statistic, user: student, topic: topic, lesson: lesson, quizzes_started: 1)
+      end
+
+      it "does not count toward the leaderboard" do
+        expect(result.payload[:quiz].counts_for_leaderboard).to be false
+      end
+    end
   end
 
   context "when the topic belongs to another subject" do

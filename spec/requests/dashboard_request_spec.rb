@@ -228,6 +228,10 @@ RSpec.describe "dashboard controller", :default_creates do
             expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-times")
               .and have_no_css("#{status_cell} i.fa-exclamation")
           end
+
+          it "shows no tick icon" do
+            expect(Capybara.string(response.body)).to have_no_css("#{status_cell} i.fa-check")
+          end
         end
 
         context "when the homework is completed" do
