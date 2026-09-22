@@ -2,10 +2,16 @@
 // markup the short answer question renders; the server's verdict arrives
 // through a stubbed fetch
 
+import QuizStatsController from "../../../app/javascript/controllers/quiz_stats_controller";
 import ShortResponseQuestionController from "../../../app/javascript/controllers/short_response_question_controller";
 import { mountControllers, unmount } from "../support/stimulus";
 
 const FIXTURE = `
+  <div data-controller="quiz-stats">
+    <span id="streak" data-quiz-stats-target="streak">0</span>
+    <span id="answeredCorrect" data-quiz-stats-target="answeredCorrect">0</span>
+    <span id="multiplier" data-quiz-stats-target="multiplier">1</span>
+  </div>
   <div data-controller="short-response-question"
        data-short-response-question-quiz-stats-outlet="[data-controller~='quiz-stats']">
     <input data-short-response-question-target="input"
@@ -25,6 +31,7 @@ describe("short-response-question", () => {
   beforeEach(async () => {
     application = await mountControllers(FIXTURE, {
       "short-response-question": ShortResponseQuestionController,
+      "quiz-stats": QuizStatsController,
     });
     input = document.querySelector("input");
     [submit, next] = document.querySelectorAll("button");
@@ -76,5 +83,33 @@ describe("short-response-question", () => {
 
     expect(input.value).toBe("To Autumn or The Autumn");
     expect(input.classList.contains("correct-answer")).toBe(true);
+  });
+
+  it("puts a check on a correct verdict", async () => {
+    await check("Paris", { correct: true, answer: [{ text: "Paris" }] });
+
+    expect(submit.querySelector("i.fa-check")).not.toBeNull();
+    expect(submit.querySelector("i.fa-times")).toBeNull();
+  });
+
+  it("puts a cross on a wrong verdict", async () => {
+    await check("London", { correct: false, answer: [{ text: "Paris" }] });
+
+    expect(submit.querySelector("i.fa-times")).not.toBeNull();
+    expect(submit.querySelector("i.fa-check")).toBeNull();
+  });
+
+  it("passes the returned stats to the quiz stats", async () => {
+    await check("Paris", {
+      correct: true,
+      answer: [{ text: "Paris" }],
+      streak: 3,
+      answeredCorrect: 5,
+      multiplier: 2,
+    });
+
+    expect(document.getElementById("streak").textContent).toBe("3");
+    expect(document.getElementById("answeredCorrect").textContent).toBe("5");
+    expect(document.getElementById("multiplier").textContent).toBe("2");
   });
 });

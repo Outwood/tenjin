@@ -215,6 +215,14 @@ RSpec.describe "using a quiz" do
       expect(response).to have_http_status(:success)
     end
 
+    context "before the question is answered" do
+      before { get quiz_path(quiz) }
+
+      it "hides the next question button" do
+        expect(Capybara.string(response.body)).to have_css("#nextButton.invisible")
+      end
+    end
+
     context "when the question has no lesson but its topic has a default lesson" do
       let(:lesson) { create(:lesson, topic: topic, title: "Photosynthesis") }
 
@@ -341,6 +349,16 @@ RSpec.describe "using a quiz" do
       it "leaves the leaderboard score unchanged" do
         expect { put quiz_path(quiz), params: {answer: {id: correct_answer.id}} }
           .not_to change { prior_score.reload.score }
+      end
+    end
+
+    context "when the answer earns a multiplier" do
+      let!(:doubling_multiplier) { create(:multiplier, score: 1, multiplier: 2) }
+
+      before { put quiz_path(quiz, format: :json), params: {answer: {id: correct_answer.id}}, xhr: true }
+
+      it "returns the updated streak, correct count and multiplier" do
+        expect(response.parsed_body).to include("streak" => 1, "answeredCorrect" => 1, "multiplier" => 2)
       end
     end
 

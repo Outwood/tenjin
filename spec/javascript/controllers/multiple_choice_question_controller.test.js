@@ -59,6 +59,37 @@ describe("multiple-choice-question", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
+  it("disables every answer while the verdict is awaited", async () => {
+    await select("response-2", {
+      ok: true,
+      json: async () => ({ correct: false, answer: [{ id: 1 }] }),
+    });
+
+    expect(document.getElementById("response-1").disabled).toBe(true);
+    expect(document.getElementById("response-2").disabled).toBe(true);
+  });
+
+  it("puts a check on a correct guess", async () => {
+    await select("response-1", {
+      ok: true,
+      json: async () => ({ correct: true, answer: [{ id: 1 }] }),
+    });
+
+    expect(classes("response-1").contains("correct-answer")).toBe(true);
+    expect(classes("response-1").contains("incorrect-answer")).toBe(false);
+    expect(document.querySelector("#response-1 i.fa-check")).not.toBeNull();
+  });
+
+  it("puts a cross on a wrong guess", async () => {
+    await select("response-2", {
+      ok: true,
+      json: async () => ({ correct: false, answer: [{ id: 1 }] }),
+    });
+
+    expect(document.querySelector("#response-2 i.fa-times")).not.toBeNull();
+    expect(document.querySelector("#response-1 i")).toBeNull();
+  });
+
   it("reloads the page when the server refuses the guess", async () => {
     await select("response-2", { ok: false, status: 422 });
 
