@@ -11,7 +11,7 @@ jest.mock("bootstrap", () => {
 });
 
 const fixture = (style) => `
-  <a href="/flagged_questions" id="unfairFlag"
+  <a href="/questions/5/flag" id="unfairFlag"
      data-controller="unfair-flag" data-action="click->unfair-flag#flag">
     <i class="${style} fa-flag"></i>
   </a>
@@ -44,10 +44,11 @@ describe("unfair-flag", () => {
     jest.clearAllMocks();
   });
 
-  it("fills the flag and thanks the student", async () => {
+  it("flags the question, fills the flag and thanks the student", async () => {
     await mount("far");
     await clickFlag();
 
+    expect(global.fetch.mock.calls[0][1].method).toBe("POST");
     expect(icon().contains("fas")).toBe(true);
     expect(icon().contains("far")).toBe(false);
     expect(Modal.getOrCreateInstance).toHaveBeenCalledWith(
@@ -56,10 +57,11 @@ describe("unfair-flag", () => {
     expect(Modal.getOrCreateInstance().show).toHaveBeenCalled();
   });
 
-  it("empties a flag already set without thanking again", async () => {
+  it("unflags a flagged question without thanking again", async () => {
     await mount("fas");
     await clickFlag();
 
+    expect(global.fetch.mock.calls[0][1].method).toBe("DELETE");
     expect(icon().contains("far")).toBe(true);
     expect(icon().contains("fas")).toBe(false);
     expect(Modal.getOrCreateInstance).not.toHaveBeenCalled();

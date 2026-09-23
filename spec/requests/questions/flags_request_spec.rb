@@ -2,15 +2,14 @@
 
 require "rails_helper"
 
-RSpec.describe "flagged questions controller", :default_creates do
-  subject(:flag) { post flagged_questions_path, params: {flagged_question: {question_id: question_id}} }
-
+RSpec.describe "question flags controller", :default_creates do
   let(:question) { create(:question, topic: topic) }
-  let(:question_id) { question.id }
 
   before { sign_in student }
 
-  describe "POST /flagged_questions" do
+  describe "POST /questions/:question_id/flag" do
+    subject(:flag) { post question_flag_path(question) }
+
     it "flags the question" do
       expect { flag }.to change { FlaggedQuestion.exists?(question: question, user: student) }.from(false).to(true)
       expect(response).to have_http_status(:ok)
@@ -19,8 +18,27 @@ RSpec.describe "flagged questions controller", :default_creates do
     context "when the student has already flagged the question" do
       let!(:flagged_question) { create(:flagged_question, user: student, question: question) }
 
+      it "keeps the one flag" do
+        expect { flag }.not_to change(FlaggedQuestion, :count)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when the question does not exist" do
+      it "is not found" do
+        expect { post question_flag_path(question_id: 0) }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
+
+  describe "DELETE /questions/:question_id/flag" do
+    subject(:unflag) { delete question_flag_path(question) }
+
+    context "when the student has flagged the question" do
+      let!(:flagged_question) { create(:flagged_question, user: student, question: question) }
+
       it "takes the flag off" do
-        expect { flag }.to change { FlaggedQuestion.exists?(flagged_question.id) }.from(true).to(false)
+        expect { unflag }.to change { FlaggedQuestion.exists?(flagged_question.id) }.from(true).to(false)
         expect(response).to have_http_status(:ok)
       end
 
@@ -29,7 +47,7 @@ RSpec.describe "flagged questions controller", :default_creates do
         # branch is what keeps one added later from reading as an unflag
         before do
           allow_any_instance_of(FlaggedQuestion).to receive(:destroy).and_return(false)
-          flag
+          unflag
         end
 
         it "keeps the flag" do
@@ -43,17 +61,12 @@ RSpec.describe "flagged questions controller", :default_creates do
       end
     end
 
-    context "when the flag names no question that exists" do
-      let(:question_id) { 0 }
+    context "with another student's flag on the question" do
+      let!(:other_flag) { create(:flagged_question, user: create(:student, school: school), question: question) }
 
-      it "flags nothing" do
-        expect { flag }.not_to change(FlaggedQuestion, :count)
-      end
-
-      it "reports what the record refused" do
-        flag
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(response.parsed_body["errors"]).to include("Question must exist")
+      it "leaves it in place" do
+        expect { unflag }.not_to change(FlaggedQuestion, :count)
+        expect(response).to have_http_status(:ok)
       end
     end
   end

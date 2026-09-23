@@ -49,8 +49,9 @@ Rails.application.routes.draw do
     resources :homeworks, only: %i[new create]
   end
   resources :questions, only: %i[index edit update destroy] do
-    member do
-      patch "reset_flags"
+    scope module: :questions do
+      resource :flag, only: %i[create destroy]
+      resource :flag_reset, only: [:create]
     end
   end
   resources :subjects, only: [] do
@@ -76,7 +77,6 @@ Rails.application.routes.draw do
       delete "unlink_oauth_account"
     end
   end
-  resources :flagged_questions, only: [:create]
   resources :lessons, except: %i[show new] do
     scope module: :lessons do
       resources :questions, only: [:index]

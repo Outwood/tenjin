@@ -8,7 +8,7 @@
     .col
       p.text-end
         = link_to flag_icon,
-          flagged_questions_path(flagged_question: {user_id: current_user.id, question_id: @question.id }),
+          question_flag_path(@question),
           class: 'btn',
           id: 'unfairFlag',
           'aria-label': 'Flag this question as unfair',

@@ -14,14 +14,6 @@ class QuestionsController < ApplicationController
       .group(:topic_id).count
   end
 
-  def reset_flags
-    question = find_question
-    authorize question, :update?
-    FlaggedQuestion.where(question: question).delete_all
-    Question.reset_counters question.id, :flagged_questions_count
-    redirect_to edit_question_path(question)
-  end
-
   def edit
     @question = authorize find_question
     assign_question_params(@question) if params[:question].present?

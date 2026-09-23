@@ -24,8 +24,7 @@
   .row
     .col
       = button_to 'Reset Question Flags',
-        reset_flags_question_path(@question),
-        method: :patch,
+        question_flag_reset_path(@question),
         class: 'btn w-100 btn-secondary',
         form: { data: { turbo: true } }
 
