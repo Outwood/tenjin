@@ -82,12 +82,9 @@ Rails.application.routes.draw do
       resources :questions, only: [:index]
     end
   end
-  resources :customisations, only: [] do
-    collection do
-      get "show_available"
-    end
-    member do
-      post "buy"
+  resources :customisations, only: [:index], path: "shop" do
+    scope module: :customisations do
+      resource :unlock, only: [:create]
     end
   end
 

@@ -22,9 +22,9 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
               aria-expanded="false")
               | Shop
             .dropdown-menu aria-labelledby='shopDropdown'
-              a.dropdown-item href=show_available_customisations_path(anchor: 'dashboard-styles')
+              a.dropdown-item href=customisations_path(anchor: 'dashboard-styles')
                 | Styles
-              a.dropdown-item href=show_available_customisations_path(anchor: 'icons')
+              a.dropdown-item href=customisations_path(anchor: 'icons')
                 | Leaderboard Icons
         li.nav-item = nav_link 'Lessons', lessons_path, current: controller_name == 'lessons'
         - if current_user.employee?
@@ -44,7 +44,7 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
             li.nav-item = nav_link 'Edit Questions', questions_path, current: controller_name == 'questions'
 
       - if current_user.student?
-        a.d-inline-flex.align-items-center.me-3 href=show_available_customisations_path
+        a.d-inline-flex.align-items-center.me-3 href=customisations_path
           i.fas.fa-star.text-warning.me-1 aria-hidden="true"
           span.visually-hidden> Challenge points:
           span#challenge-points.text-light = current_user.challenge_points

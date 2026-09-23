@@ -12,7 +12,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
     visit(dashboard_path)
     find("button", text: "Shop").click
     find("a", text: "Styles").click
-    expect(page).to have_current_path(show_available_customisations_path)
+    expect(page).to have_current_path(customisations_path)
   end
 
   describe "available dashboard styles" do
@@ -21,7 +21,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
     let(:student) { create(:student, school: school, challenge_points: 10) }
 
     before do
-      visit(show_available_customisations_path)
+      visit(customisations_path)
     end
 
     it "lists available customisations and their prices" do
@@ -40,7 +40,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
 
     context "after buying a customisation" do
       before do
-        within("form[action='#{buy_customisation_path(dashboard_customisation)}']") do
+        within("form[action='#{customisation_unlock_path(dashboard_customisation)}']") do
           click_button "Buy"
         end
         expect(page).to have_current_path(dashboard_path)
@@ -62,7 +62,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
       end
 
       context "when returning to the store" do
-        before { visit(show_available_customisations_path) }
+        before { visit(customisations_path) }
 
         it "shows the purchased customisation in a separate section" do
           expect(page).to have_content(second_customisation.name.upcase)
@@ -80,12 +80,12 @@ RSpec.describe "User customises the site", :default_creates, :js do
         it "allows switching back at no cost after buying another" do
           expected_points = student.challenge_points - dashboard_customisation.cost - second_customisation.cost
 
-          within("form[action='#{buy_customisation_path(second_customisation)}']") do
+          within("form[action='#{customisation_unlock_path(second_customisation)}']") do
             click_button "Buy"
           end
           expect(page).to have_current_path(dashboard_path)
-          visit(show_available_customisations_path)
-          within("form[action='#{buy_customisation_path(dashboard_customisation)}']") do
+          visit(customisations_path)
+          within("form[action='#{customisation_unlock_path(dashboard_customisation)}']") do
             click_button "Switch"
           end
           expect(page).to have_current_path(dashboard_path)
@@ -102,7 +102,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
     let(:student) { create(:student, school: school, challenge_points: 1000) }
 
     before do
-      visit(show_available_customisations_path)
+      visit(customisations_path)
     end
 
     it "lists available icons with a buy button" do
@@ -115,7 +115,7 @@ RSpec.describe "User customises the site", :default_creates, :js do
         create(:customisation, customisation_type: "leaderboard_icon", cost: 10, purchasable: false)
       end
 
-      before { visit(show_available_customisations_path) }
+      before { visit(customisations_path) }
 
       it "hides it" do
         expect(page).to have_no_content(unpurchasable_icon.name.upcase)
@@ -125,10 +125,10 @@ RSpec.describe "User customises the site", :default_creates, :js do
     context "when the student has a topic score" do
       let!(:topic_score) { create(:topic_score, user: student, topic: topic) }
 
-      before { visit(show_available_customisations_path) }
+      before { visit(customisations_path) }
 
       it "shows the icon on the leaderboard after buying" do
-        within("form[action='#{buy_customisation_path(icon_customisation)}']") do
+        within("form[action='#{customisation_unlock_path(icon_customisation)}']") do
           click_button "Buy"
         end
         expect(page).to have_current_path(dashboard_path)
