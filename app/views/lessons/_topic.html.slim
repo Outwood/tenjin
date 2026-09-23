@@ -27,7 +27,7 @@ details.lesson-topic.border-bottom id=dom_id(topic) open=opened data-controller=
           td.lesson-title = l.title
           td.lesson-count.text-end = @active_question_counts.fetch(l.id, 0)
           td.lesson-actions.text-end
-            = link_to 'Questions', lesson_questions_path(lesson_id: l), class: 'btn btn-sm btn-outline-primary'
+            = link_to 'Questions', lesson_questions_path(l), class: 'btn btn-sm btn-outline-primary'
             - if editable
               = link_to 'Edit', edit_lesson_path(l), class: 'btn btn-sm btn-outline-primary ms-1'
               = button_to 'Delete', lesson_path(l),

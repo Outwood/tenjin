@@ -14,31 +14,12 @@ class QuestionsController < ApplicationController
       .group(:topic_id).count
   end
 
-  def lesson
-    redirect_to lessons_path if lesson_params.blank?
-
-    @lesson = Lesson.find(lesson_params)
-    authorize @lesson, :view_questions?
-    @questions = Question.with_rich_text_question_text_and_embeds
-      .includes(:answers)
-      .where(lesson: @lesson, active: true)
-
-    render "lesson_question_index"
-  end
-
   def reset_flags
     question = find_question
     authorize question, :update?
     FlaggedQuestion.where(question: question).delete_all
     Question.reset_counters question.id, :flagged_questions_count
     redirect_to question
-  end
-
-  def flagged_questions
-    @subject = Subject.find(flagged_questions_params)
-    authorize @subject, :flagged_questions?
-    @questions = @subject.flagged_questions
-    render :flagged
   end
 
   def show
@@ -67,14 +48,6 @@ class QuestionsController < ApplicationController
   end
 
   private
-
-  def lesson_params
-    params.require(:lesson_id)
-  end
-
-  def flagged_questions_params
-    params.require(:subject_id)
-  end
 
   def question_params
     params.require(:question).permit(:question_text, :question_type, :lesson_id,

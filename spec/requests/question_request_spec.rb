@@ -53,21 +53,6 @@ RSpec.describe "questions controller", :default_creates do
     end
   end
 
-  describe "GET /questions/flagged_questions" do
-    let!(:flagged_question) { create(:question, topic: topic, flagged_questions_count: 5) }
-
-    before do
-      sign_in author
-      get flagged_questions_questions_path(subject_id: quiz_subject.id)
-    end
-
-    it "lists the subject's flagged questions" do
-      expect(Capybara.string(response.body)).to have_css("#question-#{flagged_question.id}")
-    end
-
-    it "does not list unflagged questions"
-  end
-
   describe "GET /questions/:id" do
     let(:question) { create(:question, topic: topic) }
 

@@ -47,15 +47,17 @@ Rails.application.routes.draw do
   resources :leaderboard, only: %i[show index]
   resources :classrooms, only: %i[show index update]
   resources :questions, only: %i[index show update destroy] do
-    collection do
-      get "lesson"
-      get "flagged_questions"
-    end
     member do
       patch "reset_flags"
     end
   end
-  resources :topics, only: %i[create update destroy] do
+  resources :subjects, only: [] do
+    scope module: :subjects do
+      resources :topics, only: [:create]
+      resources :flagged_questions, only: [:index]
+    end
+  end
+  resources :topics, only: %i[update destroy] do
     scope module: :topics do
       resources :questions, only: %i[index new create]
       resource :import, only: %i[new create]
@@ -69,7 +71,11 @@ Rails.application.routes.draw do
     end
   end
   resources :flagged_questions, only: [:create]
-  resources :lessons, except: %i[show]
+  resources :lessons, except: %i[show] do
+    scope module: :lessons do
+      resources :questions, only: [:index]
+    end
+  end
   resources :customisations, only: [] do
     collection do
       get "show_available"
