@@ -96,12 +96,16 @@ class Challenge::UpdateChallengeProgress < ApplicationService
       .where(end_date: Time.current..)
   end
 
+  # Claims the award in SQL so a concurrent answer cannot claim it twice, and
+  # adds the points without saving the user, whose validity is no bar to them
   def complete_challenge(progress)
-    progress.awarded = true
-    progress.save
+    ChallengeProgress.transaction do
+      claimed = ChallengeProgress.where(id: progress.id, awarded: false)
+        .update_all(awarded: true, updated_at: Time.current)
+      next if claimed.zero?
 
-    progress.user.challenge_points = 0 if progress.user.challenge_points.nil?
-    progress.user.challenge_points += progress.challenge.points
-    progress.user.save
+      User.where(id: progress.user_id)
+        .update_all(["challenge_points = COALESCE(challenge_points, 0) + ?", progress.challenge.points])
+    end
   end
 end

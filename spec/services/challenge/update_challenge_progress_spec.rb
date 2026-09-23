@@ -73,6 +73,40 @@ RSpec.describe Challenge::UpdateChallengeProgress, :default_creates do
       expect(progress.progress).to eq(3)
     end
 
+    context "with a pupil whose record fails validation" do
+      let(:pupil_without_upi) { create(:student, :without_upi, school: school) }
+      let(:quiz) { create(:quiz, subject: quiz_subject, user: pupil_without_upi, topic: topic, streak: 5) }
+
+      it "still awards the points" do
+        expect { described_class.call(quiz) }
+          .to change { pupil_without_upi.reload.challenge_points }.by(challenge.points)
+      end
+    end
+
+    context "with a pupil who has no challenge points yet" do
+      let(:pupil_without_points) { create(:student, school: school, challenge_points: nil) }
+      let(:quiz) { create(:quiz, subject: quiz_subject, user: pupil_without_points, topic: topic, streak: 5) }
+
+      it "starts their total at the challenge's points" do
+        expect { described_class.call(quiz) }
+          .to change { pupil_without_points.reload.challenge_points }.from(nil).to(challenge.points)
+      end
+    end
+
+    context "when a concurrent answer awards the challenge first" do
+      before do
+        # Lands the other answer's award between this one's progress upsert and its claim
+        allow(ChallengeProgress).to receive(:find).and_wrap_original do |find, *args|
+          find.call(*args).tap { |progress| ChallengeProgress.where(id: progress.id).update_all(awarded: true) }
+        end
+      end
+
+      it "does not award the points again" do
+        expect { described_class.call(quiz_streak_of_five) }
+          .not_to(change { student.reload.challenge_points })
+      end
+    end
+
     context "with an already-completed progress record" do
       let!(:completed_progress) do
         create(:challenge_progress, challenge: challenge, user: student, completed: true, awarded: true)
