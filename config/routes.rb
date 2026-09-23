@@ -39,9 +39,9 @@ Rails.application.routes.draw do
 
   resources :quizzes, only: %i[index show update]
   resources :schools, only: [:show] do
-    member do
-      patch :sync
-      patch :reset_all_passwords
+    scope module: :schools do
+      resource :sync, only: [:create]
+      resource :password_reset, only: [:create]
     end
   end
   resources :leaderboards, only: [:index]

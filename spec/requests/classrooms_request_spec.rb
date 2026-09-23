@@ -16,7 +16,7 @@ RSpec.describe "classrooms controller", :default_creates do
       expect(Capybara.string(response.body))
         .to have_css("#syncStatus", exact_text: "Last synced 3 Sep 2026.")
         .and have_link("School overview", href: school_path(school))
-        .and have_no_css("form[action='#{sync_school_path(school)}']")
+        .and have_no_css("form[action='#{school_sync_path(school)}']")
     end
   end
 

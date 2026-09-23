@@ -22,7 +22,7 @@ RSpec.describe "schools controller", :default_creates do
 
       it "offers a sync of the school" do
         expect(Capybara.string(response.body))
-          .to have_css("form[action='#{sync_school_path(school)}'] button", exact_text: "Sync Classrooms & Users")
+          .to have_css("form[action='#{school_sync_path(school)}'] button", exact_text: "Sync Classrooms & Users")
       end
 
       it "dates the last sync" do
@@ -32,7 +32,7 @@ RSpec.describe "schools controller", :default_creates do
       it "offers the reset of every password behind the confirmation modal" do
         expect(Capybara.string(response.body))
           .to have_button("Reset and print all passwords")
-          .and have_css("#resetAllPasswordsModal form[action='#{reset_all_passwords_school_path(school)}']", visible: :all)
+          .and have_css("#resetAllPasswordsModal form[action='#{school_password_reset_path(school)}']", visible: :all)
       end
     end
 
@@ -60,20 +60,20 @@ RSpec.describe "schools controller", :default_creates do
     end
   end
 
-  describe "PATCH /schools/:id/sync" do
+  describe "POST /schools/:school_id/sync" do
     context "as a school admin of the school" do
       before { sign_in school_admin }
 
       it "queues the sync job" do
-        expect { patch sync_school_path(school) }.to have_enqueued_job(SyncSchoolJob).with(school)
+        expect { post school_sync_path(school) }.to have_enqueued_job(SyncSchoolJob).with(school)
       end
 
       it "marks the school as queued" do
-        expect { patch sync_school_path(school) }.to change { school.reload.sync_status }.to("queued")
+        expect { post school_sync_path(school) }.to change { school.reload.sync_status }.to("queued")
       end
 
       it "swaps the sync section for the queued state" do
-        patch sync_school_path(school), headers: turbo_headers
+        post school_sync_path(school), headers: turbo_headers
         expect(stream_update(ActionView::RecordIdentifier.dom_id(school, :sync)))
           .to have_css(".badge", exact_text: "Queued")
           .and have_text(SchoolsHelper::SYNC_REFRESH_MESSAGE)
@@ -81,7 +81,7 @@ RSpec.describe "schools controller", :default_creates do
       end
 
       it "returns to the school page without Turbo" do
-        patch sync_school_path(school)
+        post school_sync_path(school)
         expect(response).to redirect_to(school_path(school))
       end
     end
@@ -89,7 +89,7 @@ RSpec.describe "schools controller", :default_creates do
     context "as a teacher" do
       before do
         sign_in teacher
-        patch sync_school_path(school)
+        post school_sync_path(school)
       end
 
       it "leaves the school alone" do
@@ -99,16 +99,16 @@ RSpec.describe "schools controller", :default_creates do
     end
   end
 
-  describe "PATCH /schools/:id/reset_all_passwords" do
+  describe "POST /schools/:school_id/password_reset" do
     context "as a school admin of the school" do
       before { sign_in school_admin }
 
       it "queues the password reset job" do
-        expect { patch reset_all_passwords_school_path(school) }.to have_enqueued_job(ResetUserPasswordsJob)
+        expect { post school_password_reset_path(school) }.to have_enqueued_job(ResetUserPasswordsJob)
       end
 
       it "returns to the school page" do
-        patch reset_all_passwords_school_path(school)
+        post school_password_reset_path(school)
         expect(response).to redirect_to(school_path(school))
       end
     end
@@ -116,7 +116,7 @@ RSpec.describe "schools controller", :default_creates do
     context "as a teacher" do
       before do
         sign_in teacher
-        patch reset_all_passwords_school_path(school)
+        post school_password_reset_path(school)
       end
 
       it "refuses the reset" do
@@ -127,7 +127,7 @@ RSpec.describe "schools controller", :default_creates do
     context "as a student" do
       before do
         sign_in student
-        patch reset_all_passwords_school_path(school)
+        post school_password_reset_path(school)
       end
 
       it "refuses the reset" do

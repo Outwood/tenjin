@@ -30,8 +30,7 @@ section.page-section.text-center.pt-2#school
           |  in the box below and click confirm.
         .row.justify-content-center
           input.px-2#confirmAllPasswordResetTextbox data-confirm-text-target='input' data-action='input->confirm-text#check'
-          = button_to 'Confirm', reset_all_passwords_school_path(@school),
-            method: :patch,
+          = button_to 'Confirm', school_password_reset_path(@school),
             disabled: true,
             class: 'btn btn-danger',
             id: 'confirmAllPasswordResetButton',
