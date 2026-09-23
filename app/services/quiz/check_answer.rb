@@ -15,8 +15,7 @@ class Quiz::CheckAnswer < ApplicationCommand
     ApplicationRecord.transaction do
       if claim_question
         score_answer
-        Quiz::MoveQuizForward.call(quiz: @quiz)
-        @quiz.save!
+        move_quiz_forward
       else
         report_earlier_answer
       end
@@ -52,10 +51,17 @@ class Quiz::CheckAnswer < ApplicationCommand
       .update_all(correct: @correct, updated_at: Time.current) == 1
   end
 
-  # A parallel submission answered first, so report what it recorded
+  # A parallel submission answered first, so report what it recorded. A quiz
+  # saved apart from its verdict can still sit on the answered question, so move it on.
   def report_earlier_answer
-    @quiz.reload
+    @quiz.lock!
+    move_quiz_forward if @quiz.active? && @quiz.current_question_id == @question.id
     @correct = @asked_question.reload.correct
+  end
+
+  def move_quiz_forward
+    Quiz::MoveQuizForward.call(quiz: @quiz)
+    @quiz.save!
   end
 
   # nil when a short-answer question accepts nothing, so there is no verdict to record

@@ -35,6 +35,11 @@ class Quiz < ApplicationRecord
     end
   end
 
+  # Serves the last id in question_order first, then the rest from the front
+  def current_question_id
+    question_order[num_questions_asked - 1]
+  end
+
   private
 
   def update_usage_statistics
