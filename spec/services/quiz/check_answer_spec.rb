@@ -67,6 +67,19 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
       expect(Leaderboard::BroadcastLeaderboardPoint).to have_received(:call).with(topic, user)
     end
 
+    context "when the same answer is submitted twice at once" do
+      # Built before the first lands, as a racing request loads its state
+      let!(:late_submission) do
+        described_class.new(quiz: Quiz.find(quiz.id), question: question, answer_given: {id: correct_answer.id})
+      end
+
+      before { check }
+
+      it "awards the point once" do
+        expect { late_submission.call }.not_to change { TopicScore.find_by!(user: user, topic: topic).score }
+      end
+    end
+
     context "when the quiz cannot be saved" do
       before { quiz.subject = nil }
 
@@ -92,6 +105,26 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
           expect(Leaderboard::BroadcastLeaderboardPoint).not_to have_received(:call)
         end
       end
+    end
+  end
+
+  context "when another answer to the question lands first" do
+    let(:quiz) { create(:quiz, user: user, question_order: [question.id], num_questions_asked: 1, streak: 0, answered_correct: 0) }
+
+    # Built before the first lands, as a racing request loads its state
+    let!(:late_submission) do
+      described_class.new(quiz: Quiz.find(quiz.id), question: question, answer_given: {id: wrong_answer.id})
+    end
+
+    before { described_class.call(quiz: quiz, question: question, answer_given: {id: correct_answer.id}) }
+
+    it "reports the verdict of the first" do
+      expect(late_submission.call.payload).to have_attributes(correct: true, streak: 1, answered_correct: 1)
+    end
+
+    it "leaves the question and quiz as the first left them" do
+      expect { late_submission.call }
+        .not_to change { [quiz.reload.attributes.values_at("num_questions_asked", "streak", "answered_correct"), quiz.asked_questions.pluck(:correct)] }
     end
   end
 
