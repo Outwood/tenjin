@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
 import Shepherd from "shepherd.js";
 
+// The layout's body attaches this by controller_name, so it is named for DashboardsController
+
 export default class extends Controller {
   initialize() {
     if (document.getElementById("oAuthEmail")) {

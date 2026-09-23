@@ -19,7 +19,7 @@ RSpec.describe "Pages", :default_creates do
       end
 
       it "serves the dashboard" do
-        expect(Capybara.string(response.body)).to have_css("body[data-controller='dashboard']")
+        expect(Capybara.string(response.body)).to have_css("body[data-controller='dashboards']")
       end
     end
   end

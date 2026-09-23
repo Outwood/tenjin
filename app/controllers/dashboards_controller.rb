@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-class DashboardController < ApplicationController
+# Serves a signed-in user's home page, one for students and one for staff
+class DashboardsController < ApplicationController
   before_action :authenticate_user!
 
   def show

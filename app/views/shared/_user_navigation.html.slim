@@ -28,7 +28,7 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
                 | Leaderboard Icons
         li.nav-item = nav_link 'Lessons', lessons_path, current: controller_name == 'lessons'
         - if current_user.employee?
-          li.nav-item = nav_link 'My Classes', dashboard_path, current: controller_name == 'dashboard'
+          li.nav-item = nav_link 'My Classes', dashboard_path, current: controller_name == 'dashboards'
           - if current_user.has_role? :school_admin
             - school_pages = [['Overview', school_path(current_user.school)], ['Users', users_path], ['Classrooms', classrooms_path]]
             - on_school_page = school_pages.any? { |_, path| current_page?(path) }

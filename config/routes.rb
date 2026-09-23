@@ -88,12 +88,12 @@ Rails.application.routes.draw do
     end
   end
 
-  get "dashboard/", to: "dashboard#show"
+  resource :dashboard, only: [:show]
 
   get "/pages/*id", to: "pages#show", as: :page, format: false
 
   authenticated :user do
-    root to: "dashboard#show", as: :authenticated_root
+    root to: "dashboards#show", as: :authenticated_root
   end
 
   # if routing the root path, update for your controller
