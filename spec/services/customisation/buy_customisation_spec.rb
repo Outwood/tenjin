@@ -75,6 +75,46 @@ RSpec.describe Customisation::BuyCustomisation, :default_creates do
     end
   end
 
+  context "with no challenge points" do
+    let(:student) { create(:student, school: school, challenge_points: nil) }
+
+    it "returns a failure result with the error message" do
+      result = described_class.call(user: student, customisation: customisation)
+      expect(result).to be_failure
+      expect(result.error).to eq "You do not have enough points"
+    end
+  end
+
+  # Read the stored total without reloading the stale user the service is given
+  def stored_points = User.find(student.id).challenge_points
+
+  context "when points are awarded after the user was loaded" do
+    before { User.where(id: student.id).update_all(challenge_points: 20) }
+
+    it "deducts from the stored total" do
+      expect { described_class.call(user: student, customisation: customisation) }
+        .to change { stored_points }.from(20).to(15)
+    end
+  end
+
+  context "when points are spent after the user was loaded" do
+    before { User.where(id: student.id).update_all(challenge_points: 3) }
+
+    it "returns a failure result with the error message" do
+      result = described_class.call(user: student, customisation: customisation)
+      expect(result).to be_failure
+      expect(result.error).to eq "You do not have enough points"
+    end
+
+    it "does not create a customisation unlock" do
+      expect { described_class.call(user: student, customisation: customisation) }.not_to change(CustomisationUnlock, :count)
+    end
+
+    it "does not change the stored total" do
+      expect { described_class.call(user: student, customisation: customisation) }.not_to change { stored_points }
+    end
+  end
+
   context "when the customisation is not purchasable" do
     let(:customisation) { create(:dashboard_customisation, cost: 5, purchasable: false) }
 

@@ -13,30 +13,29 @@ class Customisation::BuyCustomisation < ApplicationCommand
     unlock = CustomisationUnlock.where(customisation: @customisation, user: @user).first_or_initialize
     if unlock.new_record?
       return failure("This customisation is not for sale") unless @customisation.for_sale?
-      return failure("You do not have enough points") unless funds_present?
 
       unlock.user = @user
     end
 
-    ApplicationRecord.transaction do
-      deduct_challenge_points if unlock.new_record?
+    bought = ApplicationRecord.transaction do
+      raise ActiveRecord::Rollback unless unlock.persisted? || deduct_challenge_points
       destroy_old_active_customisation
       create_new_active_customisation
       unlock.save!
     end
+    return failure("You do not have enough points") unless bought
 
     success
   end
 
   private
 
+  # Spends the points in SQL against the stored total, so an award landing
+  # mid-purchase survives and two purchases cannot overdraw
   def deduct_challenge_points
-    @user.challenge_points -= @customisation.cost
-    @user.save!
-  end
-
-  def funds_present?
-    @user.challenge_points >= @customisation.cost
+    User.where(id: @user.id, challenge_points: @customisation.cost..)
+      .update_all(["challenge_points = challenge_points - ?", @customisation.cost])
+      .positive?
   end
 
   def destroy_old_active_customisation
