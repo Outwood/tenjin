@@ -10,7 +10,7 @@
       .d-flex.flex-wrap.align-items-center.justify-content-between.gap-2.mb-2
         h2.subject-title.mb-0 = s.name
         - if editable
-          = link_to 'Add Lesson', new_lesson_path(subject: s), class: 'btn btn-primary'
+          = link_to 'Add Lesson', new_subject_lesson_path(s), class: 'btn btn-primary'
       - if active_topics.empty? && inactive_topics.empty?
         p.text-body-secondary No lessons yet.
       - active_topics.each do |topic, lessons|

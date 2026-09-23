@@ -6,7 +6,7 @@
     h2.page-section-header.text-uppercase Homework
     ==render_small_separator
     .row.justify-content-center
-      = link_to 'Set Homework', new_homework_path(classroom: {classroom_id: @classroom.id}), class: 'btn w-100 btn-primary'
+      = link_to 'Set Homework', new_classroom_homework_path(@classroom), class: 'btn w-100 btn-primary'
       - homework_table_options = { paginationSize: 5,
           placeholder: 'No homeworks have been found',
           initialSort: [{ column: 'due', dir: 'desc' }],

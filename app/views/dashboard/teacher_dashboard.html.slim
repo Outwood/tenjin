@@ -23,7 +23,7 @@ section.page-section.text-center#myClassrooms
                 td.d-none.d-lg-table-cell = e.classroom.description
                 td = e.subject.name if e.subject.present?
                 td.d-none.d-lg-table-cell = e.classroom.enrollments.size
-                td = link_to 'Set Homework', new_homework_path(classroom: {classroom_id: e.classroom.id}), class: 'btn btn-dark'
+                td = link_to 'Set Homework', new_classroom_homework_path(e.classroom), class: 'btn btn-dark'
 - if @other_classrooms.present?
   section.page-section.text-center#otherClassrooms
     .container

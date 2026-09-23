@@ -5,20 +5,13 @@ require "rails_helper"
 RSpec.describe "homeworks controller", :default_creates do
   before { sign_in teacher }
 
-  describe "GET /homeworks/new" do
-    context "when no classroom is specified" do
-      it "redirects to the dashboard" do
-        get new_homework_path
-        expect(response).to redirect_to(dashboard_path)
-      end
-    end
-
+  describe "GET /classrooms/:classroom_id/homeworks/new" do
     context "with a classroom" do
       let!(:full_lesson) { create(:lesson, topic: topic, questions_count: 10) }
       let!(:short_lesson) { create(:lesson, topic: topic, questions_count: 9) }
       let(:page) { Capybara.string(response.body) }
 
-      before { get new_homework_path(classroom: {classroom_id: classroom.id}) }
+      before { get new_classroom_homework_path(classroom) }
 
       it "lists no lessons before a topic is chosen" do
         expect(page).to have_select("Lesson (Optional)", disabled: true, options: [""])
@@ -31,11 +24,11 @@ RSpec.describe "homeworks controller", :default_creates do
     end
   end
 
-  describe "POST /homeworks" do
-    let(:homework_params) { {classroom_id: classroom.id, topic_id: topic.id, due_date: 1.week.from_now, required: 70} }
+  describe "POST /classrooms/:classroom_id/homeworks" do
+    let(:homework_params) { {topic_id: topic.id, due_date: 1.week.from_now, required: 70} }
 
     context "with a topic homework" do
-      before { post homeworks_path, params: {homework: homework_params} }
+      before { post classroom_homeworks_path(classroom), params: {homework: homework_params} }
 
       it "sets the homework for the topic" do
         expect(Homework.sole).to have_attributes(classroom: classroom, topic: topic, lesson: nil, required: 70)
@@ -50,7 +43,7 @@ RSpec.describe "homeworks controller", :default_creates do
     context "with a lesson homework" do
       let(:lesson) { create(:lesson, topic: topic) }
 
-      before { post homeworks_path, params: {homework: homework_params.merge(lesson_id: lesson.id)} }
+      before { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(lesson_id: lesson.id)} }
 
       it "sets the homework for the lesson" do
         expect(Homework.sole).to have_attributes(topic: topic, lesson: lesson)
@@ -61,9 +54,20 @@ RSpec.describe "homeworks controller", :default_creates do
       end
     end
 
+    context "with another school's classroom" do
+      let(:other_classroom) { create(:classroom, subject: quiz_subject) }
+
+      it "sets no homework and redirects with an alert" do
+        expect { post classroom_homeworks_path(other_classroom), params: {homework: homework_params} }
+          .not_to change(Homework, :count)
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eq("You are not authorized to perform this action.")
+      end
+    end
+
     context "with a due date in the past" do
       it "sets no homework and re-renders the form with the error" do
-        expect { post homeworks_path, params: {homework: homework_params.merge(due_date: 1.day.ago)} }
+        expect { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(due_date: 1.day.ago)} }
           .not_to change(Homework, :count)
         expect(Capybara.string(response.body)).to have_css("form", text: "can't be in the past")
       end
@@ -73,7 +77,7 @@ RSpec.describe "homeworks controller", :default_creates do
       let(:lesson) { create(:lesson, topic: topic, title: "Equivalent fractions", questions_count: 10) }
       let!(:sibling_lesson) { create(:lesson, topic: topic, title: "Mixed numbers", questions_count: 10) }
 
-      before { post homeworks_path, params: {homework: homework_params.merge(lesson_id: lesson.id, due_date: 1.day.ago)} }
+      before { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(lesson_id: lesson.id, due_date: 1.day.ago)} }
 
       it "keeps the chosen lesson among the topic's lessons" do
         expect(Capybara.string(response.body))

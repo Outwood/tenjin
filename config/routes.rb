@@ -45,13 +45,16 @@ Rails.application.routes.draw do
     end
   end
   resources :leaderboard, only: %i[show index]
-  resources :classrooms, only: %i[show index update]
+  resources :classrooms, only: %i[show index update] do
+    resources :homeworks, only: %i[new create]
+  end
   resources :questions, only: %i[index edit update destroy] do
     member do
       patch "reset_flags"
     end
   end
   resources :subjects, only: [] do
+    resources :lessons, only: [:new]
     scope module: :subjects do
       resources :topics, only: %i[new create]
       resources :flagged_questions, only: [:index]
@@ -63,7 +66,7 @@ Rails.application.routes.draw do
       resource :import, only: %i[new create]
     end
   end
-  resources :homeworks, only: %i[show new create destroy]
+  resources :homeworks, only: %i[show destroy]
   resources :users, only: %i[show index update] do
     member do
       patch "reset_password"
@@ -71,7 +74,7 @@ Rails.application.routes.draw do
     end
   end
   resources :flagged_questions, only: [:create]
-  resources :lessons, except: %i[show] do
+  resources :lessons, except: %i[show new] do
     scope module: :lessons do
       resources :questions, only: [:index]
     end

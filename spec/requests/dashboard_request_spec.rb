@@ -31,7 +31,7 @@ RSpec.describe "dashboard controller", :default_creates do
 
       it "links to the set homework form for the classroom" do
         expect(Capybara.string(response.body))
-          .to have_link("Set Homework", href: new_homework_path(classroom: {classroom_id: classroom.id}))
+          .to have_link("Set Homework", href: new_classroom_homework_path(classroom))
       end
 
       it "does not show challenge points" do

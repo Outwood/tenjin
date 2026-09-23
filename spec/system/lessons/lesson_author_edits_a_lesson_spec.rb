@@ -13,7 +13,7 @@ RSpec.describe "Lesson author edits a lesson", :default_creates do
   describe "adding a lesson" do
     let!(:topic) { super() }
 
-    before { visit(new_lesson_path(subject: quiz_subject)) }
+    before { visit(new_subject_lesson_path(quiz_subject)) }
 
     it "creates a lesson" do
       fill_in "URL", with: "https://vimeo.com/371104836"

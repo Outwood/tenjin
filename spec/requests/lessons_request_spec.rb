@@ -34,7 +34,7 @@ RSpec.describe "lessons controller", :default_creates do
       it "offers to add the first lesson" do
         expect(Capybara.string(response.body))
           .to have_no_css(".lesson-title", visible: :all)
-          .and have_link("Add Lesson", href: new_lesson_path(subject: empty_subject))
+          .and have_link("Add Lesson", href: new_subject_lesson_path(empty_subject))
       end
     end
 
@@ -66,7 +66,7 @@ RSpec.describe "lessons controller", :default_creates do
         it "offers to add lessons only to authored subjects" do
           expect(Capybara.string(response.body))
             .to have_link("Add Lesson", count: 1)
-            .and have_link("Add Lesson", href: new_lesson_path(subject: quiz_subject))
+            .and have_link("Add Lesson", href: new_subject_lesson_path(quiz_subject))
         end
       end
 
@@ -81,7 +81,7 @@ RSpec.describe "lessons controller", :default_creates do
         it "offers to add a lesson to it" do
           expect(Capybara.string(response.body))
             .to have_css(".subject-title", text: empty_subject.name)
-            .and have_link("Add Lesson", href: new_lesson_path(subject: empty_subject))
+            .and have_link("Add Lesson", href: new_subject_lesson_path(empty_subject))
         end
       end
 

@@ -18,7 +18,7 @@ class LessonsController < ApplicationController
   end
 
   def new
-    subject = Subject.find(new_lesson_params)
+    subject = Subject.find(params[:subject_id])
     @topics = topics_for(subject)
     return redirect_to lessons_path, flash: {error: "No topics found for subject"} if @topics.empty?
 
@@ -79,10 +79,6 @@ class LessonsController < ApplicationController
   # The index starts with every topic closed, so reopen the one just changed
   def redirect_to_topic(topic)
     redirect_to lessons_path(open: topic.id)
-  end
-
-  def new_lesson_params
-    params.require(:subject)
   end
 
   def lesson_params

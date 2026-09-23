@@ -8,7 +8,7 @@ RSpec.describe "Teacher sets homework", :default_creates, :js do
 
   before do
     sign_in teacher
-    visit(new_homework_path(classroom: {classroom_id: classroom.id}))
+    visit(new_classroom_homework_path(classroom))
   end
 
   # Wiring smoke for the date picker and the Stimulus lesson picker; lesson
