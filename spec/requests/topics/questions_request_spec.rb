@@ -33,8 +33,20 @@ RSpec.describe "topic questions controller", :default_creates do
       expect(response).to have_http_status(:success)
       expect(response.content_type).to start_with("application/json")
       expect(response.headers["Content-Disposition"])
-        .to include("attachment").and include("filename=#{topic.name}.json")
+        .to start_with("attachment").and include("filename*=UTF-8''#{topic.name}.json")
       expect(JSON.parse(response.body).first).to include("question_text", "answers")
+    end
+
+    context "when the topic name carries header syntax" do
+      let(:punctuated_topic) { create(:topic, subject: quiz_subject, name: 'Forces, "motion"; é') }
+
+      it "keeps the whole name in the encoded filename" do
+        get topic_questions_path(punctuated_topic, format: :json)
+
+        disposition = response.headers["Content-Disposition"]
+        expect(CGI.unescape(disposition[/filename\*=UTF-8''(\S+)\z/, 1].to_s))
+          .to eq('Forces, "motion"; é.json')
+      end
     end
   end
 

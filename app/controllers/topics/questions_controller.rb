@@ -22,7 +22,7 @@ module Topics
         format.json do
           send_data Question.where(topic: @topic).to_json(include: :answers),
             type: "application/json; header=present",
-            disposition: "attachment; filename=#{@topic.name}.json"
+            filename: "#{@topic.name}.json"
         end
       end
     end
