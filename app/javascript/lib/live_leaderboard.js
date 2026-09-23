@@ -50,7 +50,6 @@ Alpine.data("liveLeaderboard", ({ subjectId, topicId, canSeeLiveToggle }) => ({
   // ── data ──
   async loadLeaderboard({ allTime = false, schoolGroup = false } = {}) {
     const params = new URLSearchParams();
-    if (this.topicId != null) params.set("topic", this.topicId);
     if (schoolGroup) params.set("school_group", "true");
     if (allTime) params.set("all_time", "true");
 

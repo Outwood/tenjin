@@ -10,28 +10,28 @@ RSpec.describe "leaderboard controller", :default_creates do
     sign_in student
   end
 
-  describe "GET #index" do
+  describe "GET /leaderboards" do
     let!(:topic) { super() }
     let(:second_subject) { create(:subject) }
     let!(:second_enrollment) do
       create(:enrollment, classroom: create(:classroom, subject: second_subject, school: school), user: student)
     end
 
-    before { get leaderboard_index_path }
+    before { get leaderboards_path }
 
     it "links each enrolled subject's overall and topic leaderboards" do
       expect(Capybara.string(response.body))
-        .to have_link("All", href: leaderboard_path(id: quiz_subject.name))
-        .and have_link(topic.name, href: leaderboard_path(id: quiz_subject.name, topic: topic.id))
-        .and have_link("All", href: leaderboard_path(id: second_subject.name))
+        .to have_link("All", href: subject_leaderboard_path(quiz_subject))
+        .and have_link(topic.name, href: topic_leaderboard_path(topic))
+        .and have_link("All", href: subject_leaderboard_path(second_subject))
     end
 
     it "does not list a subject the student is not enrolled in"
   end
 
-  describe "GET #show" do
+  describe "GET /subjects/:subject_id/leaderboard" do
     describe "as a student" do
-      before { get leaderboard_path(quiz_subject.name) }
+      before { get subject_leaderboard_path(quiz_subject) }
 
       it "does not offer the live leaderboard" do
         expect(Capybara.string(response.body)).to have_css(%([x-data*='"canSeeLiveToggle":false']))
@@ -41,7 +41,7 @@ RSpec.describe "leaderboard controller", :default_creates do
     describe "as a teacher" do
       before do
         sign_in teacher
-        get leaderboard_path(quiz_subject.name)
+        get subject_leaderboard_path(quiz_subject)
       end
 
       it "offers the live leaderboard" do
@@ -54,7 +54,7 @@ RSpec.describe "leaderboard controller", :default_creates do
     let!(:topic_score) { create(:topic_score, topic: topic, user: student, score: 10) }
 
     context "with the default filters" do
-      before { get leaderboard_path(quiz_subject.name, format: :json), xhr: true }
+      before { get subject_leaderboard_path(quiz_subject, format: :json), xhr: true }
 
       it "returns the school's entries, the viewer and the subject name" do
         expect(response.parsed_body).to include(
@@ -71,7 +71,7 @@ RSpec.describe "leaderboard controller", :default_creates do
         create(:topic_score, topic: create(:topic, subject: quiz_subject), user: student, score: 20)
       end
 
-      before { get leaderboard_path(quiz_subject.name, format: :json), params: {topic: topic.id}, xhr: true }
+      before { get topic_leaderboard_path(topic, format: :json), xhr: true }
 
       it "narrows the scores to that topic and names it" do
         expect(response.parsed_body)
@@ -82,7 +82,7 @@ RSpec.describe "leaderboard controller", :default_creates do
     context "with an all time score" do
       let!(:all_time_score) { create(:all_time_topic_score, user: student, topic: topic, score: 500) }
 
-      before { get leaderboard_path(quiz_subject.name, format: :json), params: {all_time: "true"}, xhr: true }
+      before { get subject_leaderboard_path(quiz_subject, format: :json), params: {all_time: "true"}, xhr: true }
 
       it "lists all time scores in place of weekly scores" do
         expect(response.parsed_body["leaderboard"])
@@ -96,7 +96,7 @@ RSpec.describe "leaderboard controller", :default_creates do
       let!(:third_school) { create(:school, school_group: school.school_group, name: "Ashfield High") }
 
       context "when only the school is requested" do
-        before { get leaderboard_path(quiz_subject.name, format: :json), xhr: true }
+        before { get subject_leaderboard_path(quiz_subject, format: :json), xhr: true }
 
         it "offers every school in the group as a filter" do
           expect(response.parsed_body["schools"])
@@ -115,7 +115,7 @@ RSpec.describe "leaderboard controller", :default_creates do
 
       context "when the school group is requested" do
         before do
-          get leaderboard_path(quiz_subject.name, format: :json), params: {school_group: "true"}, xhr: true
+          get subject_leaderboard_path(quiz_subject, format: :json), params: {school_group: "true"}, xhr: true
         end
 
         it "lists entries from every school in the group" do
@@ -129,7 +129,7 @@ RSpec.describe "leaderboard controller", :default_creates do
     context "without a school group" do
       before do
         school.update!(school_group: nil)
-        get leaderboard_path(quiz_subject.name, format: :json), xhr: true
+        get subject_leaderboard_path(quiz_subject, format: :json), xhr: true
       end
 
       it "offers only the school as a filter" do
@@ -137,11 +137,9 @@ RSpec.describe "leaderboard controller", :default_creates do
       end
     end
 
-    context "with a subject name that matches nothing" do
-      before { get leaderboard_path("Alchemy", format: :json), xhr: true }
-
-      it "answers with an empty payload" do
-        expect(response.parsed_body.values).to all(be_nil)
+    context "with a subject that does not exist" do
+      it "is not found" do
+        expect { get subject_leaderboard_path(0, format: :json), xhr: true }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
 
@@ -151,7 +149,7 @@ RSpec.describe "leaderboard controller", :default_creates do
       let!(:other_subject_classroom) { create(:classroom, school: school) }
       let!(:other_school_classroom) { create(:classroom, subject: quiz_subject) }
 
-      before { get leaderboard_path(quiz_subject.name, format: :json), xhr: true }
+      before { get subject_leaderboard_path(quiz_subject, format: :json), xhr: true }
 
       it "offers only the school's classrooms for the subject as filters" do
         expect(response.parsed_body["classrooms"]).to contain_exactly(classroom.name, "7 Alpha", "7 Beta")
@@ -166,7 +164,7 @@ RSpec.describe "leaderboard controller", :default_creates do
     context "with a classroom winner" do
       let!(:classroom_winner) { create(:classroom_winner, user: student, classroom: classroom, score: 100) }
 
-      before { get leaderboard_path(quiz_subject.name, format: :json), xhr: true }
+      before { get subject_leaderboard_path(quiz_subject, format: :json), xhr: true }
 
       it "lists the winner by classroom with their initialled name" do
         expect(response.parsed_body["winners"]).to eq([[classroom.name, student_name, 100]])

@@ -127,15 +127,14 @@ afterEach(() => {
 
 describe("liveLeaderboard", () => {
   describe("on load", () => {
-    it("requests the page's scores as XHR, narrowed to the topic when one is shown", async () => {
-      const subject = await mount();
-      const topic = await mount({ topicId: TOPIC_ID });
+    // The page's own path names the subject or topic the scores are for
+    it("requests the page's scores as XHR from its own path", async () => {
+      const { fetch } = await mount({ topicId: TOPIC_ID });
 
-      expect(subject.fetch.mock.calls[0][0]).toBe("/.json?");
-      expect(subject.fetch.mock.calls[0][1].headers["X-Requested-With"]).toBe(
+      expect(fetch.mock.calls[0][0]).toBe("/.json?");
+      expect(fetch.mock.calls[0][1].headers["X-Requested-With"]).toBe(
         "XMLHttpRequest",
       );
-      expect(topic.fetch.mock.calls[0][0]).toBe(`/.json?topic=${TOPIC_ID}`);
     });
 
     it("renders the loaded rows without a flash and stops loading", async () => {

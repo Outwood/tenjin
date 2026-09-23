@@ -83,9 +83,9 @@ RSpec.describe Leaderboard::ResetWeeklyLeaderboard, :default_creates do
 
     it "builds each (school, subject) leaderboard only once" do
       call_count = 0
-      allow(Leaderboard::Query).to receive(:new).and_wrap_original do |original, *args|
+      allow(Leaderboard::Query).to receive(:new).and_wrap_original do |original, *args, **kwargs|
         call_count += 1
-        original.call(*args)
+        original.call(*args, **kwargs)
       end
 
       described_class.call

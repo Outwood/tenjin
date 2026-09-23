@@ -14,7 +14,7 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
 
     #navbarSupportedContent.collapse.navbar-collapse
       ul.navbar-nav.me-auto
-        li.nav-item = nav_link 'Leaderboard', leaderboard_index_path, current: controller_name == 'leaderboard'
+        li.nav-item = nav_link 'Leaderboard', leaderboards_path, current: controller_name == 'leaderboards'
         - if current_user.student?
           li.nav-item.dropdown
             button#shopDropdown.nav-link.dropdown-toggle(type="button"

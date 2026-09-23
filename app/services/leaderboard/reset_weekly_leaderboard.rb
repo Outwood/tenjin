@@ -23,7 +23,7 @@ class Leaderboard::ResetWeeklyLeaderboard < ApplicationService
   end
 
   def build_leaderboard(school, subject)
-    Leaderboard::Query.new(nil, id: subject.name, school: school.id)
+    Leaderboard::Query.new(nil, subject: subject, school: school.id)
       .results
       .sort_by { |s| -s[:score] }
   end

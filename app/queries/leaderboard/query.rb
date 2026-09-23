@@ -4,13 +4,13 @@
 # Arel query runs once and the result array is cached.
 # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/ClassLength
 class Leaderboard::Query
-  def initialize(user, params)
+  def initialize(user, subject:, topic: nil, school: nil, school_group: false, all_time: false)
     @user = user if user.present?
-    @subject = Subject.find_by(name: params[:id])
-    @topic = params[:topic]
-    @school = params[:school]
-    @school_group = true if @user.present? && @user.school.school_group_id.present? && params[:school_group] == "true"
-    @all_time = true if params[:all_time] == "true"
+    @subject = subject
+    @topic = topic
+    @school = school
+    @school_group = true if school_group && @user.present? && @user.school.school_group_id.present?
+    @all_time = all_time
   end
 
   def results
@@ -127,7 +127,7 @@ class Leaderboard::Query
   end
 
   def by_topic
-    @query = @query.where(topics[:id].eq(@topic))
+    @query = @query.where(topics[:id].eq(@topic.id))
   end
 
   def by_subject

@@ -44,7 +44,7 @@ Rails.application.routes.draw do
       patch :reset_all_passwords
     end
   end
-  resources :leaderboard, only: %i[show index]
+  resources :leaderboards, only: [:index]
   resources :classrooms, only: %i[show index update] do
     resources :homeworks, only: %i[new create]
   end
@@ -55,12 +55,14 @@ Rails.application.routes.draw do
   end
   resources :subjects, only: [] do
     resources :lessons, only: [:new]
+    resource :leaderboard, only: [:show]
     scope module: :subjects do
       resources :topics, only: %i[new create]
       resources :flagged_questions, only: [:index]
     end
   end
   resources :topics, only: %i[update destroy] do
+    resource :leaderboard, only: [:show]
     scope module: :topics do
       resources :questions, only: %i[index new create]
       resource :import, only: %i[new create]

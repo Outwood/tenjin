@@ -15,7 +15,7 @@ RSpec.describe "User views an updating leaderboard", :default_creates, :js do
 
   before do
     sign_in student
-    visit(leaderboard_path(quiz_subject.name, topic: topic))
+    visit(topic_leaderboard_path(topic))
     # A broadcast sent before the cable connects is lost, and the flash needs the row it lands on
     expect(page).to have_css("tr#row-#{student.id}").and have_css("#connected")
   end

@@ -13,7 +13,7 @@ RSpec.describe "User selects a leaderboard", :default_creates, :js do
   context "with a topic in the subject" do
     let!(:topic) { super() }
 
-    before { visit leaderboard_index_path }
+    before { visit leaderboards_path }
 
     it "opens the subject and shows the chosen topic's leaderboard" do
       click_link(quiz_subject.name)
