@@ -66,4 +66,21 @@ describe("unfair-flag", () => {
     expect(icon().contains("fas")).toBe(false);
     expect(Modal.getOrCreateInstance).not.toHaveBeenCalled();
   });
+  it("ignores a second click until the first request answers", async () => {
+    await mount("far");
+    let answer;
+    global.fetch = jest.fn(() => new Promise((resolve) => (answer = resolve)));
+    const link = document.getElementById("unfairFlag");
+
+    link.click();
+    link.click();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    answer({ ok: true });
+    await flush();
+    global.fetch = jest.fn().mockResolvedValue({ ok: true });
+    link.click();
+    await flush();
+    expect(global.fetch.mock.calls[0][1].method).toBe("DELETE");
+  });
 });
