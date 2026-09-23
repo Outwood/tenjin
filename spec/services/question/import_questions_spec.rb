@@ -38,6 +38,18 @@ RSpec.describe Question::ImportQuestions, :default_creates do
     expect(result).to be_success
   end
 
+  it "renames the topic after the file" do
+    described_class.call(data: JSON.generate(no_lessons), topic: topic, filename: "Fractions.v2.json")
+    expect(topic.reload.name).to eq("Fractions.v2")
+  end
+
+  context "when the filename has no extension" do
+    it "renames the topic to the whole filename" do
+      described_class.call(data: JSON.generate(no_lessons), topic: topic, filename: "Fractions")
+      expect(topic.reload.name).to eq("Fractions")
+    end
+  end
+
   context "when question type is missing" do
     before { multiple_lessons[0] = multiple_lessons[0].except("question_type") }
 
@@ -53,6 +65,10 @@ RSpec.describe Question::ImportQuestions, :default_creates do
 
     it "fails validation" do
       expect(import_multiple_lessons).to be_failure
+    end
+
+    it "creates no lessons" do
+      expect { import_multiple_lessons }.not_to change(Lesson, :count)
     end
   end
 

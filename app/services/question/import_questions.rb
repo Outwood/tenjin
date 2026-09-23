@@ -5,7 +5,7 @@ class Question::ImportQuestions < ApplicationCommand
     @json = JSON.parse(data)
     @topic = topic
     @questions_to_import = []
-    @name = filename.rpartition(".").first
+    @name = File.basename(filename, ".*")
   end
 
   def call
@@ -19,15 +19,25 @@ class Question::ImportQuestions < ApplicationCommand
   private
 
   # Returns nil on success, an error string on failure.
+  # A rejected question also undoes the lessons created for the ones before it
   def import_json_questions
+    error = nil
+    ApplicationRecord.transaction do
+      error = build_questions
+      raise ActiveRecord::Rollback if error
+
+      @questions_to_import.each(&:save!)
+      @topic.update!(name: @name)
+    end
+    error
+  end
+
+  def build_questions
     @json.each do |question|
       @question = question
       error = validate_question || build_question
       return error if error
     end
-
-    @questions_to_import.each(&:save)
-    @topic.update_attribute(:name, @name)
     nil
   end
 
