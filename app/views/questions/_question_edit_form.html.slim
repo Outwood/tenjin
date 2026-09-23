@@ -1,4 +1,5 @@
-= form_with model: @question, url: question_form_url(@question), id:'questionForm', local: true, data: { controller: 'nested-fields reload-form' } do |f|
+= form_with model: @question, url: question_form_url(@question), id: 'questionForm', local: true,
+  data: { controller: 'nested-fields reload-form' } do |f|
   .row.my-2
     .col-sm-3
       = f.label(:question_type, 'Question Type')
