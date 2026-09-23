@@ -8,7 +8,7 @@ RSpec.describe "Author transfers question files", :default_creates, :js do
 
   before do
     sign_in author
-    visit topic_questions_path(topic_id: topic.id)
+    visit topic_questions_path(topic)
   end
 
   describe "uploading questions" do

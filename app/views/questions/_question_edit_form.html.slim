@@ -1,4 +1,4 @@
-= form_with model: @question, id:'questionForm', local: true, data: { controller: 'nested-fields reload-form' } do |f|
+= form_with model: @question, url: question_form_url(@question), id:'questionForm', local: true, data: { controller: 'nested-fields reload-form' } do |f|
   .row.my-2
     .col-sm-3
       = f.label(:question_type, 'Question Type')
@@ -23,16 +23,17 @@
           options_from_collection_for_select(@question.topic.lessons, :id, :title, selected: @question.lesson_id),
           { include_blank: 'Select Lesson' },
           class: 'form-select')
-  .row.my-2
-    .col-sm-3
-      = f.label(:topic_id, 'Topic:')
-    .col-sm-9
-      = f.select( :topic_id,
-          options_from_collection_for_select( @question.topic.subject.topics.order(:name),
-            :id, :name, selected: @question.topic_id),
-          {},
-          class: 'form-select reload-page',
-          data: { action: 'change->reload-form#reload' })
+  - if @question.persisted?
+    .row.my-2
+      .col-sm-3
+        = f.label(:topic_id, 'Topic:')
+      .col-sm-9
+        = f.select( :topic_id,
+            options_from_collection_for_select( @question.topic.subject.topics.order(:name),
+              :id, :name, selected: @question.topic_id),
+            {},
+            class: 'form-select reload-page',
+            data: { action: 'change->reload-form#reload' })
   table.table#table-answers
     thead
       tr
@@ -42,11 +43,11 @@
           span.visually-hidden Actions
     tbody.fields data-nested-fields-target='fields'
       = f.fields_for :answers, answer_rows(@question) do |a|
-        = render 'answer', f: a
+        = render 'questions/answer', f: a
   - unless @question.question_type == 'boolean'
     .row.my-2
       .col
-        = link_to_add_row('Add Answer', f, :answers, class: 'btn btn-primary w-100')
+        = link_to_add_row('Add Answer', f, :answers, partial: 'questions/answer', class: 'btn btn-primary w-100')
   .row.my-2
     .col
       = f.submit("Save Question", class: 'btn w-100 btn-success')

@@ -13,7 +13,7 @@ RSpec.describe "topics controller", :default_creates do
 
     it "creates a topic for the subject and redirects to its questions" do
       expect { create_topic }.to change { quiz_subject.topics.count }.by(1)
-      expect(response).to redirect_to(topic_questions_path(topic_id: Topic.last))
+      expect(response).to redirect_to(topic_questions_path(Topic.last))
     end
 
     context "when not authorized for the subject" do

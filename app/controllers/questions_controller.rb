@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class QuestionsController < ApplicationController
-  BOOLEAN_LABELS = %w[False True].freeze
+  include QuestionAnswers
 
   before_action :authenticate_user!
 
@@ -12,19 +12,6 @@ class QuestionsController < ApplicationController
 
     @question_counts = Question.where(topic: Topic.where(subject_id: @subjects.map(&:id), active: true))
       .group(:topic_id).count
-  end
-
-  def topic
-    redirect_to questions_path if topic_params.blank?
-
-    @topic = Topic.find(topic_params)
-    authorize @topic, :show?
-    @topic_lessons = Lesson.where(topic: @topic)
-    @questions = Question.with_rich_text_question_text_and_embeds
-      .includes(:question_statistic, :lesson)
-      .where(topic: @topic, active: true)
-
-    render "topic_question_index"
   end
 
   def lesson
@@ -60,27 +47,6 @@ class QuestionsController < ApplicationController
     check_answers(@question)
   end
 
-  def new
-    @question = Question.new(question_params)
-    authorize @question
-
-    return if @question.topic.blank?
-
-    check_answers(@question)
-  end
-
-  def create
-    @question = Question.new(question_params)
-    authorize @question
-    check_answers(@question)
-
-    if @question.save
-      redirect_to topic_questions_path(topic_id: @question.topic), notice: "Question successfully created"
-    else
-      render :new
-    end
-  end
-
   def update
     @question = authorize find_question
     assign_question_params(@question)
@@ -97,48 +63,10 @@ class QuestionsController < ApplicationController
     question = authorize find_question
     topic = question.topic
     question.update_attribute(:active, false)
-    redirect_to topic_questions_path(topic_id: topic)
-  end
-
-  def download_topic
-    topic = Topic.find(topic_params)
-    authorize topic, :show?
-    questions = Question.where(topic: topic).to_json(include: :answers)
-
-    send_data questions,
-      type: "application/json; header=present",
-      disposition: "attachment; filename=#{topic.name}.json"
-  end
-
-  def import_topic
-    @topic = Topic.find(topic_params)
-    authorize @topic, :update?
-  end
-
-  def import
-    @topic = Topic.find(topic_params)
-    authorize @topic, :update?
-
-    if params[:file].nil?
-      flash[:alert] = "Please attach a file"
-      return render :import_topic, topic_id: @topic
-    end
-
-    data = params[:file].read
-    case Question::ImportQuestions.call(data: data, topic: @topic, filename: params[:file].original_filename)
-    in {success: true, payload: {number_questions_imported:}}
-      flash[:notice] = "Imported #{number_questions_imported} questions"
-    in {success: false, error:}
-      flash[:alert] = "Import failed: #{error}"
-    end
-    redirect_to topic_questions_path(topic_id: @topic)
+    redirect_to topic_questions_path(topic)
   end
 
   private
-
-  def topic_params
-    params.require(:topic_id)
-  end
 
   def lesson_params
     params.require(:lesson_id)
@@ -161,43 +89,5 @@ class QuestionsController < ApplicationController
   def assign_question_params(question)
     question.assign_attributes(question_params)
     authorize question
-  end
-
-  def setup_boolean_question(question)
-    question.answers.build until question.answers.length >= 2
-    answers = question.answers.to_a
-    kept = boolean_answers_to_keep(answers)
-    # Marked, not removed: replacing the association deletes them at once, even on a preview
-    (answers - kept).each(&:mark_for_destruction)
-    label_boolean_answers(kept)
-    # Puts any remaining errors in front of the author in the editor
-    question.valid?
-  end
-
-  # The oldest answer meaning each label, then the rest oldest first; load
-  # order is no guide, as Postgres moves rows it updates
-  def boolean_answers_to_keep(answers)
-    saved, unsaved = answers.partition(&:persisted?)
-    by_age = saved.sort_by(&:id) + unsaved
-    by_label = BOOLEAN_LABELS.filter_map { |label| by_age.find { |answer| boolean_label(answer) == label } }
-    (by_label + (by_age - by_label)).first(2)
-  end
-
-  def boolean_label(answer)
-    BOOLEAN_LABELS.find { |label| label.casecmp?(answer.text.to_s.strip) }
-  end
-
-  # Labels by meaning, so each answer keeps its correct flag; only answers
-  # with no True/False meaning are labelled by position
-  def label_boolean_answers(answers)
-    labels = answers.map { |answer| boolean_label(answer) }
-    labels = labels.map { nil } if labels.compact.uniq.size < labels.compact.size
-    unused = BOOLEAN_LABELS - labels
-    answers.zip(labels).each { |answer, label| answer.text = label || unused.shift }
-  end
-
-  def check_answers(question)
-    setup_boolean_question(question) if question.boolean?
-    question.answers.each { |a| a.correct = true } if question.short_answer? || question.question_type.nil?
   end
 end

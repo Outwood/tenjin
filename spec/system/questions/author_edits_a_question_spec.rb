@@ -11,12 +11,12 @@ RSpec.describe "Author edits a question", :default_creates do
   describe "topic question index", :js do
     let!(:lesson) { create(:lesson, topic: topic, title: "Photosynthesis") }
 
-    before { visit(topic_questions_path(topic_id: topic)) }
+    before { visit(topic_questions_path(topic)) }
 
     # auto-submit smoke; TopicsController#update is covered in spec/requests/topics_request_spec.rb
     it "saves the default lesson on change" do
       select "Photosynthesis", from: "Select Default Lesson"
-      visit(topic_questions_path(topic_id: topic))
+      visit(topic_questions_path(topic))
       expect(page).to have_select("Select Default Lesson", selected: "Photosynthesis")
     end
   end
@@ -40,7 +40,7 @@ RSpec.describe "Author edits a question", :default_creates do
     # turbo_confirm smoke; QuestionsController#destroy is covered in spec/requests/question_request_spec.rb
     it "deletes the question", :js do
       page.accept_confirm { click_button("Delete Question") }
-      expect(page).to have_current_path(topic_questions_path(topic_id: topic))
+      expect(page).to have_current_path(topic_questions_path(topic))
     end
 
     # reload-form smoke; the boolean preview is covered in spec/requests/question_request_spec.rb

@@ -26,17 +26,17 @@
           data: { action: 'change->auto-submit#submit' }
   .row.my-2
     .col
-      =link_to 'Add Question', new_question_path(question: { topic_id: @topic }), class:'btn btn-primary w-100'
+      =link_to 'Add Question', new_topic_question_path(@topic), class:'btn btn-primary w-100'
   .row.my-2
     .col
-      = render 'question_table'
+      = render 'questions/question_table'
   .row.my-2
     .col
       = link_to 'Download Questions',
-          download_topic_questions_path(topic_id: @topic),
+          topic_questions_path(@topic, format: :json),
           class:'btn btn-primary w-100'
       = link_to 'Import Questions',
-          import_topic_questions_path(topic_id: @topic),
+          new_topic_import_path(@topic),
           class:'btn btn-primary w-100'
 
   .row.my-5

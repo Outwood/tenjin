@@ -9,6 +9,11 @@ module QuestionsHelper
     end
   end
 
+  # A new question is created in the topic it was started from
+  def question_form_url(question)
+    question.persisted? ? question_path(question) : topic_questions_path(question.topic)
+  end
+
   def percentage_correct(question)
     qs = question.question_statistic
     return "0%" if qs.blank?

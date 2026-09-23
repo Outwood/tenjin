@@ -9,7 +9,7 @@ class TopicsController < ApplicationController
     authorize topic
     topic.save!
 
-    redirect_to topic_questions_path(topic_id: topic)
+    redirect_to topic_questions_path(topic)
   end
 
   def update

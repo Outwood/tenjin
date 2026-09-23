@@ -29,7 +29,7 @@ RSpec.describe "questions controller", :default_creates do
 
         def topic_row(topic)
           Capybara.string(response.body)
-            .find_link(href: topic_questions_path(topic_id: topic.id))
+            .find_link(href: topic_questions_path(topic))
             .ancestor("tr")
         end
 
@@ -50,21 +50,6 @@ RSpec.describe "questions controller", :default_creates do
           expect(question_queries).to contain_exactly(a_string_starting_with("SELECT COUNT"))
         end
       end
-    end
-  end
-
-  describe "GET /questions/topic" do
-    let(:question) { create(:question, topic: topic) }
-    let!(:flags) { create_list(:flagged_question, 5, question: question, user: student) }
-
-    before do
-      sign_in author
-      get topic_questions_path(topic_id: topic.id)
-    end
-
-    it "shows each question's flag count" do
-      expect(Capybara.string(response.body))
-        .to have_css("#question-#{question.id} td.flags", exact_text: "5")
     end
   end
 
@@ -383,7 +368,7 @@ RSpec.describe "questions controller", :default_creates do
     it "deactivates the question and redirects to its topic" do
       expect { delete question_path(question) }
         .to change { question.reload.active }.from(true).to(false)
-      expect(response).to redirect_to(topic_questions_path(topic_id: topic))
+      expect(response).to redirect_to(topic_questions_path(topic))
     end
   end
 
@@ -407,35 +392,6 @@ RSpec.describe "questions controller", :default_creates do
         expect(response).to redirect_to(root_path)
         follow_redirect!
         expect(response.body).to include("You are not authorized to perform this action.")
-      end
-    end
-  end
-
-  describe "GET /questions/download_topic" do
-    let!(:question) { create(:question, topic: topic) }
-
-    before { sign_in author }
-
-    it "responds with the questions as a JSON attachment named after the topic" do
-      get download_topic_questions_path(topic_id: topic.id)
-
-      expect(response).to have_http_status(:success)
-      expect(response.content_type).to start_with("application/json")
-      expect(response.headers["Content-Disposition"])
-        .to include("attachment").and include("filename=#{topic.name}.json")
-      expect(JSON.parse(response.body).first).to include("question_text", "answers")
-    end
-  end
-
-  describe "POST /questions/import" do
-    before { sign_in author }
-
-    context "without an attached file" do
-      it "re-renders the import form with an alert" do
-        post import_questions_path, params: {topic_id: topic.id}
-
-        expect(response).to have_http_status(:success)
-        expect(response.body).to include("Please attach a file")
       end
     end
   end
