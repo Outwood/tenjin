@@ -4,6 +4,9 @@ require "rails_helper"
 
 RSpec.describe LeaderboardChannel, :default_creates do
   let(:viewer) { student }
+  let!(:viewer_enrollment) do
+    create(:enrollment, user: viewer, classroom: create(:classroom, school: viewer.school, subject: quiz_subject))
+  end
 
   before { stub_connection current_user: viewer }
 
@@ -26,6 +29,14 @@ RSpec.describe LeaderboardChannel, :default_creates do
     it "streams the school's leaderboard" do
       expect(subscription.streams)
         .to contain_exactly("leaderboard:subject-#{quiz_subject.id}:school-#{school_without_school_group.id}")
+    end
+  end
+
+  context "with a subject the student is not enrolled in" do
+    before { subscribe(subject_id: create(:subject).id) }
+
+    it "rejects the subscription" do
+      expect(subscription).to be_rejected
     end
   end
 

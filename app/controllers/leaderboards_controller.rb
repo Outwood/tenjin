@@ -9,10 +9,10 @@ class LeaderboardsController < ApplicationController
   end
 
   def show
-    authorize current_user
     # A topic's board belongs to its own subject, so the subject is never taken separately
     @topic = Topic.find(params[:topic_id]) if params[:topic_id]
-    @subject = @topic&.subject || Subject.find(params[:subject_id])
+    subject = @topic&.subject || Subject.find(params[:subject_id])
+    @subject = authorize subject, :leaderboard?
 
     respond_to do |format|
       format.html { @subjects = current_user.subjects.distinct }

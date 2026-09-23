@@ -9,6 +9,7 @@ require "rails_helper"
 # stream a broadcast reaches is in spec/channels/leaderboard_channel_spec.rb and
 # spec/services/leaderboard/broadcast_leaderboard_point_spec.rb.
 RSpec.describe "User views an updating leaderboard", :default_creates, :js do
+  let!(:student_enrollment) { create(:enrollment, user: student, classroom: classroom) }
   let!(:student_topic_score) { create(:topic_score, user: student, score: 10, topic: topic) }
   let(:second_school) { create(:school, name: "Rival High", school_group: school.school_group) }
   let!(:second_school_score) { create(:topic_score, topic: topic, school: second_school, score: 11) }

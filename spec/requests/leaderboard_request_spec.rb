@@ -38,6 +38,22 @@ RSpec.describe "leaderboard controller", :default_creates do
       end
     end
 
+    context "with a subject the student is not enrolled in" do
+      let(:other_subject) { create(:subject) }
+      let(:other_topic) { create(:topic, subject: other_subject) }
+
+      it "refuses the board with an alert" do
+        get subject_leaderboard_path(other_subject)
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eq("You are not authorized to perform this action.")
+      end
+
+      it "refuses its topics' scores" do
+        get topic_leaderboard_path(other_topic, format: :json), xhr: true
+        expect(response).to redirect_to(root_path)
+      end
+    end
+
     describe "as a teacher" do
       before do
         sign_in teacher

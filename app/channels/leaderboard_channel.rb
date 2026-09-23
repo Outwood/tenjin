@@ -7,9 +7,9 @@ class LeaderboardChannel < ApplicationCable::Channel
   end
 
   def subscribed
-    subject_id = Subject.where(id: params[:subject_id]).pick(:id)
-    return reject if subject_id.nil?
+    subject = Subject.find_by(id: params[:subject_id])
+    return reject unless subject && SubjectPolicy.new(current_user, subject).leaderboard?
 
-    stream_for self.class.leaderboard_for(subject_id, current_user.school)
+    stream_for self.class.leaderboard_for(subject.id, current_user.school)
   end
 end
