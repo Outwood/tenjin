@@ -48,7 +48,7 @@
               td = link_to s.forename, user_path(s)
               td = s.surname
               td = s.username
-              td = link_to('Reset Password', reset_password_user_path(id: s.id),
+              td = link_to('Reset Password', user_password_reset_path(s),
                 class: 'btn btn-dark reset-password reset-password-student',
                 data: { controller: 'password-reset', action: 'click->password-reset#reset' })
               td = link_to(s) do

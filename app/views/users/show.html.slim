@@ -22,7 +22,7 @@ section.page-section.text-center
           p.text-end-md Unlink Account from Google
         .col-sm-3
           = button_to "Unlink #{current_user.oauth_email}",
-            unlink_oauth_account_user_path(current_user),
+            user_oauth_link_path(current_user),
             class: 'btn btn-danger',
             method: :delete,
             form: { data: { turbo: true, turbo_confirm: 'Are you sure?' } }

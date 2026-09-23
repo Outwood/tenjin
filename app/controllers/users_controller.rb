@@ -36,24 +36,6 @@ class UsersController < ApplicationController
     end
   end
 
-  def reset_password
-    user = authorize find_user
-    new_password = Devise.friendly_token(6)
-
-    if user.reset_password(new_password, new_password)
-      render json: {id: user.id, password: new_password}
-    else
-      render json: {errors: user.errors.full_messages}, status: :unprocessable_content
-    end
-  end
-
-  def unlink_oauth_account
-    user = authorize find_user
-    user.update(oauth_uid: "", oauth_email: "", oauth_provider: "")
-
-    redirect_to user
-  end
-
   private
 
   def update_password_params

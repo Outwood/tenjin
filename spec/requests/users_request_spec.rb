@@ -233,11 +233,11 @@ RSpec.describe "user controller", :default_creates do
     end
   end
 
-  describe "PATCH #reset_password" do
+  describe "POST /users/:user_id/password_reset" do
     before { sign_in school_admin }
 
     context "with a resettable student" do
-      before { patch reset_password_user_path(student) }
+      before { post user_password_reset_path(student) }
 
       it "returns a password that now signs the student in" do
         expect(response.parsed_body).to include("id" => student.id)
@@ -248,7 +248,7 @@ RSpec.describe "user controller", :default_creates do
     context "when the record refuses the change" do
       let!(:legacy_student) { create(:student, :without_upi, school: school) }
 
-      before { patch reset_password_user_path(legacy_student) }
+      before { post user_password_reset_path(legacy_student) }
 
       it "hands back no password to read out" do
         expect(response).to have_http_status(:unprocessable_content)
@@ -261,10 +261,10 @@ RSpec.describe "user controller", :default_creates do
     end
   end
 
-  describe "DELETE #unlink_oauth_account" do
+  describe "DELETE /users/:user_id/oauth_link" do
     before do
       sign_in student
-      delete unlink_oauth_account_user_path(student)
+      delete user_oauth_link_path(student)
     end
 
     it "clears the linked account" do

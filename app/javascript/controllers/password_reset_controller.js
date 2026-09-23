@@ -4,7 +4,7 @@ import csrfFetch from "../lib/csrf_fetch";
 export default class extends Controller {
   async reset(event) {
     event.preventDefault();
-    const response = await csrfFetch(this.element.href, { method: "PATCH" });
+    const response = await csrfFetch(this.element.href, { method: "POST" });
     const body = await response.json().catch(() => ({}));
     // Tabulator renders cells as `div.tabulator-cell` rather than `<td>`.
     const cell = this.element.closest("td, .tabulator-cell");

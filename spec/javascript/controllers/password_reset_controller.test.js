@@ -14,7 +14,7 @@ describe("PasswordResetController#reset", () => {
   beforeEach(() => {
     cell = document.createElement("td");
     link = document.createElement("a");
-    link.href = "/users/1/reset_password";
+    link.href = "/users/1/password_reset";
     cell.appendChild(link);
     document.body.appendChild(cell);
 
@@ -34,6 +34,7 @@ describe("PasswordResetController#reset", () => {
 
     await controller.reset(new Event("click"));
 
+    expect(csrfFetch).toHaveBeenCalledWith(link.href, { method: "POST" });
     expect(cell.querySelector(".new-password").textContent).toBe(
       "swift-otter-42",
     );

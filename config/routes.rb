@@ -71,9 +71,9 @@ Rails.application.routes.draw do
   end
   resources :homeworks, only: %i[show destroy]
   resources :users, only: %i[show index update] do
-    member do
-      patch "reset_password"
-      delete "unlink_oauth_account"
+    scope module: :users do
+      resource :password_reset, only: [:create]
+      resource :oauth_link, only: [:destroy]
     end
   end
   resources :flagged_questions, only: [:create]
