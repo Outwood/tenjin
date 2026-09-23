@@ -14,7 +14,8 @@ class Quiz::AddLeaderboardPoint < ApplicationService
     upsert_score(@question.topic.id, @user.id, multiplier)
 
     Challenge::UpdateChallengeProgress.call(@quiz, multiplier, @question.topic)
-    Leaderboard::BroadcastLeaderboardPoint.call(@question.topic, @user)
+    # A point rolled back with the answer must never reach the live leaderboards
+    ActiveRecord.after_all_transactions_commit { Leaderboard::BroadcastLeaderboardPoint.call(@question.topic, @user) }
   end
 
   protected

@@ -11,10 +11,13 @@ class Quiz::CheckAnswer < ApplicationCommand
   def call
     return failure(:no_answer_provided) if no_answer?
 
-    check_answer_correct unless already_answered?
+    # A refused save undoes the verdict and points with it, so a retry scores afresh
+    ApplicationRecord.transaction do
+      check_answer_correct unless already_answered?
 
-    Quiz::MoveQuizForward.call(quiz: @quiz)
-    @quiz.save!
+      Quiz::MoveQuizForward.call(quiz: @quiz)
+      @quiz.save!
+    end
 
     success(Quiz::CheckAnswerOutcome.new(
       question: @question,

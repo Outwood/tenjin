@@ -50,12 +50,48 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
     expect(result.error).to eq :no_answer_provided
   end
 
-  context "when the quiz cannot be saved" do
-    before { quiz.subject = nil }
+  context "with a quiz that counts for the leaderboard" do
+    subject(:check) { described_class.call(quiz: quiz, question: question, answer_given: {id: correct_answer.id}) }
 
-    it "raises rather than reporting a score the server does not hold" do
-      expect { described_class.call(quiz: quiz, question: question, answer_given: {id: correct_answer.id}) }
-        .to raise_error(ActiveRecord::RecordInvalid, /Subject must exist/)
+    let(:quiz) do
+      create(:quiz, user: user, question_order: [question.id], num_questions_asked: 1, counts_for_leaderboard: true)
+    end
+
+    before do
+      allow(Quiz::AddLeaderboardPoint).to receive(:call).and_call_original
+      allow(Leaderboard::BroadcastLeaderboardPoint).to receive(:call)
+    end
+
+    it "broadcasts the point once the answer is saved" do
+      check
+      expect(Leaderboard::BroadcastLeaderboardPoint).to have_received(:call).with(topic, user)
+    end
+
+    context "when the quiz cannot be saved" do
+      before { quiz.subject = nil }
+
+      it "raises rather than reporting a score the server does not hold" do
+        expect { check }.to raise_error(ActiveRecord::RecordInvalid, /Subject must exist/)
+      end
+
+      context "after the refusal" do
+        before do
+          check
+        rescue ActiveRecord::RecordInvalid
+        end
+
+        it "leaves the question unanswered, so a retry scores it" do
+          expect(quiz.asked_questions.where(question: question).pluck(:correct)).to all(be_nil)
+        end
+
+        it "adds no leaderboard point" do
+          expect(TopicScore.where(user: user, topic: topic)).to be_empty
+        end
+
+        it "broadcasts nothing" do
+          expect(Leaderboard::BroadcastLeaderboardPoint).not_to have_received(:call)
+        end
+      end
     end
   end
 
