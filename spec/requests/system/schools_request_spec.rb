@@ -117,9 +117,9 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
         post system_schools_path, params: {school: {client_id: "A000000000", token: "a-token"}}
       end
 
-      it "re-renders the form with the outage above it" do
+      it "re-renders the form with the failure above it" do
         expect(Capybara.string(response.body))
-          .to have_css(".alert-danger", text: "Wonde did not answer. Try again in a few minutes.")
+          .to have_css(".alert-danger", text: "Wonde could not supply this school. Check the Client ID and token, or try again later.")
       end
     end
   end

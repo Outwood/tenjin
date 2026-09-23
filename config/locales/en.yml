@@ -48,7 +48,7 @@ en:
     errors:
       models:
         school:
-          wonde_unavailable: "Wonde did not answer. Try again in a few minutes."
+          wonde_unavailable: "Wonde could not supply this school. Check the Client ID and token, or try again later."
           attributes:
             client_id:
               not_on_wonde: "is not a school this token can read on Wonde"
