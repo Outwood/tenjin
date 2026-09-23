@@ -14,7 +14,7 @@ class Quiz::CheckAnswer < ApplicationCommand
     check_answer_correct unless already_answered?
 
     Quiz::MoveQuizForward.call(quiz: @quiz)
-    @quiz.save
+    @quiz.save!
 
     success(Quiz::CheckAnswerOutcome.new(
       question: @question,

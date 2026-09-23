@@ -50,6 +50,15 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
     expect(result.error).to eq :no_answer_provided
   end
 
+  context "when the quiz cannot be saved" do
+    before { quiz.subject = nil }
+
+    it "raises rather than reporting a score the server does not hold" do
+      expect { described_class.call(quiz: quiz, question: question, answer_given: {id: correct_answer.id}) }
+        .to raise_error(ActiveRecord::RecordInvalid, /Subject must exist/)
+    end
+  end
+
   context "with a correct answer to another question" do
     subject(:check) { described_class.call(quiz: quiz, question: question, answer_given: {id: foreign_answer.id}) }
 

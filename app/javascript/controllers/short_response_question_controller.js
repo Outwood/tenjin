@@ -15,8 +15,10 @@ export default class extends Controller {
       method: "PUT",
       body: JSON.stringify({ answer: { short_answer: guess } }),
     });
+    // A refusal leaves the server on this question, so the page is stale:
+    // show it as it now stands rather than a dead input
     if (!response.ok) {
-      console.error("Quiz answer PUT failed", response.status);
+      this.reload();
       return;
     }
     const payload = await response.json();
@@ -26,6 +28,10 @@ export default class extends Controller {
 
     this.nextButtonTarget.classList.remove("invisible");
     this.nextButtonTarget.focus();
+  }
+
+  reload() {
+    location.reload();
   }
 
   // The server decides correctness; the answers are only for the reveal

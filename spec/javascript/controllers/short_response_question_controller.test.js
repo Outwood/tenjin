@@ -26,9 +26,13 @@ const FIXTURE = `
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("short-response-question", () => {
-  let application, input, submit, next;
+  let application, input, submit, next, reload;
 
   beforeEach(async () => {
+    // jsdom cannot navigate, so the reload is observed at the controller's seam
+    reload = jest
+      .spyOn(ShortResponseQuestionController.prototype, "reload")
+      .mockImplementation(() => {});
     application = await mountControllers(FIXTURE, {
       "short-response-question": ShortResponseQuestionController,
       "quiz-stats": QuizStatsController,
@@ -39,13 +43,16 @@ describe("short-response-question", () => {
 
   afterEach(() => {
     unmount(application);
+    reload.mockRestore();
     delete global.fetch;
   });
 
   async function check(guess, verdict) {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({ ok: true, json: async () => verdict });
+    await submitWith(guess, { ok: true, json: async () => verdict });
+  }
+
+  async function submitWith(guess, response) {
+    global.fetch = jest.fn().mockResolvedValue(response);
     input.value = guess;
     submit.click();
     await flush();
@@ -111,5 +118,12 @@ describe("short-response-question", () => {
     expect(document.getElementById("streak").textContent).toBe("3");
     expect(document.getElementById("answeredCorrect").textContent).toBe("5");
     expect(document.getElementById("multiplier").textContent).toBe("2");
+  });
+
+  it("reloads the page when the server refuses the guess", async () => {
+    await submitWith("Paris", { ok: false, status: 500 });
+
+    expect(reload).toHaveBeenCalled();
+    expect(next.classList.contains("invisible")).toBe(true);
   });
 });
