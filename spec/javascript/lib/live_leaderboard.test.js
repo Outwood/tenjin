@@ -386,21 +386,31 @@ describe("liveLeaderboard", () => {
       expect(tbody.querySelector("td#score-2").textContent).toBe("1");
     });
 
-    // Applies the subject total on a topic leaderboard too, see #220
-    test.failing(
-      "shows the topic score rather than the subject total",
-      async () => {
-        const { component, received } = await mount({ topicId: TOPIC_ID });
+    it("shows the topic score rather than the subject total", async () => {
+      const { component, received } = await mount({ topicId: TOPIC_ID });
 
-        received(
-          point(1, { topic: TOPIC_ID, topic_score: 12, subject_score: 30 }),
-        );
+      received(
+        point(1, { topic: TOPIC_ID, topic_score: 12, subject_score: 30 }),
+      );
 
-        expect(render(component).querySelector("td#score-1").textContent).toBe(
-          "12",
-        );
-      },
-    );
+      expect(render(component).querySelector("td#score-1").textContent).toBe(
+        "12",
+      );
+    });
+
+    it("counts only topic points scored since live mode was switched on", async () => {
+      const { component, received } = await mount({ topicId: TOPIC_ID });
+      component.live = true;
+      component.toggleLive();
+
+      received(
+        point(1, { topic: TOPIC_ID, topic_score: 15, subject_score: 45 }),
+      );
+
+      expect(render(component).querySelector("td#score-1").textContent).toBe(
+        "5",
+      );
+    });
   });
 
   describe("weekly winners", () => {

@@ -137,7 +137,7 @@ Alpine.data("liveLeaderboard", ({ subjectId, topicId, canSeeLiveToggle }) => ({
     }
 
     const { id } = data;
-    let score = data.subject_score;
+    let score = this.topicId == null ? data.subject_score : data.topic_score;
     if (this.live && this.initialLeaderboard[id]) {
       score = score - this.initialLeaderboard[id].score;
     }
