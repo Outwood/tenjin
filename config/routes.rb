@@ -37,7 +37,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :quizzes, only: %i[index show new create update]
+  resources :quizzes, only: %i[index show update]
   resources :schools, only: [:show] do
     member do
       patch :sync
@@ -55,6 +55,7 @@ Rails.application.routes.draw do
   end
   resources :subjects, only: [] do
     resources :lessons, only: [:new]
+    resources :quizzes, only: %i[new create]
     resource :leaderboard, only: [:show]
     scope module: :subjects do
       resources :topics, only: %i[new create]

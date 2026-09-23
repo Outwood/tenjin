@@ -21,7 +21,7 @@ section.page-section.text-center#homework[
                 data-subject=h.homework.topic.subject_id
                 data-lesson=(h.homework.lesson.id unless h.homework.lesson_id.blank?)
                 data-controller='quiz-starter'
-                data-quiz-starter-subject-value=h.homework.topic.subject_id.to_s
+                data-quiz-starter-url-value=subject_quizzes_path(h.homework.topic.subject_id)
                 data-quiz-starter-topic-value=h.homework.topic.id.to_s
                 data-quiz-starter-lesson-value=(h.homework.lesson_id.to_s if h.homework.lesson_id.present?)
                 data-action='click->quiz-starter#start')

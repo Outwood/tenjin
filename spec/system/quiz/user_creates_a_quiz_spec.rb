@@ -12,7 +12,7 @@ RSpec.describe "User creates a quiz", :default_creates do
   before do
     setup_subject_database
     sign_in student
-    visit(new_quiz_path(subject: quiz_subject.name))
+    visit(new_subject_quiz_path(quiz_subject))
   end
 
   it "starts a quiz on the chosen topic" do

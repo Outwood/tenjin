@@ -13,7 +13,7 @@ section.page-section.text-center#newQuiz
       .carousel-inner
         - @subjects.each_with_index do |s, i|
             .carousel-item class=('active' if i.zero?)
-              a href=new_quiz_path(subject: s.name)
+              a href=new_subject_quiz_path(s)
                 = image_pack_tag(subject_image(s), class: 'w-100 subject-carousel-item-image', alt: s.name)
                 .carousel-caption
                   h3.text-uppercase = s.name
@@ -42,7 +42,7 @@ section#challenges.page-section.text-center
                 - topic_value = c.daily? ? 'Lucky Dip' : c.topic.id.to_s
                 tr.challenge-row(data-challenge=c.id data-topic=topic_value data-subject=c.topic.subject_id
                   data-controller='quiz-starter'
-                  data-quiz-starter-subject-value=c.topic.subject_id.to_s
+                  data-quiz-starter-url-value=subject_quizzes_path(c.topic.subject_id)
                   data-quiz-starter-topic-value=topic_value
                   data-action='click->quiz-starter#start')
                   td.text-start = c.stringify

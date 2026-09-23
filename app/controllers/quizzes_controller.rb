@@ -8,7 +8,7 @@ class QuizzesController < ApplicationController
   def index
     policy_scope(Quiz)
     quiz = Quiz.current_for(current_user)
-    redirect_to(quiz || new_quiz_path)
+    redirect_to(quiz || dashboard_path)
   end
 
   def show
@@ -32,7 +32,7 @@ class QuizzesController < ApplicationController
   end
 
   def new
-    @subject = Subject.find_by(name: params[:subject])
+    @subject = find_subject
     authorize Quiz.new(subject: @subject)
 
     @topics = @subject.topics.where(active: true)
@@ -43,9 +43,9 @@ class QuizzesController < ApplicationController
   end
 
   def create
-    subject = Subject.find_by(id: quiz_params[:subject])
+    subject = find_subject
     authorize Quiz.new(subject: subject)
-    return redirect_to new_quiz_path(subject: subject.name) if quiz_params[:topic_id].blank?
+    return redirect_to new_subject_quiz_path(subject) if quiz_params[:topic_id].blank?
 
     result = Quiz::CreateQuiz.call(user: current_user,
       topic: quiz_params[:topic_id],
@@ -86,6 +86,10 @@ class QuizzesController < ApplicationController
     end
   end
 
+  def find_subject
+    Subject.find(params[:subject_id])
+  end
+
   def find_quiz
     Quiz.find(params[:id])
   end
@@ -99,7 +103,7 @@ class QuizzesController < ApplicationController
   end
 
   def quiz_params
-    params.require(:quiz).permit(:topic_id, :subject, :lesson_id)
+    params.fetch(:quiz, {}).permit(:topic_id, :lesson_id)
   end
 
   def quiz_not_authorized(exception)
@@ -113,7 +117,6 @@ class QuizzesController < ApplicationController
   end
 
   def refused_start_message(subject)
-    return "Subject does not exist" if subject.nil?
     return "Your school does not have access to quizzes" unless current_user.school.permitted?
 
     "You are not enrolled in #{subject.name}"

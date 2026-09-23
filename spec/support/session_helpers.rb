@@ -32,13 +32,13 @@ module SessionHelpers
   end
 
   def navigate_to_quiz
-    visit(new_quiz_path(subject: quiz_subject.name))
+    visit(new_subject_quiz_path(quiz_subject))
     select Topic.last.name, from: "quiz_topic_id"
     click_button("Create Quiz")
   end
 
   def navigate_to_lucky_dip
-    visit(new_quiz_path(subject: quiz_subject.name))
+    visit(new_subject_quiz_path(quiz_subject))
     select "Lucky Dip", from: "quiz_topic_id"
     click_button("Create Quiz")
   end

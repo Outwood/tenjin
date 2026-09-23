@@ -134,7 +134,7 @@ RSpec.describe "dashboard controller", :default_creates do
 
           it "links the subject's image to its topic select page" do
             expect(Capybara.string(response.body))
-              .to have_css("a[href='#{new_quiz_path(subject: "Computer Science")}'] img[src*='computer-science']")
+              .to have_css("a[href='#{new_subject_quiz_path(computer_science)}'] img[src*='computer-science']")
           end
         end
 

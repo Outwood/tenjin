@@ -29,19 +29,24 @@ RSpec.describe "using a quiz" do
         expect(response).to redirect_to(new_quiz)
       end
     end
+
+    context "with no quiz in progress" do
+      let!(:quiz) { create(:quiz, user: student, active: false) }
+
+      it "redirects to the dashboard without an alert" do
+        get quizzes_path
+        expect(response).to redirect_to(dashboard_path)
+        expect(flash[:alert]).to be_nil
+      end
+    end
   end
 
   context "when setting up a quiz" do
-    it "redirects to dashboard" do
-      get new_quiz_path
-      expect(response).to redirect_to dashboard_path
-    end
-
     context "when the subject is valid" do
       let!(:enrollment) { create(:enrollment, school: school, user: student) }
 
       it "renders the topic select page" do
-        get new_quiz_path, params: {subject: enrollment.classroom.subject.name}
+        get new_subject_quiz_path(enrollment.classroom.subject)
         expect(response).to have_http_status(:success)
       end
     end
@@ -52,7 +57,7 @@ RSpec.describe "using a quiz" do
       let!(:active_topic) { create(:topic, subject: quiz_subject, name: "Fractions") }
       let!(:inactive_topic) { create(:topic, subject: quiz_subject, name: "Photosynthesis", active: false) }
 
-      before { get new_quiz_path(subject: quiz_subject.name) }
+      before { get new_subject_quiz_path(quiz_subject) }
 
       it "offers only active topics" do
         expect(Capybara.string(response.body))
@@ -67,7 +72,7 @@ RSpec.describe "using a quiz" do
         create(:active_customisation, user: student, customisation: create(:dashboard_customisation, value: "orange"))
       end
 
-      before { get new_quiz_path(subject: quiz_subject.name) }
+      before { get new_subject_quiz_path(quiz_subject) }
 
       it "colours the separator with the style, not the red default" do
         expect(Capybara.string(response.body)).to have_css(".heading-divider[style*='orange']")
@@ -80,20 +85,15 @@ RSpec.describe "using a quiz" do
       let!(:different_subject) { create(:classroom, school: school) }
 
       it "redirects to dashboard" do
-        get new_quiz_path, params: {subject: different_subject.subject.name}
+        get new_subject_quiz_path(different_subject.subject)
         expect(response).to redirect_to dashboard_path
       end
     end
   end
 
   context "when selecting a subject that does not exist" do
-    subject { get new_quiz_path, params: {subject: "NOSUBJECT"} }
-
-    it { is_expected.to redirect_to(dashboard_path) }
-
-    it "responds with a flash alert" do
-      subject
-      expect(flash[:alert]).to match(/does not exist/)
+    it "is not found" do
+      expect { get new_subject_quiz_path(0) }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 
@@ -119,7 +119,7 @@ RSpec.describe "using a quiz" do
   end
 
   describe "starting a quiz" do
-    subject { post quizzes_path, params: {quiz: {topic_id: topic.id, subject: quiz_subject.id}} }
+    subject { post subject_quizzes_path(quiz_subject), params: {quiz: {topic_id: topic.id}} }
 
     let(:classroom) { create(:classroom, school: school, subject: quiz_subject) }
     let!(:enrollment) { create(:enrollment, school: school, classroom: classroom, user: student) }
@@ -149,7 +149,7 @@ RSpec.describe "using a quiz" do
     end
 
     context "with a lucky dip" do
-      subject { post quizzes_path, params: {quiz: {topic_id: Quiz::LUCKY_DIP, subject: quiz_subject.id}} }
+      subject { post subject_quizzes_path(quiz_subject), params: {quiz: {topic_id: Quiz::LUCKY_DIP}} }
 
       it "creates a quiz" do
         expect { subject }.to change(Quiz, :count).by(1)
@@ -157,15 +157,16 @@ RSpec.describe "using a quiz" do
     end
 
     context "with no topic" do
-      subject { post quizzes_path, params: {quiz: {subject: quiz_subject.id}} }
+      subject { post subject_quizzes_path(quiz_subject) }
 
-      it { is_expected.to redirect_to(new_quiz_path(subject: quiz_subject.name)) }
+      it { is_expected.to redirect_to(new_subject_quiz_path(quiz_subject)) }
     end
 
     context "when the subject does not exist" do
-      subject { post quizzes_path, params: {quiz: {topic_id: topic.id, subject: 0}} }
-
-      it_behaves_like "a refused quiz start", /does not exist/
+      it "is not found" do
+        expect { post subject_quizzes_path(0), params: {quiz: {topic_id: topic.id}} }
+          .to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
 
     context "when the student is not enrolled in the subject" do
@@ -188,7 +189,7 @@ RSpec.describe "using a quiz" do
 
     context "when the lesson belongs to another topic" do
       subject do
-        post quizzes_path, params: {quiz: {topic_id: topic.id, subject: quiz_subject.id, lesson_id: lesson.id}}
+        post subject_quizzes_path(quiz_subject), params: {quiz: {topic_id: topic.id, lesson_id: lesson.id}}
       end
 
       let(:lesson) { create(:lesson) }
@@ -200,7 +201,7 @@ RSpec.describe "using a quiz" do
     end
 
     context "when a quiz was started moments ago" do
-      before { post quizzes_path, params: {quiz: {topic_id: topic.id, subject: quiz_subject.id}} }
+      before { post subject_quizzes_path(quiz_subject), params: {quiz: {topic_id: topic.id}} }
 
       it_behaves_like "a refused quiz start", /You need to wait/
     end
