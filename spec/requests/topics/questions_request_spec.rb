@@ -9,7 +9,7 @@ RSpec.describe "topic questions controller", :default_creates do
 
   describe "GET /topics/:topic_id/questions" do
     let(:question) { create(:question, topic: topic) }
-    let!(:flags) { create_list(:flagged_question, 5, question: question, user: student) }
+    let!(:flags) { create_list(:flagged_question, 5, question: question) }
 
     before { get topic_questions_path(topic) }
 

@@ -14,6 +14,9 @@ module Questions
       else
         render json: {errors: @flag.errors.full_messages}, status: :unprocessable_content
       end
+    rescue ActiveRecord::RecordNotUnique
+      # A concurrent request saved this student's flag first
+      head :ok
     end
 
     def destroy

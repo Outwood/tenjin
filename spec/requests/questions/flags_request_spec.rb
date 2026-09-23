@@ -24,6 +24,24 @@ RSpec.describe "question flags controller", :default_creates do
       end
     end
 
+    context "when a concurrent request flags the question between look-up and save" do
+      before do
+        allow(FlaggedQuestion).to receive(:find_or_initialize_by).and_wrap_original do |original, **attributes|
+          original.call(**attributes).tap { create(:flagged_question, **attributes) }
+        end
+        flag
+      end
+
+      it "answers as already flagged" do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "counts the one flag" do
+        expect(FlaggedQuestion.where(question: question, user: student).count).to eq 1
+        expect(question.reload.flagged_questions_count).to eq 1
+      end
+    end
+
     context "when the question does not exist" do
       it "is not found" do
         expect { post question_flag_path(question_id: 0) }.to raise_error(ActiveRecord::RecordNotFound)
