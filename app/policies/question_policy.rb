@@ -13,5 +13,4 @@ class QuestionPolicy < ApplicationPolicy
 
   alias_method :create?, :update?
   alias_method :destroy?, :update?
-  alias_method :show?, :update?
 end

@@ -46,7 +46,7 @@ Rails.application.routes.draw do
   end
   resources :leaderboard, only: %i[show index]
   resources :classrooms, only: %i[show index update]
-  resources :questions, only: %i[index show update destroy] do
+  resources :questions, only: %i[index edit update destroy] do
     member do
       patch "reset_flags"
     end

@@ -14,7 +14,7 @@
       - @questions.order(:created_at).each_with_index do |q, index|
         tr id="question-#{q.id}"
           td = index + 1
-          td.question-text = link_to q.question_text.blank? ? 'Click here to edit' : q.question_text, q
+          td.question-text = link_to q.question_text.blank? ? 'Click here to edit' : q.question_text, edit_question_path(q)
           td.amount = times_asked(q)
           td.flags = q.flagged_questions.size
           td.correct = percentage_correct(q)

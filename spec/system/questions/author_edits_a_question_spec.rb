@@ -22,12 +22,12 @@ RSpec.describe "Author edits a question", :default_creates do
   end
 
   describe "question editor" do
-    before { visit(question_path(question)) }
+    before { visit(edit_question_path(question)) }
 
     context "with a lesson for the topic" do
       let!(:lesson) { create(:lesson, topic: topic, title: "Photosynthesis") }
 
-      before { visit(question_path(question)) }
+      before { visit(edit_question_path(question)) }
 
       # rack_test form-wiring smoke; the persisted state is covered in spec/requests/question_request_spec.rb
       it "assigns a lesson" do
@@ -63,7 +63,7 @@ RSpec.describe "Author edits a question", :default_creates do
     context "with an incorrect answer", :js do
       let!(:incorrect_answer) { create(:answer, question: question, correct: false) }
 
-      before { visit(question_path(question)) }
+      before { visit(edit_question_path(question)) }
 
       # nested-fields#removeRecord smoke; _destroy handling is covered in spec/requests/question_request_spec.rb
       it "removes an answer" do

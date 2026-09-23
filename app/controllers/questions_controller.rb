@@ -19,10 +19,10 @@ class QuestionsController < ApplicationController
     authorize question, :update?
     FlaggedQuestion.where(question: question).delete_all
     Question.reset_counters question.id, :flagged_questions_count
-    redirect_to question
+    redirect_to edit_question_path(question)
   end
 
-  def show
+  def edit
     @question = authorize find_question
     assign_question_params(@question) if params[:question].present?
     check_answers(@question)
@@ -34,9 +34,9 @@ class QuestionsController < ApplicationController
     check_answers(@question)
 
     if @question.save
-      redirect_to @question, notice: "Question successfully updated"
+      redirect_to edit_question_path(@question), notice: "Question successfully updated"
     else
-      render :show
+      render :edit
     end
   end
 

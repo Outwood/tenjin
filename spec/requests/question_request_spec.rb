@@ -53,7 +53,7 @@ RSpec.describe "questions controller", :default_creates do
     end
   end
 
-  describe "GET /questions/:id" do
+  describe "GET /questions/:id/edit" do
     let(:question) { create(:question, topic: topic) }
 
     before { sign_in author }
@@ -61,7 +61,7 @@ RSpec.describe "questions controller", :default_creates do
     def ticked_answer(label) = "#table-answers tbody tr:has(input.text-answer[value='#{label}']) input.form-check-input[checked]"
 
     it "labels each select" do
-      get question_path(question)
+      get edit_question_path(question)
       expect(Capybara.string(response.body))
         .to have_select("Question Type").and have_select("Lesson:").and have_select("Topic:")
     end
@@ -69,7 +69,7 @@ RSpec.describe "questions controller", :default_creates do
     context "with a short answer question" do
       let(:question) { create(:short_answer_question, topic: topic) }
 
-      before { get question_path(question) }
+      before { get edit_question_path(question) }
 
       it "hides the correct answer toggle" do
         expect(Capybara.string(response.body)).to have_no_css("#table-answers th", text: "Correct?")
@@ -77,7 +77,7 @@ RSpec.describe "questions controller", :default_creates do
     end
 
     context "when previewing the question as boolean" do
-      before { get question_path(question, question: {question_type: "boolean"}) }
+      before { get edit_question_path(question, question: {question_type: "boolean"}) }
 
       it "hides the remove answer links" do
         expect(Capybara.string(response.body)).to have_no_link("Remove")
@@ -91,7 +91,7 @@ RSpec.describe "questions controller", :default_creates do
     context "when previewing a three-answer question as boolean" do
       before do
         create_list(:answer, 2, question: question, correct: false)
-        get question_path(question, question: {question_type: "boolean"})
+        get edit_question_path(question, question: {question_type: "boolean"})
       end
 
       it "deletes no answers" do
@@ -109,7 +109,7 @@ RSpec.describe "questions controller", :default_creates do
       before do
         question.answers.find_by!(correct: true).update_columns(text: "TRUE")
         question.answers.find_by!(correct: false).update_columns(text: "FALSE ")
-        get question_path(question)
+        get edit_question_path(question)
       end
 
       it "ticks the answer labelled True" do
@@ -122,7 +122,7 @@ RSpec.describe "questions controller", :default_creates do
       before do
         question.answers.first.update_columns(text: "True")
         create(:answer, question: question, correct: false, text: "Paris")
-        get question_path(question, question: {question_type: "boolean"})
+        get edit_question_path(question, question: {question_type: "boolean"})
       end
 
       it "keeps the tick on True and labels the other answer False" do
@@ -135,7 +135,7 @@ RSpec.describe "questions controller", :default_creates do
       before do
         question.answers.first.update_columns(text: "True")
         create(:answer, question: question, correct: false, text: "true")
-        get question_path(question, question: {question_type: "boolean"})
+        get edit_question_path(question, question: {question_type: "boolean"})
       end
 
       it "labels the answers False and True" do
@@ -146,7 +146,7 @@ RSpec.describe "questions controller", :default_creates do
     context "with a question from another subject" do
       let(:question) { create(:question) }
 
-      before { get question_path(question, question: {topic_id: topic.id}) }
+      before { get edit_question_path(question, question: {topic_id: topic.id}) }
 
       it "redirects with an alert" do
         expect(response).to redirect_to(root_path)
@@ -155,7 +155,7 @@ RSpec.describe "questions controller", :default_creates do
     end
 
     context "when previewing a move to another subject's topic" do
-      before { get question_path(question, question: {topic_id: create(:topic).id}) }
+      before { get edit_question_path(question, question: {topic_id: create(:topic).id}) }
 
       it "redirects with an alert" do
         expect(response).to redirect_to(root_path)
@@ -166,7 +166,7 @@ RSpec.describe "questions controller", :default_creates do
     context "with a multiple choice question of three answers" do
       let!(:extra_answers) { create_list(:answer, 2, question: question) }
 
-      before { get question_path(question) }
+      before { get edit_question_path(question) }
 
       it "shows the correct answer toggle" do
         expect(Capybara.string(response.body))
@@ -192,7 +192,7 @@ RSpec.describe "questions controller", :default_creates do
       it "assigns the lesson" do
         expect { patch question_path(question), params: {question: {lesson_id: lesson.id}} }
           .to change { question.reload.lesson }.from(nil).to(lesson)
-        expect(response).to redirect_to(question)
+        expect(response).to redirect_to(edit_question_path(question))
         expect(flash[:notice]).to eq("Question successfully updated")
       end
     end
@@ -366,7 +366,7 @@ RSpec.describe "questions controller", :default_creates do
     it "clears the question's flags" do
       expect { patch reset_flags_question_path(question) }
         .to change { question.reload.flagged_questions_count }.from(1).to(0)
-      expect(response).to redirect_to(question)
+      expect(response).to redirect_to(edit_question_path(question))
     end
 
     context "when not authorized for the question's subject" do

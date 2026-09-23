@@ -17,6 +17,11 @@ RSpec.describe "topic questions controller", :default_creates do
       expect(Capybara.string(response.body))
         .to have_css("#question-#{question.id} td.flags", exact_text: "5")
     end
+
+    it "links each question to its editor" do
+      expect(Capybara.string(response.body))
+        .to have_css("#question-#{question.id} td.question-text a[href='#{edit_question_path(question)}']")
+    end
   end
 
   describe "GET /topics/:topic_id/questions.json" do
