@@ -37,7 +37,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :quizzes
+  resources :quizzes, only: %i[index show new create update]
   resources :schools, only: [:show] do
     member do
       patch :sync
@@ -46,7 +46,7 @@ Rails.application.routes.draw do
   end
   resources :leaderboard, only: %i[show index]
   resources :classrooms, only: %i[show index update]
-  resources :questions do
+  resources :questions, except: %i[edit] do
     collection do
       get "topic"
       get "lesson"
@@ -60,7 +60,7 @@ Rails.application.routes.draw do
     end
   end
   resources :topics, only: %i[create update destroy]
-  resources :homeworks
+  resources :homeworks, only: %i[show new create destroy]
   resources :users, only: %i[show index update] do
     member do
       patch "reset_password"
@@ -68,7 +68,7 @@ Rails.application.routes.draw do
     end
   end
   resources :flagged_questions, only: [:create]
-  resources :lessons
+  resources :lessons, except: %i[show]
   resources :customisations, only: [] do
     collection do
       get "show_available"
@@ -78,7 +78,6 @@ Rails.application.routes.draw do
     end
   end
 
-  get "quizzes/new/:subject", to: "quizzes#new"
   get "dashboard/", to: "dashboard#show"
 
   get "/pages/*id", to: "pages#show", as: :page, format: false
