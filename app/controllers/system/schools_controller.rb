@@ -35,7 +35,7 @@ module System
         SyncSchoolJob.perform_later @school
         redirect_to [:system, @school]
       else
-        render :new
+        render :new, status: :unprocessable_content
       end
     end
 

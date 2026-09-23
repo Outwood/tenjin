@@ -42,8 +42,18 @@ en:
       stalled: Sync timed out
       unknown: Unknown
   activerecord:
+    attributes:
+      school:
+        client_id: Client ID
     errors:
       models:
+        school:
+          wonde_unavailable: "Wonde did not answer. Try again in a few minutes."
+          attributes:
+            client_id:
+              not_on_wonde: "is not a school this token can read on Wonde"
+            token:
+              refused_by_wonde: "was refused by Wonde"
         school_group:
           restrict_dependent_destroy:
             has_many: "This group still has schools. Move them to another group, or leave them ungrouped, before deleting it."

@@ -1,6 +1,7 @@
 .container
   = admin_page_header 'Add School', breadcrumbs: [['Schools', system_schools_path]]
   = simple_form_for([:system, @school]) do |f|
-    = f.input :client_id, label: 'Client ID'
+    = f.error_notification message: @school.errors[:base].to_sentence.presence
+    = f.input :client_id
     = f.input :token
     = f.submit 'Add School', class: 'btn btn-primary'

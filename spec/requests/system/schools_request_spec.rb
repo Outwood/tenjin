@@ -88,6 +88,42 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
     end
   end
 
+  describe "POST /system/schools" do
+    let(:school_url) { "https://api.wonde.com/v1.0/schools/A000000000" }
+
+    before { sign_in super_admin }
+
+    context "when Wonde does not recognise the id" do
+      before do
+        stub_request(:get, school_url).to_return(status: 404, body: {error: "not_found"}.to_json)
+        post system_schools_path, params: {school: {client_id: "A000000000", token: "a-token"}}
+      end
+
+      it "re-renders the form with the reason against the id" do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(Capybara.string(response.body))
+          .to have_css(".invalid-feedback", text: "Client ID is not a school this token can read on Wonde")
+          .and have_field("Client ID", with: "A000000000")
+      end
+
+      it "adds no school" do
+        expect(School.where(client_id: "A000000000")).not_to exist
+      end
+    end
+
+    context "when Wonde does not answer" do
+      before do
+        stub_request(:get, school_url).to_timeout
+        post system_schools_path, params: {school: {client_id: "A000000000", token: "a-token"}}
+      end
+
+      it "re-renders the form with the outage above it" do
+        expect(Capybara.string(response.body))
+          .to have_css(".alert-danger", text: "Wonde did not answer. Try again in a few minutes.")
+      end
+    end
+  end
+
   describe "PATCH /system/schools/:id" do
     before { sign_in super_admin }
 
