@@ -118,6 +118,16 @@ RSpec.describe "homeworks controller", :default_creates do
       end
     end
 
+    context "with no pupils enrolled in the class" do
+      let(:empty_classroom) { create(:classroom, school: school, subject: quiz_subject) }
+      let(:homework) { create(:homework, classroom: empty_classroom) }
+
+      it "reports no completions out of none" do
+        get homework_path(homework)
+        expect(Capybara.string(response.body)).to have_css(".display-4", text: "0 / 0 - 0%")
+      end
+    end
+
     context "with a lesson homework" do
       let(:lesson) { create(:lesson, topic: topic) }
       let(:homework) { create(:homework, classroom: classroom, topic: topic, lesson: lesson) }

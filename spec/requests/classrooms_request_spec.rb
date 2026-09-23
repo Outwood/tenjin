@@ -71,8 +71,6 @@ RSpec.describe "classrooms controller", :default_creates do
   end
 
   describe "GET /classrooms/:id" do
-    # Homework only reaches the table once a pupil has progress on it
-    let!(:enrollment) { create(:enrollment, classroom: classroom, user: student) }
     let!(:homeworks) do
       Array.new(3) { create(:homework, classroom: classroom, topic: create(:topic, subject: quiz_subject)) }
     end
@@ -95,6 +93,14 @@ RSpec.describe "classrooms controller", :default_creates do
       end
 
       expect(topic_queries.size).to eq(1)
+    end
+
+    context "with no pupils enrolled" do
+      it "lists each homework as none complete out of none" do
+        get classroom_path(classroom)
+        expect(Capybara.string(response.body))
+          .to have_css("#homework-table tbody tr", count: 3, text: "0 / 0 - 0%")
+      end
     end
   end
 end

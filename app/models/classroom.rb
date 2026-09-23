@@ -22,12 +22,12 @@ class Classroom < ApplicationRecord
     c
   end
 
-  # Only homework with progress rows: the join drops any set before a pupil was enrolled
+  # Left join so homework set on a class with no pupils still counts, as 0 of 0
   def homework_counts
     h_count = HomeworkProgress.arel_table[:id].count
 
     Homework.select(:id, h_count, homework_count_completed.sum.as("completed_count"), :due_date, :topic_id)
-      .joins(:homework_progresses)
+      .left_joins(:homework_progresses)
       .group(:id)
       .where(classroom: self)
       .preload(:topic)
