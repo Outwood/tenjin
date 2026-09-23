@@ -3,7 +3,7 @@
     .d-flex.flex-wrap.align-items-center.justify-content-between.gap-2.my-3
       .display-3 = s.name
       .d-flex.flex-wrap.gap-2
-        = button_to 'Add Topic', subject_topics_path(s), class: 'btn btn-primary'
+        = link_to 'Add Topic', new_subject_topic_path(s), class: 'btn btn-primary'
         = link_to 'Most Flagged Questions', subject_flagged_questions_path(s), class: 'btn btn-info'
     table.table
       thead

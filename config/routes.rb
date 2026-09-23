@@ -53,7 +53,7 @@ Rails.application.routes.draw do
   end
   resources :subjects, only: [] do
     scope module: :subjects do
-      resources :topics, only: [:create]
+      resources :topics, only: %i[new create]
       resources :flagged_questions, only: [:index]
     end
   end

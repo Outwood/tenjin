@@ -10,9 +10,11 @@ RSpec.describe "Author adds a topic", :default_creates do
     visit(questions_path)
   end
 
-  # rack_test form-wiring smoke; TopicsController#create is covered in spec/requests/topics_request_spec.rb
-  it "lands on the new topic ready to be renamed" do
-    click_button "Add Topic"
-    expect(page).to have_field("Topic Name:", with: "New topic")
+  # rack_test form-wiring smoke; Subjects::TopicsController is covered in spec/requests/subjects/topics_request_spec.rb
+  it "lands on the named topic" do
+    click_link "Add Topic"
+    fill_in "Name", with: "Fractions"
+    click_button "Create Topic"
+    expect(page).to have_field("Topic Name:", with: "Fractions")
   end
 end

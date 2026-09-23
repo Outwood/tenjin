@@ -1,0 +1,11 @@
+.container
+  section.page-section.text-center.pt-2#createTopic
+    h1.page-section-header.text-uppercase Create Topic
+    h3.text-uppercase = @subject.name
+    ==render_small_separator
+    = simple_form_for [@subject, @topic] do |f|
+      = f.input :name,
+        input_html: { class: 'col-sm-9 form-control' },
+        label_html: { class: 'col-sm-3 col-form-label' },
+        wrapper_html: { class: 'row mb-3' }
+      = f.button :submit, class: 'btn w-100 btn-primary'
