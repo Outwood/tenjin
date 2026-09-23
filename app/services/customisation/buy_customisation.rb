@@ -10,28 +10,30 @@ class Customisation::BuyCustomisation < ApplicationCommand
     return failure("Customisation not found") if @customisation.blank?
     return failure("User not found") if @user.blank?
 
-    unlock = CustomisationUnlock.where(customisation: @customisation, user: @user).first_or_initialize
-    if unlock.new_record?
-      return failure("This customisation is not for sale") unless @customisation.for_sale?
-
-      unlock.user = @user
+    ApplicationRecord.transaction do
+      # Serialises the user's purchases: a double submit finds the first one's
+      # unlock, and two switches cannot leave two active items of one type
+      User.lock.find(@user.id)
+      buy_or_switch
     end
-
-    bought = ApplicationRecord.transaction do
-      raise ActiveRecord::Rollback unless unlock.persisted? || deduct_challenge_points
-      destroy_old_active_customisation
-      create_new_active_customisation
-      unlock.save!
-    end
-    return failure("You do not have enough points") unless bought
-
-    success
   end
 
   private
 
-  # Spends the points in SQL against the stored total, so an award landing
-  # mid-purchase survives and two purchases cannot overdraw
+  def buy_or_switch
+    unlock = CustomisationUnlock.where(customisation: @customisation, user: @user).first_or_initialize
+    if unlock.new_record?
+      return failure("This customisation is not for sale") unless @customisation.for_sale?
+      return failure("You do not have enough points") unless deduct_challenge_points
+    end
+
+    destroy_old_active_customisation
+    create_new_active_customisation
+    unlock.save!
+    success
+  end
+
+  # Spends against the stored total, not the one loaded with the request
   def deduct_challenge_points
     User.where(id: @user.id, challenge_points: @customisation.cost..)
       .update_all(["challenge_points = challenge_points - ?", @customisation.cost])
