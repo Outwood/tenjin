@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_24_130000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_25_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -114,6 +114,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_24_130000) do
     t.boolean "correct"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.bigint "answer_id"
+    t.jsonb "response"
+    t.datetime "answered_at"
+    t.index ["answer_id"], name: "index_asked_questions_on_answer_id"
+    t.index ["answered_at"], name: "index_asked_questions_on_answered_at", where: "(answered_at IS NOT NULL)"
     t.index ["question_id"], name: "index_asked_questions_on_question_id"
     t.index ["quiz_id", "question_id"], name: "index_asked_questions_on_quiz_id_and_question_id", unique: true
   end
@@ -446,6 +451,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_24_130000) do
   add_foreign_key "all_time_topic_scores", "topics"
   add_foreign_key "all_time_topic_scores", "users"
   add_foreign_key "answers", "questions"
+  add_foreign_key "asked_questions", "answers", on_delete: :nullify
   add_foreign_key "asked_questions", "questions"
   add_foreign_key "asked_questions", "quizzes"
   add_foreign_key "challenge_progresses", "challenges"

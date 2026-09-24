@@ -341,6 +341,12 @@ RSpec.describe "using a quiz" do
         get quiz_path(id: quiz.id)
         expect(response).to have_http_status(:success)
       end
+
+      it "caps the answer at the length the server accepts" do
+        get quiz_path(id: quiz.id)
+        expect(Capybara.string(response.body))
+          .to have_css("input#shortAnswerText[maxlength='#{Quiz::CheckAnswer::MAX_RESPONSE_LENGTH}']")
+      end
     end
   end
   describe "answering a question" do

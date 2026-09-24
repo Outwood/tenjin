@@ -8,20 +8,15 @@ class Subject::Statistics
   end
 
   def asked_questions
-    @asked_questions ||= previous_asked_questions + asked_questions_this_week
+    @asked_questions ||= QuestionStatistic.joins(question: {topic: :subject})
+      .where(question: {topics: {subject: @subject}})
+      .sum(:number_asked)
   end
 
   def asked_questions_this_week
     @asked_questions_this_week ||= AskedQuestion.joins(question: {topic: :subject})
       .where(question: {topics: {subject: @subject}})
+      .where(answered_at: Time.current.beginning_of_week..)
       .count
-  end
-
-  private
-
-  def previous_asked_questions
-    QuestionStatistic.joins(question: {topic: :subject})
-      .where(question: {topics: {subject: @subject}})
-      .sum(:number_asked)
   end
 end

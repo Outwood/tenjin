@@ -3,6 +3,7 @@ div(data-controller="short-response-question next-question"
   p.lead.text-center == @question.question_text
   input.form-control.text-center.container-fluid.m-2#shortAnswerText(autofocus=''
     autocomplete='off'
+    maxlength=Quiz::CheckAnswer::MAX_RESPONSE_LENGTH
     data-short-response-question-target="input"
     data-action="keydown.enter->short-response-question#check")
   button.btn.btn-dark.w-100.m-2.question-button#shortAnswerButton(data-short-response-question-target="submitButton"

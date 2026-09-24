@@ -6,6 +6,7 @@ class Answer < ApplicationRecord
   TEXT_CONSTRAINT = "answers_question_id_text"
 
   belongs_to :question
+  has_many :asked_questions, dependent: :nullify
   validates :text, presence: true
 
   # Whitespace never tells one answer from another, on screen or to the checker

@@ -49,6 +49,37 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
     expect(result.error).to eq :no_answer_provided
   end
 
+  describe "the stored answer" do
+    let(:asked_question) { quiz.asked_questions.find_by!(question: question) }
+
+    before { described_class.call(quiz: quiz, question: question, answer_given: {id: wrong_answer.id}) }
+
+    it "records the option chosen, its text and when" do
+      expect(asked_question).to have_attributes(
+        correct: false,
+        answer_id: wrong_answer.id,
+        response: {"text" => wrong_answer.text},
+        answered_at: be_within(1.minute).of(Time.current)
+      )
+    end
+  end
+
+  it "counts the answer for the question and the pupil" do
+    described_class.call(quiz: quiz, question: question, answer_given: {id: correct_answer.id})
+    expect(QuestionStatistic.find_by!(question: question)).to have_attributes(number_asked: 1, number_correct: 1)
+    expect(UserStatistic.find_by!(user: user, week_beginning: Date.current.beginning_of_week).questions_answered).to eq 1
+  end
+
+  context "with a verdict recorded before answered_at existed" do
+    before { quiz.asked_questions.find_by!(question: question).update!(correct: true) }
+
+    it "neither claims nor counts it again" do
+      expect { described_class.call(quiz: quiz, question: question, answer_given: {id: wrong_answer.id}) }
+        .to not_change { [quiz.reload.num_questions_asked, quiz.asked_questions.pick(:correct, :answered_at)] }
+        .and not_change(QuestionStatistic, :count)
+    end
+  end
+
   context "with a quiz that counts for the leaderboard" do
     subject(:check) { described_class.call(quiz: quiz, question: question, answer_given: {id: correct_answer.id}) }
 
@@ -103,6 +134,11 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
         it "broadcasts nothing" do
           expect(Leaderboard::BroadcastLeaderboardPoint).not_to have_received(:call)
         end
+
+        it "counts nothing" do
+          expect(QuestionStatistic.where(question: question)).to be_empty
+          expect(UserStatistic.where(user: user)).to be_empty
+        end
       end
     end
   end
@@ -124,6 +160,12 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
     it "leaves the question and quiz as the first left them" do
       expect { late_submission.call }
         .not_to change { [quiz.reload.attributes.values_at("num_questions_asked", "streak", "answered_correct"), quiz.asked_questions.pluck(:correct)] }
+    end
+
+    it "counts the answer once" do
+      expect { late_submission.call }
+        .to not_change { QuestionStatistic.find_by!(question: question).number_asked }
+        .and not_change { UserStatistic.find_by!(user: user, week_beginning: Date.current.beginning_of_week).questions_answered }
     end
   end
 
@@ -215,6 +257,89 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
         expect {
           described_class.call(quiz: quiz, question: short_answer_question, answer_given: {short_answer: other_answer.text})
         }.to change { quiz.reload.streak }.by(1)
+      end
+    end
+
+    describe "the stored answer" do
+      let(:asked_question) { quiz.asked_questions.find_by!(question: short_answer_question) }
+
+      before do
+        described_class.call(quiz: quiz, question: short_answer_question, answer_given: {short_answer: typed})
+      end
+
+      context "with extra spaces typed" do
+        let(:typed) { "  Some  guess " }
+
+        it "records the text as typed, with no option" do
+          expect(asked_question).to have_attributes(answer_id: nil, response: {"text" => "  Some  guess "})
+        end
+      end
+
+      context "with a blank answer" do
+        let(:typed) { "" }
+
+        it "records it and judges it wrong" do
+          expect(asked_question).to have_attributes(response: {"text" => ""}, correct: false, answered_at: be_present)
+        end
+      end
+
+      context "with an answer as long as the field allows" do
+        let(:typed) { "a" * described_class::MAX_RESPONSE_LENGTH }
+
+        it "records it" do
+          expect(asked_question.answered_at).to be_present
+        end
+      end
+    end
+
+    context "with an answer longer than the field allows" do
+      subject(:check) do
+        described_class.call(quiz: quiz, question: short_answer_question,
+          answer_given: {short_answer: "a" * (described_class::MAX_RESPONSE_LENGTH + 1)})
+      end
+
+      it "refuses it as no answer" do
+        expect(check.error).to eq :no_answer_provided
+      end
+
+      it "leaves the question unanswered" do
+        check
+        expect(quiz.asked_questions.find_by!(question: short_answer_question).answered_at).to be_nil
+      end
+    end
+
+    context "with an answer containing a NUL character" do
+      subject(:check) do
+        described_class.call(quiz: quiz, question: short_answer_question, answer_given: {short_answer: "a\u0000b"})
+      end
+
+      it "refuses it as no answer" do
+        expect(check.error).to eq :no_answer_provided
+      end
+    end
+
+    context "with a question that accepts no text" do
+      # Built before the first lands, as a racing request loads its state
+      let!(:late_submission) do
+        described_class.new(quiz: Quiz.find(quiz.id), question: short_answer_question, answer_given: {short_answer: "later"})
+      end
+
+      before do
+        Answer.where(question: short_answer_question).delete_all
+        described_class.call(quiz: quiz, question: short_answer_question, answer_given: {short_answer: "anything"})
+      end
+
+      it "records the answer without a verdict" do
+        expect(quiz.asked_questions.find_by!(question: short_answer_question))
+          .to have_attributes(correct: nil, answered_at: be_present, response: {"text" => "anything"})
+      end
+
+      it "moves the quiz on once" do
+        expect { late_submission.call }.not_to change { quiz.reload.num_questions_asked }
+      end
+
+      it "counts the answer as asked, not correct" do
+        expect(QuestionStatistic.find_by!(question: short_answer_question)).to have_attributes(number_asked: 1, number_correct: 0)
       end
     end
   end

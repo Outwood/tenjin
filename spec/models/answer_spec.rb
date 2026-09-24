@@ -36,4 +36,22 @@ RSpec.describe Answer do
       }.not_to raise_error
     end
   end
+
+  describe "attempts that chose it" do
+    let(:question) { create(:question) }
+    let(:answer) { question.answers.first }
+    let!(:asked_question) do
+      create(:asked_question, :answered, question: question, answer: answer, response: {"text" => answer.text})
+    end
+
+    it "keeps them without the link when the answer is destroyed" do
+      answer.destroy!
+      expect(asked_question.reload).to have_attributes(answer_id: nil, response: {"text" => answer.text})
+    end
+
+    it "keeps them without the link when the answer is deleted in SQL" do
+      Answer.where(id: answer.id).delete_all
+      expect(asked_question.reload).to have_attributes(answer_id: nil, response: {"text" => answer.text})
+    end
+  end
 end

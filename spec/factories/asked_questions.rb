@@ -6,5 +6,10 @@ FactoryBot.define do
     association :quiz, strategy: :create
 
     correct { nil }
+
+    trait :answered do
+      correct { true }
+      answered_at { Time.current }
+    end
   end
 end
