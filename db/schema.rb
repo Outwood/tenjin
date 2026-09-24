@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_23_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_24_120100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -99,7 +99,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_23_120000) do
 
   create_table "answers", force: :cascade do |t|
     t.bigint "question_id", null: false
-    t.string "text"
+    t.string "text", null: false
     t.boolean "correct", default: false, null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
@@ -114,7 +114,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_23_120000) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.index ["question_id"], name: "index_asked_questions_on_question_id"
-    t.index ["quiz_id"], name: "index_asked_questions_on_quiz_id"
+    t.index ["quiz_id", "question_id"], name: "index_asked_questions_on_quiz_id_and_question_id", unique: true
   end
 
   create_table "challenge_progresses", force: :cascade do |t|
@@ -286,12 +286,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_23_120000) do
 
   create_table "questions", force: :cascade do |t|
     t.bigint "topic_id", null: false
-    t.integer "question_type"
+    t.integer "question_type", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.integer "external_id"
     t.bigint "lesson_id"
-    t.boolean "active", default: true
+    t.boolean "active", default: true, null: false
     t.integer "flagged_questions_count", default: 0, null: false
     t.index ["lesson_id"], name: "index_questions_on_lesson_id"
     t.index ["topic_id"], name: "index_questions_on_topic_id"
