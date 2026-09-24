@@ -18,6 +18,8 @@ class AddResponseToAskedQuestions < ActiveRecord::Migration[7.2]
   end
 
   def down
+    execute "SET LOCAL lock_timeout TO '10s'"
+
     remove_column :asked_questions, :answered_at
     remove_column :asked_questions, :response
     remove_column :asked_questions, :answer_id
