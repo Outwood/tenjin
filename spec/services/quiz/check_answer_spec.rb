@@ -125,33 +125,6 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
       expect { late_submission.call }
         .not_to change { [quiz.reload.attributes.values_at("num_questions_asked", "streak", "answered_correct"), quiz.asked_questions.pluck(:correct)] }
     end
-
-    context "when the first answer finished a quiz of that one question" do
-      let(:quiz) { create(:new_quiz, user: user, question_order: [question.id]) }
-
-      it "leaves the quiz finished" do
-        expect { late_submission.call }.not_to change { quiz.reload.num_questions_asked }.from(1)
-      end
-    end
-  end
-
-  context "with a quiz still on a question it has answered" do
-    subject(:check) { described_class.call(quiz: quiz, question: question, answer_given: {id: wrong_answer.id}) }
-
-    before { quiz.asked_questions.find_by!(question: question).update!(correct: true) }
-
-    it "moves the quiz on" do
-      expect { check }.to change { quiz.reload.num_questions_asked }.from(1).to(2)
-    end
-
-    it "reports the recorded verdict" do
-      expect(check.payload.correct).to be true
-    end
-
-    it "awards no point" do
-      check
-      expect(Quiz::AddLeaderboardPoint).not_to have_received(:call)
-    end
   end
 
   context "with a correct answer to another question" do

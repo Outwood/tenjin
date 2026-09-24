@@ -95,7 +95,7 @@ class QuizzesController < ApplicationController
   end
 
   def question_for_quiz(quiz)
-    Question.find(quiz.current_question_id)
+    Question.find(quiz.question_order[quiz.num_questions_asked - 1])
   end
 
   def answer_params
