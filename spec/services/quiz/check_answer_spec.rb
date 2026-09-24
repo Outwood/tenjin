@@ -169,6 +169,14 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
       }.to change { quiz.reload.streak }.by(1)
     end
 
+    it "matches an answer typed with non-breaking spaces" do
+      answer = short_answer_question.answers.find_by!(correct: true)
+      expect {
+        described_class.call(quiz: quiz, question: short_answer_question,
+          answer_given: {short_answer: answer.text.tr(" ", "\u00A0")})
+      }.to change { quiz.reload.streak }.by(1)
+    end
+
     it "resets streak on a miss" do
       quiz.update(streak: 3)
       described_class.call(quiz: quiz, question: short_answer_question, answer_given: {short_answer: "not it"})

@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+# A question in a topic, with the answers that define how it is marked
 class Question < ApplicationRecord
+  ANSWERS_REPEAT = "Answers must be different from each other"
+
   has_many :answers, dependent: :destroy
   has_many :asked_questions, dependent: :destroy
   has_many :flagged_questions, dependent: :destroy
@@ -48,14 +51,23 @@ class Question < ApplicationRecord
   end
 
   def answers_distinct
-    keys = kept_answers.map { |answer| answer_key(answer.text) }
-    errors.add :base, "Answers must be different from each other" if keys.uniq.size < keys.size
+    keys = kept_answers.map { |answer| answer_key(answer.text.to_s) }.reject(&:empty?)
+    errors.add :base, ANSWERS_REPEAT if keys.uniq.size < keys.size
   end
 
   def at_least_one_correct_answer
     return if kept_answers.any?(&:correct)
 
     errors.add :base, "Question must have at least one correct answer."
+  end
+
+  # Another save can commit the same answer after this one validated; the
+  # deferred unique constraint then fails the commit
+  def save(...)
+    super
+  rescue ActiveRecord::RecordNotUnique
+    errors.add :base, ANSWERS_REPEAT
+    false
   end
 
   def as_json(*)
@@ -71,8 +83,7 @@ class Question < ApplicationRecord
   # Options show as typed, so case tells them apart; a short answer is
   # checked ignoring case, as Quiz::CheckAnswer compares it
   def answer_key(text)
-    key = Answer.normalise_text(text)
-    short_answer? ? key.downcase(:fold) : key
+    short_answer? ? text.downcase(:fold) : text
   end
 
   # Answers removed through nested attributes stay loaded until the save

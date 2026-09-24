@@ -104,9 +104,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_24_130000) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.integer "external_id"
-    t.virtual "text_key", type: :string, as: "btrim(regexp_replace((text)::text, '[ \\t\\n\\r\\f\\v]+'::text, ' '::text, 'g'::text))", stored: true
 
-    t.unique_constraint ["question_id", "text_key"], deferrable: :deferred, name: "answers_question_id_text_key"
+    t.unique_constraint ["question_id", "text"], deferrable: :deferred, name: "answers_question_id_text"
   end
 
   create_table "asked_questions", force: :cascade do |t|

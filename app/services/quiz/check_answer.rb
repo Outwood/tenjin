@@ -65,8 +65,8 @@ class Quiz::CheckAnswer < ApplicationCommand
     accepted = Answer.where(question_id: @question, correct: true).pluck(:text)
     return if accepted.empty?
 
-    guess = Answer.normalise_text(@answer_given[:short_answer])
-    accepted.any? { |text| guess.casecmp?(Answer.normalise_text(text)) }
+    guess = Answer.normalize_value_for(:text, @answer_given[:short_answer].to_s)
+    accepted.any? { |text| guess.casecmp?(text) }
   end
 
   def score_answer

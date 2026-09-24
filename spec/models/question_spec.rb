@@ -49,6 +49,17 @@ RSpec.describe Question, :default_creates do
       end
     end
 
+    context "with labels carrying stray whitespace" do
+      before do
+        boolean_question.answers.first.text = " true "
+        boolean_question.answers.last.text = "false\n"
+      end
+
+      it "is valid" do
+        expect(boolean_question).to be_valid
+      end
+    end
+
     context "with non-boolean answer text" do
       before { boolean_question.answers.first.text = "Maybe" }
 
@@ -61,8 +72,10 @@ RSpec.describe Question, :default_creates do
   describe "answer texts" do
     let(:question) { build(:question, topic: topic) }
 
+    let(:first_text) { "Max Jones" }
+
     before do
-      question.answers.first.text = "Max Jones"
+      question.answers.first.text = first_text
       question.answers.build(text: repeated_text)
     end
 
@@ -93,6 +106,16 @@ RSpec.describe Question, :default_creates do
       end
     end
 
+    context "with two blank answers" do
+      let(:first_text) { "" }
+      let(:repeated_text) { "" }
+
+      it "reports no repeat" do
+        question.validate
+        expect(question.errors[:base]).not_to include("Answers must be different from each other")
+      end
+    end
+
     context "with the repeat marked for destruction" do
       let(:repeated_text) { "Max Jones" }
 
@@ -115,10 +138,26 @@ RSpec.describe Question, :default_creates do
       ])
     end
 
-    # The uniqueness constraint is checked at commit, which a transactional example never reaches
     it "saves both" do
-      expect { described_class.connection.execute("SET CONSTRAINTS ALL IMMEDIATE") }.not_to raise_error
+      expect { check_deferred_constraints! }.not_to raise_error
       expect(question.answers.order(:id).pluck(:text)).to eq(%w[Lyon Paris])
+    end
+  end
+
+  context "when another save adds the same option first" do
+    let(:question) { create(:question, topic: topic) }
+    let(:stale_copy) { described_class.find(question.id).tap { |copy| copy.answers.load } }
+
+    before do
+      stale_copy
+      question.answers.create!(text: "Paris")
+      check_deferred_constraints!
+      stale_copy.answers.build(text: "Paris")
+    end
+
+    it "reports the repeat instead of raising" do
+      expect(stale_copy.save).to be false
+      expect(stale_copy.errors[:base]).to include("Answers must be different from each other")
     end
   end
 
