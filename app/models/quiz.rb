@@ -8,7 +8,7 @@ class Quiz < ApplicationRecord
   belongs_to :topic, optional: true
   belongs_to :lesson, optional: true
 
-  has_many :asked_questions, dependent: :destroy
+  has_many :asked_questions, dependent: :delete_all
   has_many :questions, through: :asked_questions
   attr_accessor :picked_subject
 

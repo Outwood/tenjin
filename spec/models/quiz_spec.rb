@@ -61,6 +61,15 @@ RSpec.describe Quiz, :default_creates do
     end
   end
 
+  describe "destroying" do
+    it "removes the quiz's attempt rows" do
+      quiz = create(:quiz, user: create(:student))
+      create(:asked_question, quiz: quiz)
+      quiz.destroy
+      expect(AskedQuestion.where(quiz_id: quiz.id)).to be_empty
+    end
+  end
+
   context "when a quiz is created" do
     let!(:quiz) { create(:quiz, user: student, topic: topic) }
     let(:usage_statistic) { UsageStatistic.find_by!(user: student, date: Date.current) }

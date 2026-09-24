@@ -5,7 +5,7 @@ class Question < ApplicationRecord
   ANSWERS_REPEAT = "Answers must be different from each other"
 
   has_many :answers, dependent: :destroy
-  has_many :asked_questions, dependent: :destroy
+  has_many :asked_questions, dependent: :delete_all
   has_many :flagged_questions, dependent: :destroy
   has_many :quizzes, through: :asked_questions
   has_one :question_statistic, dependent: :destroy
