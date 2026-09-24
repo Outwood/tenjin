@@ -63,7 +63,6 @@ id,question_id,text,correct
 61,16,Loss leaders,true
 62,16,Cost-based pricing,false
 63,16,Psychological pricing,false
-64,16,Cost-based pricing,false
 65,17,Psychological pricing,true
 66,17,Customer-based pricing,false
 67,17,Loss leaders,false
@@ -2559,7 +2558,6 @@ id,question_id,text,correct
 2557,1008,They were the best hope of protecting them from the communists,false
 2558,1008,They wanted a return to traditional German values,false
 2559,1009,They were the best hope of protecting them from the communists,true
-2560,1009,They were the best hope of protecting them from the communists,false
 2561,1009,They wanted a return to traditional German values,false
 2562,1010,60%,true
 2563,1010,50%,false

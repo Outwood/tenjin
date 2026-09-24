@@ -58,6 +58,70 @@ RSpec.describe Question, :default_creates do
     end
   end
 
+  describe "answer texts" do
+    let(:question) { build(:question, topic: topic) }
+
+    before do
+      question.answers.first.text = "Max Jones"
+      question.answers.build(text: repeated_text)
+    end
+
+    context "with options differing only in spacing" do
+      let(:repeated_text) { " Max  Jones " }
+
+      it "is invalid" do
+        expect(question).to be_invalid
+        expect(question.errors[:base]).to include("Answers must be different from each other")
+      end
+    end
+
+    context "with options differing in case" do
+      let(:repeated_text) { "max jones" }
+
+      it "is valid" do
+        expect(question).to be_valid
+      end
+    end
+
+    context "with short answers differing only in case" do
+      let(:question) { build(:short_answer_question, topic: topic) }
+      let(:repeated_text) { "max jones" }
+
+      it "is invalid" do
+        expect(question).to be_invalid
+        expect(question.errors[:base]).to include("Answers must be different from each other")
+      end
+    end
+
+    context "with the repeat marked for destruction" do
+      let(:repeated_text) { "Max Jones" }
+
+      before { question.answers.last.mark_for_destruction }
+
+      it "is valid" do
+        expect(question).to be_valid
+      end
+    end
+  end
+
+  context "when two options swap texts" do
+    let(:question) { create(:question, topic: topic) }
+    let!(:first_answer) { question.answers.first.tap { |answer| answer.update!(text: "Paris") } }
+    let!(:second_answer) { create(:answer, question: question, text: "Lyon") }
+
+    before do
+      question.reload.update!(answers_attributes: [
+        {id: first_answer.id, text: "Lyon"}, {id: second_answer.id, text: "Paris"}
+      ])
+    end
+
+    # The uniqueness constraint is checked at commit, which a transactional example never reaches
+    it "saves both" do
+      expect { described_class.connection.execute("SET CONSTRAINTS ALL IMMEDIATE") }.not_to raise_error
+      expect(question.answers.order(:id).pluck(:text)).to eq(%w[Lyon Paris])
+    end
+  end
+
   describe "answers marked for destruction" do
     let(:correct_answer) { question.answers.find_by!(correct: true) }
 

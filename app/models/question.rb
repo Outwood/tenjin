@@ -27,6 +27,7 @@ class Question < ApplicationRecord
   validates_associated :answers
 
   validate :at_least_one_correct_answer
+  validate :answers_distinct
   validate :boolean_true_or_false
   validate :lesson_is_for_topic
 
@@ -46,6 +47,11 @@ class Question < ApplicationRecord
     errors.add :base, "Boolean must be true or false only"
   end
 
+  def answers_distinct
+    keys = kept_answers.map { |answer| answer_key(answer.text) }
+    errors.add :base, "Answers must be different from each other" if keys.uniq.size < keys.size
+  end
+
   def at_least_one_correct_answer
     return if kept_answers.any?(&:correct)
 
@@ -61,6 +67,13 @@ class Question < ApplicationRecord
   end
 
   private
+
+  # Options show as typed, so case tells them apart; a short answer is
+  # checked ignoring case, as Quiz::CheckAnswer compares it
+  def answer_key(text)
+    key = Answer.normalise_text(text)
+    short_answer? ? key.downcase(:fold) : key
+  end
 
   # Answers removed through nested attributes stay loaded until the save
   def kept_answers

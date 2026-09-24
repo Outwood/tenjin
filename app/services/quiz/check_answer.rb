@@ -65,13 +65,8 @@ class Quiz::CheckAnswer < ApplicationCommand
     accepted = Answer.where(question_id: @question, correct: true).pluck(:text)
     return if accepted.empty?
 
-    guess = normalise(@answer_given[:short_answer])
-    accepted.any? { |text| guess.casecmp?(normalise(text)) }
-  end
-
-  # Stray spacing is never what separates a right answer from a wrong one
-  def normalise(text)
-    text.to_s.strip.gsub(/\s+/, " ")
+    guess = Answer.normalise_text(@answer_given[:short_answer])
+    accepted.any? { |text| guess.casecmp?(Answer.normalise_text(text)) }
   end
 
   def score_answer
