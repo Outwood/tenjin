@@ -85,8 +85,8 @@ class Quiz::CreateQuiz < ApplicationCommand
       question_array += additional_topic_questions
     end
 
-    # Get maximum of 10 questions only
-    question_array.shuffle.sample(10)
+    # Get maximum of 10 questions only; the additional questions include the one-per-topic picks
+    question_array.uniq.sample(10)
   end
 
   def additional_topic_questions

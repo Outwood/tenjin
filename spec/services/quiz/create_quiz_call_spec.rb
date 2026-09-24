@@ -88,6 +88,18 @@ RSpec.describe Quiz::CreateQuiz, :default_creates do
     end
   end
 
+  context "when a lucky dip subject has fewer than ten questions" do
+    let(:small_subject) { create(:subject) }
+    let!(:questions) do
+      create_list(:topic, 2, subject: small_subject).map { |t| create(:question, topic: t) }
+    end
+    let(:result) { described_class.call(user: student, topic: "Lucky Dip", subject: small_subject) }
+
+    it "asks each question once" do
+      expect(result.payload[:quiz].question_order).to contain_exactly(*questions.map(&:id))
+    end
+  end
+
   context "when creating a lesson based quiz" do
     let(:result) do
       described_class.call(user: student, topic: topic.id, subject: quiz_subject, lesson: lesson.id)
