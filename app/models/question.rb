@@ -22,6 +22,7 @@ class Question < ApplicationRecord
   end
 
   before_update :check_boolean
+  after_save :check_answer_texts_now
   before_update :check_short_answer
 
   accepts_nested_attributes_for :answers, allow_destroy: true
@@ -45,7 +46,7 @@ class Question < ApplicationRecord
     # Check for the presence of both true and false in two answers in a case insensitive search
     return errors.add :base, "Boolean question must contain two answers" unless answer_text.size == 2
 
-    return if answer_text.all? { |text| %w[true false].any? { |permitted| permitted.casecmp(text).zero? } }
+    return if answer_text.map(&:downcase).sort == %w[false true]
 
     errors.add :base, "Boolean must be true or false only"
   end
@@ -62,12 +63,23 @@ class Question < ApplicationRecord
   end
 
   # Another save can commit the same answer after this one validated; the
-  # deferred unique constraint then fails the commit
+  # unique constraint then refuses it, and it reads as the validation error
   def save(...)
     super
-  rescue ActiveRecord::RecordNotUnique
+  rescue ActiveRecord::RecordNotUnique => e
+    raise unless answer_text_repeat?(e)
+
     errors.add :base, ANSWERS_REPEAT
     false
+  end
+
+  def save!(...)
+    super
+  rescue ActiveRecord::RecordNotUnique => e
+    raise unless answer_text_repeat?(e)
+
+    errors.add :base, ANSWERS_REPEAT
+    raise ActiveRecord::RecordInvalid, self
   end
 
   def as_json(*)
@@ -84,6 +96,19 @@ class Question < ApplicationRecord
   # checked ignoring case, as Quiz::CheckAnswer compares it
   def answer_key(text)
     short_answer? ? text.downcase(:fold) : text
+  end
+
+  # The constraint waits for commit so a save can swap two options' texts;
+  # checking once every answer is written keeps a repeat inside this save,
+  # whatever transaction wraps it
+  def check_answer_texts_now
+    self.class.connection.execute("SET CONSTRAINTS #{Answer::TEXT_CONSTRAINT} IMMEDIATE")
+    self.class.connection.execute("SET CONSTRAINTS #{Answer::TEXT_CONSTRAINT} DEFERRED")
+  end
+
+  def answer_text_repeat?(error)
+    error.cause.respond_to?(:result) &&
+      error.cause.result.error_field(PG::Result::PG_DIAG_CONSTRAINT_NAME) == Answer::TEXT_CONSTRAINT
   end
 
   # Answers removed through nested attributes stay loaded until the save

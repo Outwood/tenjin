@@ -2,6 +2,9 @@
 
 # One option, accepted text or True/False label belonging to a question
 class Answer < ApplicationRecord
+  # Created deferrable by AddUniqueAnswerTextPerQuestion
+  TEXT_CONSTRAINT = "answers_question_id_text"
+
   belongs_to :question
   validates :text, presence: true
 

@@ -177,6 +177,14 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
       }.to change { quiz.reload.streak }.by(1)
     end
 
+    it "matches an accepted text stored without normalising" do
+      # Raw SQL, since any write through the model normalises
+      Answer.connection.execute("UPDATE answers SET text = ' Max  Jones ' WHERE question_id = #{short_answer_question.id}")
+      expect {
+        described_class.call(quiz: quiz, question: short_answer_question, answer_given: {short_answer: "max jones"})
+      }.to change { quiz.reload.streak }.by(1)
+    end
+
     it "resets streak on a miss" do
       quiz.update(streak: 3)
       described_class.call(quiz: quiz, question: short_answer_question, answer_given: {short_answer: "not it"})

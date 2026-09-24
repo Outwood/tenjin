@@ -27,25 +27,23 @@ RSpec.describe Question, :default_creates do
 
     context "when true answer precedes false" do
       before do
-        boolean_question
-        boolean_question.answers.first.update!(text: "TruE")
-        create(:answer, question: question, correct: true, text: "fAlsE")
+        boolean_question.answers.first.text = "TruE"
+        boolean_question.answers.last.text = "fAlsE"
       end
 
       it "is valid" do
-        expect(question).to be_valid
+        expect(boolean_question).to be_valid
       end
     end
 
     context "when false answer precedes true" do
       before do
-        boolean_question
-        boolean_question.answers.first.update!(text: "FaLsE")
-        create(:answer, question: question, correct: true, text: "TrUe")
+        boolean_question.answers.first.text = "FaLsE"
+        boolean_question.answers.last.text = "TrUe"
       end
 
       it "is valid" do
-        expect(question).to be_valid
+        expect(boolean_question).to be_valid
       end
     end
 
@@ -57,6 +55,17 @@ RSpec.describe Question, :default_creates do
 
       it "is valid" do
         expect(boolean_question).to be_valid
+      end
+    end
+
+    context "with two labels meaning true" do
+      before do
+        boolean_question.answers.first.text = "True"
+        boolean_question.answers.last.text = "true"
+      end
+
+      it "is invalid" do
+        expect(boolean_question).to be_invalid
       end
     end
 
@@ -151,13 +160,33 @@ RSpec.describe Question, :default_creates do
     before do
       stale_copy
       question.answers.create!(text: "Paris")
-      check_deferred_constraints!
-      stale_copy.answers.build(text: "Paris")
     end
 
-    it "reports the repeat instead of raising" do
+    it "reports the repeat from save" do
+      stale_copy.answers.build(text: "Paris")
       expect(stale_copy.save).to be false
       expect(stale_copy.errors[:base]).to include("Answers must be different from each other")
+    end
+
+    it "reports the repeat from update" do
+      expect(stale_copy.update(answers_attributes: [{text: "Paris"}])).to be false
+      expect(stale_copy.errors[:base]).to include("Answers must be different from each other")
+    end
+
+    it "raises it as invalid from save!" do
+      stale_copy.answers.build(text: "Paris")
+      expect { stale_copy.save! }.to raise_error(ActiveRecord::RecordInvalid, /Answers must be different/)
+    end
+  end
+
+  context "when another unique index refuses the save" do
+    before do
+      described_class.connection.execute("CREATE UNIQUE INDEX one_question_per_topic ON questions (topic_id)")
+      create(:question, topic: topic)
+    end
+
+    it "raises rather than blaming the answers" do
+      expect { build(:question, topic: topic).save }.to raise_error(ActiveRecord::RecordNotUnique)
     end
   end
 

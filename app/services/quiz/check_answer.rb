@@ -66,7 +66,8 @@ class Quiz::CheckAnswer < ApplicationCommand
     return if accepted.empty?
 
     guess = Answer.normalize_value_for(:text, @answer_given[:short_answer].to_s)
-    accepted.any? { |text| guess.casecmp?(text) }
+    # A text written around the model is stored as given
+    accepted.any? { |text| guess.casecmp?(Answer.normalize_value_for(:text, text)) }
   end
 
   def score_answer
