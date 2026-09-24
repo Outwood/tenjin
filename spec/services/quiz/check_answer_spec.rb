@@ -2,8 +2,6 @@
 
 require "rails_helper"
 
-RSpec::Matchers.define_negated_matcher :not_change, :change
-
 RSpec.describe Quiz::CheckAnswer, :default_creates do
   let(:user) { create(:student, school: school) }
   let(:question) { create(:question, topic: topic) }

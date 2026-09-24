@@ -3,8 +3,6 @@
 require "rails_helper"
 require "rake"
 
-RSpec::Matchers.define_negated_matcher :not_change, :change
-
 RSpec.describe "asked_questions rake tasks", :default_creates do
   before(:all) { Rails.application.load_tasks unless Rake::Task.task_defined?("asked_questions:count_uncounted") }
 
