@@ -62,6 +62,7 @@ class LeaderboardsController < ApplicationController
     @user_data = {id: current_user.id,
                   role: current_user.role,
                   school: current_user.school.name,
-                  classrooms: current_user.enrollments.joins(:classroom).pluck("classrooms.name")}
+                  classrooms: subject_classrooms.joins(:enrollments).where(enrollments: {user: current_user})
+                    .order(:name).pluck(:name)}
   end
 end
