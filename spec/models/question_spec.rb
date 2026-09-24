@@ -35,25 +35,46 @@ RSpec.describe Question, :default_creates do
 
     context "when true answer precedes false" do
       before do
-        boolean_question
-        boolean_question.answers.first.update!(text: "TruE")
-        create(:answer, question: question, correct: true, text: "fAlsE")
+        boolean_question.answers.first.text = "TruE"
+        boolean_question.answers.last.text = "fAlsE"
       end
 
       it "is valid" do
-        expect(question).to be_valid
+        expect(boolean_question).to be_valid
       end
     end
 
     context "when false answer precedes true" do
       before do
-        boolean_question
-        boolean_question.answers.first.update!(text: "FaLsE")
-        create(:answer, question: question, correct: true, text: "TrUe")
+        boolean_question.answers.first.text = "FaLsE"
+        boolean_question.answers.last.text = "TrUe"
       end
 
       it "is valid" do
-        expect(question).to be_valid
+        expect(boolean_question).to be_valid
+      end
+    end
+
+    context "with labels carrying stray whitespace" do
+      before do
+        boolean_question.answers.first.text = " true "
+        boolean_question.answers.last.text = "false\n"
+      end
+
+      it "is valid" do
+        expect(boolean_question).to be_valid
+      end
+    end
+
+    context "with two labels meaning true" do
+      before do
+        boolean_question.answers.first.text = "True"
+        boolean_question.answers.last.text = "true"
+      end
+
+      it "asks for one of each" do
+        expect(boolean_question).to be_invalid
+        expect(boolean_question.errors[:base]).to contain_exactly("Boolean question must have one True and one False answer")
       end
     end
 
@@ -63,6 +84,201 @@ RSpec.describe Question, :default_creates do
       it "is invalid" do
         expect(boolean_question).not_to be_valid
       end
+    end
+  end
+
+  describe "answer texts" do
+    let(:question) { build(:question, topic: topic) }
+
+    let(:first_text) { "Max Jones" }
+
+    before do
+      question.answers.first.text = first_text
+      question.answers.build(text: repeated_text)
+    end
+
+    context "with options differing only in spacing" do
+      let(:repeated_text) { " Max  Jones " }
+
+      it "is invalid" do
+        expect(question).to be_invalid
+        expect(question.errors[:base]).to include("Answers must be different from each other")
+      end
+    end
+
+    context "with options differing in case" do
+      let(:repeated_text) { "max jones" }
+
+      it "is valid" do
+        expect(question).to be_valid
+      end
+    end
+
+    context "with short answers differing only in case" do
+      let(:question) { build(:short_answer_question, topic: topic) }
+      let(:repeated_text) { "max jones" }
+
+      it "is invalid" do
+        expect(question).to be_invalid
+        expect(question.errors[:base]).to include("Answers must be different from each other")
+      end
+    end
+
+    context "with two blank answers" do
+      let(:first_text) { "" }
+      let(:repeated_text) { "" }
+
+      it "reports no repeat" do
+        question.validate
+        expect(question.errors[:base]).not_to include("Answers must be different from each other")
+      end
+    end
+
+    context "with the repeat marked for destruction" do
+      let(:repeated_text) { "Max Jones" }
+
+      before { question.answers.last.mark_for_destruction }
+
+      it "is valid" do
+        expect(question).to be_valid
+      end
+    end
+  end
+
+  context "when two options swap texts" do
+    let(:question) { create(:question, topic: topic) }
+    let!(:first_answer) { question.answers.first.tap { |answer| answer.update!(text: "Paris") } }
+    let!(:second_answer) { create(:answer, question: question, text: "Lyon") }
+
+    before do
+      question.reload.update!(answers_attributes: [
+        {id: first_answer.id, text: "Lyon"}, {id: second_answer.id, text: "Paris"}
+      ])
+    end
+
+    it "saves both" do
+      expect { check_deferred_constraints! }.not_to raise_error
+      expect(question.answers.order(:id).pluck(:text)).to eq(%w[Lyon Paris])
+    end
+  end
+
+  context "when another save adds the same option first" do
+    let(:question) { create(:question, topic: topic) }
+    let(:stale_copy) { described_class.find(question.id).tap { |copy| copy.answers.load } }
+
+    before do
+      stale_copy
+      question.answers.create!(text: "Paris")
+    end
+
+    it "reports the repeat from save" do
+      stale_copy.answers.build(text: "Paris")
+      expect(stale_copy.save).to be false
+      expect(stale_copy.errors[:base]).to include("Answers must be different from each other")
+    end
+
+    it "reports the repeat from update" do
+      expect(stale_copy.update(answers_attributes: [{text: "Paris"}])).to be false
+      expect(stale_copy.errors[:base]).to include("Answers must be different from each other")
+    end
+
+    it "raises it as invalid from save!" do
+      stale_copy.answers.build(text: "Paris")
+      expect { stale_copy.save! }.to raise_error(ActiveRecord::RecordInvalid, /Answers must be different/)
+    end
+
+    it "leaves a surrounding transaction usable" do
+      described_class.transaction do
+        stale_copy.answers.build(text: "Paris")
+        stale_copy.save
+        expect { described_class.count }.not_to raise_error
+      end
+    end
+  end
+
+  context "when the caller has made the answer text check immediate" do
+    let(:question) { create(:question, topic: topic) }
+
+    before do
+      check_deferred_constraints!
+      question.answers.build(text: "Lyon")
+      question.save!
+    end
+
+    it "leaves it immediate" do
+      expect { create(:answer, question: question, text: "Lyon") }.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+  end
+
+  context "when a question is created" do
+    let(:statements) { [] }
+
+    before do
+      record = ->(*, payload) { statements << payload[:sql] }
+      ActiveSupport::Notifications.subscribed(record, "sql.active_record") { create(:question, topic: topic) }
+    end
+
+    it "runs no answer text check" do
+      expect(statements.grep(/SET CONSTRAINTS/)).to be_empty
+    end
+  end
+
+  context "when another question's repeat is pending in the same transaction" do
+    let(:other_question) { create(:question, topic: topic) }
+    let(:question) { create(:question, topic: topic) }
+
+    before do
+      other_question.answers.first.update!(text: "Rome")
+      question
+    end
+
+    it "raises it rather than blaming this question" do
+      described_class.transaction do
+        create(:answer, question: other_question, text: "Rome")
+        question.answers.build(text: "Paris")
+        expect { question.save }.to raise_error(ActiveRecord::RecordNotUnique)
+        expect(question.errors).to be_empty
+      end
+    end
+  end
+
+  context "when a save writes no answer text" do
+    let!(:question) { create(:question, topic: topic) }
+    let(:statements) { [] }
+
+    before do
+      record = ->(*, payload) { statements << payload[:sql] }
+      ActiveSupport::Notifications.subscribed(record, "sql.active_record") { question.update!(active: false) }
+    end
+
+    it "runs no answer text check" do
+      expect(statements.grep(/SET CONSTRAINTS/)).to be_empty
+    end
+  end
+
+  context "with a stored option carrying stray whitespace" do
+    let(:question) { create(:question, topic: topic) }
+
+    before do
+      # Raw SQL, since any write through the model normalises
+      described_class.connection.execute("UPDATE answers SET text = ' Paris' WHERE question_id = #{question.id}")
+      question.reload.answers.build(text: "Paris")
+    end
+
+    it "counts a new copy as a repeat" do
+      expect(question).to be_invalid
+      expect(question.errors[:base]).to include("Answers must be different from each other")
+    end
+  end
+
+  context "when another unique index refuses the save" do
+    before do
+      described_class.connection.execute("CREATE UNIQUE INDEX one_question_per_topic ON questions (topic_id)")
+      create(:question, topic: topic)
+    end
+
+    it "raises rather than blaming the answers" do
+      expect { build(:question, topic: topic).save }.to raise_error(ActiveRecord::RecordNotUnique)
     end
   end
 

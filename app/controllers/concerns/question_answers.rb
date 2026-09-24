@@ -32,7 +32,7 @@ module QuestionAnswers
   end
 
   def boolean_label(answer)
-    BOOLEAN_LABELS.find { |label| label.casecmp?(answer.text.to_s.strip) }
+    BOOLEAN_LABELS.find { |label| label.casecmp?(Answer.normalize_value_for(:text, answer.text.to_s)) }
   end
 
   # Labels by meaning, so each answer keeps its correct flag; only answers
