@@ -68,7 +68,8 @@ class Quiz::CheckAnswer < ApplicationCommand
     @correct = verdict
     @answered_at = Time.current
 
-    # A row answered before answered_at existed carries only its verdict
+    # A row answered before answered_at existed carries only its verdict; correct: nil
+    # can go once asked_questions:count_uncounted has given every such row an answered_at
     AskedQuestion.where(id: @asked_question.id, answered_at: nil, correct: nil)
       .update_all(correct: @correct, answer_id: chosen_answer&.id, response: {text: response_text},
         answered_at: @answered_at, updated_at: @answered_at) == 1
