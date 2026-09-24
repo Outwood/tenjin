@@ -3,6 +3,6 @@
 namespace :maintenance do
   desc "Run regular jobs"
   task regular_jobs: :environment do
-    UpdateQuestionStatisticsJob.perform_later
+    DeactivateStaleQuizzesJob.perform_later
   end
 end

@@ -15,6 +15,6 @@ namespace :daily_updates do
       Lesson.reset_counters(l.id, :questions)
     end
 
-    UpdateQuestionStatisticsJob.perform_later
+    DeactivateStaleQuizzesJob.perform_later
   end
 end
