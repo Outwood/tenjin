@@ -15,7 +15,7 @@ class Question < ApplicationRecord
 
   has_rich_text :question_text
 
-  enum :question_type, {short_answer: 0, boolean: 1, multiple: 2}
+  enum :question_type, {short_answer: 0, boolean: 1, multiple: 2}, validate: true
 
   def self.counts_by_subject
     joins(topic: :subject).group("topics.subject_id").count
@@ -29,6 +29,7 @@ class Question < ApplicationRecord
   accepts_nested_attributes_for :answers, allow_destroy: true
 
   validates :question_text, presence: true
+  validates :active, inclusion: {in: [true, false]}
   validates_associated :answers
 
   validate :at_least_one_correct_answer

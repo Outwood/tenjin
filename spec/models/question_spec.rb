@@ -16,6 +16,14 @@ RSpec.describe Question, :default_creates do
     it { is_expected.to belong_to(:topic) }
     it { is_expected.to have_many(:answers) }
     it { is_expected.to belong_to(:lesson).optional }
+
+    it "requires a question type" do
+      expect(build(:question, question_type: nil)).to be_invalid
+    end
+
+    it "requires the question to be active or inactive" do
+      expect(build(:question, active: nil)).to be_invalid
+    end
   end
 
   it "does not allow a mismatched lesson and topic" do
