@@ -433,5 +433,36 @@ describe("liveLeaderboard", () => {
       component.setFilter("Class", "All");
       expect(component.winnerLabel()).toBe("Student 1 - 100 points");
     });
+
+    it("names no classroom while the chosen one has no winner", async () => {
+      const { component } = await mount({
+        load: {
+          classrooms: ["10A", "10B"],
+          winners: [["10A", "Student 1", 100]],
+        },
+      });
+
+      component.setFilter("Class", "10B");
+      expect(component.winnerClassroom()).toBeUndefined();
+    });
+
+    it("names the first of the viewer's classrooms with a winner", async () => {
+      const { component } = await mount({
+        load: {
+          user: { ...VIEWER, classrooms: ["10A", "10B"] },
+          classrooms: ["10A", "10B"],
+          winners: [["10B", "Student 2", 90]],
+        },
+      });
+
+      expect(component.winnerClassroom()).toBe("10B");
+      expect(component.winnerLabel()).toBe("Student 2 - 90 points");
+    });
+
+    it("names no classroom while none of the viewer's has a winner", async () => {
+      const { component } = await mount();
+
+      expect(component.winnerClassroom()).toBeUndefined();
+    });
   });
 });

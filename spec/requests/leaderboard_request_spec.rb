@@ -177,6 +177,18 @@ RSpec.describe "leaderboard controller", :default_creates do
       end
     end
 
+    context "with the student also enrolled in another subject" do
+      let!(:other_subject_enrollment) do
+        create(:enrollment, classroom: create(:classroom, school: school), user: student)
+      end
+
+      before { get subject_leaderboard_path(quiz_subject, format: :json), xhr: true }
+
+      it "names only the student's classrooms for the subject" do
+        expect(response.parsed_body.dig("user", "classrooms")).to eq([classroom.name])
+      end
+    end
+
     context "with a classroom winner" do
       let!(:classroom_winner) { create(:classroom_winner, user: student, classroom: classroom, score: 100) }
 

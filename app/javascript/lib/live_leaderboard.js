@@ -242,14 +242,15 @@ Alpine.data("liveLeaderboard", ({ subjectId, topicId, canSeeLiveToggle }) => ({
       : "Class";
   },
 
+  // The chosen classroom while it has a winner, or else the viewer's first that has one
   winnerClassroom() {
+    const hasWinner = (classroom) =>
+      this.winners.some((w) => w[0] === classroom);
     const classFilter = this.currentFilters.find((f) => f.name === "Class");
-    if (classFilter) {
-      return classFilter.option === "All"
-        ? this.user.classrooms?.[0]
-        : classFilter.option;
+    if (classFilter && classFilter.option !== "All") {
+      return hasWinner(classFilter.option) ? classFilter.option : undefined;
     }
-    return this.user.classrooms?.[0];
+    return this.user.classrooms?.find(hasWinner);
   },
 
   winnerLabel() {
