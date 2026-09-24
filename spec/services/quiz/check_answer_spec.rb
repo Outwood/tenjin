@@ -164,8 +164,10 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
         .not_to change { [quiz.reload.attributes.values_at("num_questions_asked", "streak", "answered_correct"), quiz.asked_questions.pluck(:correct)] }
     end
 
-    it "counts the question once" do
-      expect { late_submission.call }.not_to change { QuestionStatistic.find_by!(question: question).number_asked }
+    it "counts the answer once" do
+      expect { late_submission.call }
+        .to not_change { QuestionStatistic.find_by!(question: question).number_asked }
+        .and not_change { UserStatistic.find_by!(user: user, week_beginning: Date.current.beginning_of_week).questions_answered }
     end
   end
 
@@ -336,6 +338,10 @@ RSpec.describe Quiz::CheckAnswer, :default_creates do
 
       it "moves the quiz on once" do
         expect { late_submission.call }.not_to change { quiz.reload.num_questions_asked }
+      end
+
+      it "counts the answer as asked, not correct" do
+        expect(QuestionStatistic.find_by!(question: short_answer_question)).to have_attributes(number_asked: 1, number_correct: 0)
       end
     end
   end

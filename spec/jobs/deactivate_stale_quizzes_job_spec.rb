@@ -11,7 +11,7 @@ RSpec.describe DeactivateStaleQuizzesJob, :default_creates do
     end
   end
 
-  context "with a quiz answered today" do
+  context "with a quiz touched today" do
     let!(:quiz) { create(:quiz, user: student) }
 
     it "leaves it active" do

@@ -21,7 +21,7 @@ class Quiz::CheckAnswer < ApplicationCommand
         score_answer
         Quiz::MoveQuizForward.call(quiz: @quiz)
         @quiz.save!
-        # Last, so the statistics row other pupils share stays locked only until commit
+        # Last, so the statistics row other pupils share is locked for the least time
         Quiz::CountAnswer.call(question_id: @question.id, user_id: @quiz.user_id, correct: @correct,
           answered_at: @answered_at)
       else
