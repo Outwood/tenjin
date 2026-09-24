@@ -84,4 +84,4 @@ the digest flip is reverted; "a legacy sgid" silently changes referent.
 
 ## Commits and pull requests
 
-Every commit subject and PR title carries a Conventional Commits prefix, an imperative verb, and at most 70 characters. The repository squash-merges from the PR title, so an unprefixed title lands on `master` and cannot be fixed without a force-push the ruleset forbids. Before writing a commit message, PR title, or PR description, invoke the `commit-conventions` skill for the prefix table, body rules, and description format.
+Every commit subject and PR title carries a Conventional Commits prefix, an imperative verb, and at most 70 characters. The repository squash-merges from the PR title, so an unprefixed title lands on `main` and cannot be fixed without a force-push the ruleset forbids. Before writing a commit message, PR title, or PR description, invoke the `commit-conventions` skill for the prefix table, body rules, and description format.
