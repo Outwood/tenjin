@@ -47,9 +47,11 @@ class Question < ApplicationRecord
     # Check for the presence of both true and false in two answers in a case insensitive search
     return errors.add :base, "Boolean question must contain two answers" unless answer_text.size == 2
 
-    return if answer_text.map(&:downcase).sort == %w[false true]
+    labels = answer_text.map(&:downcase)
+    return if labels.sort == %w[false true]
+    return errors.add :base, "Boolean must be true or false only" unless labels.all? { |label| %w[true false].include?(label) }
 
-    errors.add :base, "Boolean must be true or false only"
+    errors.add :base, "Boolean question must have one True and one False answer"
   end
 
   def answers_distinct
@@ -83,11 +85,12 @@ class Question < ApplicationRecord
 
   # The constraint waits for commit so a save can swap two options' texts.
   # Checking once every answer is written turns a repeat another save
-  # committed first into the validation error, inside this save. The
+  # committed first into the validation error, inside this save. A new
+  # question's answers can only repeat each other, which validation catches. The
   # savepoint is rolled back either way, which keeps the caller's
   # transaction usable and its constraint mode as it was.
   def check_answer_texts_now
-    return unless @writes_answer_text
+    return unless @writes_answer_text && !previously_new_record?
 
     self.class.transaction(requires_new: true) do
       self.class.connection.execute("SET CONSTRAINTS #{Answer::TEXT_CONSTRAINT} IMMEDIATE")
@@ -107,9 +110,14 @@ class Question < ApplicationRecord
     end
   end
 
+  # The check fires for every row the transaction has pending, so the
+  # violated key must be this question's before the repeat is claimed
   def answer_text_repeat?(error)
-    error.cause.respond_to?(:result) &&
-      error.cause.result.error_field(PG::Result::PG_DIAG_CONSTRAINT_NAME) == Answer::TEXT_CONSTRAINT
+    return false unless error.cause.respond_to?(:result)
+
+    result = error.cause.result
+    result.error_field(PG::Result::PG_DIAG_CONSTRAINT_NAME) == Answer::TEXT_CONSTRAINT &&
+      result.error_field(PG::Result::PG_DIAG_MESSAGE_DETAIL).to_s[/\(question_id, text\)=\((\d+),/, 1] == id.to_s
   end
 
   # Answers removed through nested attributes stay loaded until the save

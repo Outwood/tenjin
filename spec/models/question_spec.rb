@@ -64,8 +64,9 @@ RSpec.describe Question, :default_creates do
         boolean_question.answers.last.text = "true"
       end
 
-      it "is invalid" do
+      it "asks for one of each" do
         expect(boolean_question).to be_invalid
+        expect(boolean_question.errors[:base]).to contain_exactly("Boolean question must have one True and one False answer")
       end
     end
 
@@ -198,6 +199,38 @@ RSpec.describe Question, :default_creates do
 
     it "leaves it immediate" do
       expect { create(:answer, question: question, text: "Lyon") }.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+  end
+
+  context "when a question is created" do
+    let(:statements) { [] }
+
+    before do
+      record = ->(*, payload) { statements << payload[:sql] }
+      ActiveSupport::Notifications.subscribed(record, "sql.active_record") { create(:question, topic: topic) }
+    end
+
+    it "runs no answer text check" do
+      expect(statements.grep(/SET CONSTRAINTS/)).to be_empty
+    end
+  end
+
+  context "when another question's repeat is pending in the same transaction" do
+    let(:other_question) { create(:question, topic: topic) }
+    let(:question) { create(:question, topic: topic) }
+
+    before do
+      other_question.answers.first.update!(text: "Rome")
+      question
+    end
+
+    it "raises it rather than blaming this question" do
+      described_class.transaction do
+        create(:answer, question: other_question, text: "Rome")
+        question.answers.build(text: "Paris")
+        expect { question.save }.to raise_error(ActiveRecord::RecordNotUnique)
+        expect(question.errors).to be_empty
+      end
     end
   end
 

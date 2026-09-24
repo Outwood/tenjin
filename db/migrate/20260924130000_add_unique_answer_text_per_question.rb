@@ -18,6 +18,9 @@ class AddUniqueAnswerTextPerQuestion < ActiveRecord::Migration[7.2]
   # constraint cannot see the type.
   INDEX = "answers_question_id_text"
 
+  # Question.question_types["short_answer"]
+  SHORT_ANSWER = 0
+
   def up
     refuse_colliding_answers
 
@@ -40,9 +43,12 @@ class AddUniqueAnswerTextPerQuestion < ActiveRecord::Migration[7.2]
   # Texts stay normalised.
   def down
     add_index :answers, :question_id, algorithm: :concurrently, if_not_exists: true
+    execute "SET lock_timeout TO '10s'"
     remove_unique_constraint :answers, name: INDEX if unique_constraint?
     # An up that failed between building the index and attaching it
     remove_index :answers, name: INDEX, algorithm: :concurrently, if_exists: true
+  ensure
+    execute "RESET lock_timeout"
   end
 
   private
@@ -51,21 +57,23 @@ class AddUniqueAnswerTextPerQuestion < ActiveRecord::Migration[7.2]
   # left to a person; the texts are untouched when this refuses. Short
   # answers that differ only in case are refused too: the constraint would
   # take them, but Question's validation would then refuse every later save
-  # of the question.
+  # of the question. The keys are built in Ruby, as Question builds them,
+  # because Postgres's lower() folds case differently ("Straße").
   def refuse_colliding_answers
-    collisions = select_rows(<<~SQL)
-      SELECT answers.question_id, string_agg(answers.id::text, ', ' ORDER BY answers.id)
+    rows = select_rows(<<~SQL)
+      SELECT answers.id, answers.question_id, questions.question_type, answers.text
       FROM answers JOIN questions ON questions.id = answers.question_id
       WHERE answers.text IS NOT NULL
-      GROUP BY answers.question_id,
-        CASE WHEN questions.question_type = 0 THEN lower(#{SQUISHED_TEXT}) ELSE #{SQUISHED_TEXT} END
-      HAVING count(*) > 1
-      ORDER BY answers.question_id
     SQL
+    groups = rows.group_by do |_id, question, type, text|
+      key = text.squish
+      [question, (type.to_i == SHORT_ANSWER) ? key.downcase(:fold) : key]
+    end
+    collisions = groups.select { |_key, answers| answers.size > 1 }.sort_by { |(question, _), _| question.to_i }
     return if collisions.empty?
 
     raise "Answers that repeat once their whitespace is collapsed, or for a short answer their case ignored: " +
-      collisions.map { |question, answers| "question #{question} (answers #{answers})" }.join("; ")
+      collisions.map { |(question, _), answers| "question #{question} (answers #{answers.map(&:first).join(", ")})" }.join("; ")
   end
 
   # A failed concurrent build leaves an INVALID index behind; it is rebuilt,
