@@ -48,18 +48,23 @@ class AddUniqueAnswerTextPerQuestion < ActiveRecord::Migration[7.2]
   private
 
   # Deleting either copy is a judgement about which one is right, so it is
-  # left to a person; the texts are untouched when this refuses.
+  # left to a person; the texts are untouched when this refuses. Short
+  # answers that differ only in case are refused too: the constraint would
+  # take them, but Question's validation would then refuse every later save
+  # of the question.
   def refuse_colliding_answers
     collisions = select_rows(<<~SQL)
-      SELECT question_id, string_agg(id::text, ', ' ORDER BY id)
-      FROM answers
-      GROUP BY question_id, #{SQUISHED_TEXT}
+      SELECT answers.question_id, string_agg(answers.id::text, ', ' ORDER BY answers.id)
+      FROM answers JOIN questions ON questions.id = answers.question_id
+      WHERE answers.text IS NOT NULL
+      GROUP BY answers.question_id,
+        CASE WHEN questions.question_type = 0 THEN lower(#{SQUISHED_TEXT}) ELSE #{SQUISHED_TEXT} END
       HAVING count(*) > 1
-      ORDER BY question_id
+      ORDER BY answers.question_id
     SQL
     return if collisions.empty?
 
-    raise "Answers that repeat once their whitespace is collapsed: " +
+    raise "Answers that repeat once their whitespace is collapsed, or for a short answer their case ignored: " +
       collisions.map { |question, answers| "question #{question} (answers #{answers})" }.join("; ")
   end
 

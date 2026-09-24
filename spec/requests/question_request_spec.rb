@@ -118,6 +118,23 @@ RSpec.describe "questions controller", :default_creates do
       end
     end
 
+    context "with a boolean question whose stored labels carry stray whitespace" do
+      let(:question) { create(:boolean_question, topic: topic) }
+
+      before do
+        # Raw SQL, since any write through the model normalises; the True answer is the older
+        Answer.connection.execute(
+          "UPDATE answers SET text = CASE WHEN correct THEN ' TRUE ' ELSE ' FALSE' END WHERE question_id = #{question.id}"
+        )
+        get edit_question_path(question)
+      end
+
+      it "ticks the answer labelled True" do
+        expect(Capybara.string(response.body))
+          .to have_css(ticked_answer("True")).and have_no_css(ticked_answer("False"))
+      end
+    end
+
     context "when previewing as boolean a question with one True answer" do
       before do
         question.answers.first.update_columns(text: "True")

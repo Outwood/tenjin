@@ -177,6 +177,57 @@ RSpec.describe Question, :default_creates do
       stale_copy.answers.build(text: "Paris")
       expect { stale_copy.save! }.to raise_error(ActiveRecord::RecordInvalid, /Answers must be different/)
     end
+
+    it "leaves a surrounding transaction usable" do
+      described_class.transaction do
+        stale_copy.answers.build(text: "Paris")
+        stale_copy.save
+        expect { described_class.count }.not_to raise_error
+      end
+    end
+  end
+
+  context "when the caller has made the answer text check immediate" do
+    let(:question) { create(:question, topic: topic) }
+
+    before do
+      check_deferred_constraints!
+      question.answers.build(text: "Lyon")
+      question.save!
+    end
+
+    it "leaves it immediate" do
+      expect { create(:answer, question: question, text: "Lyon") }.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+  end
+
+  context "when a save writes no answer text" do
+    let!(:question) { create(:question, topic: topic) }
+    let(:statements) { [] }
+
+    before do
+      record = ->(*, payload) { statements << payload[:sql] }
+      ActiveSupport::Notifications.subscribed(record, "sql.active_record") { question.update!(active: false) }
+    end
+
+    it "runs no answer text check" do
+      expect(statements.grep(/SET CONSTRAINTS/)).to be_empty
+    end
+  end
+
+  context "with a stored option carrying stray whitespace" do
+    let(:question) { create(:question, topic: topic) }
+
+    before do
+      # Raw SQL, since any write through the model normalises
+      described_class.connection.execute("UPDATE answers SET text = ' Paris' WHERE question_id = #{question.id}")
+      question.reload.answers.build(text: "Paris")
+    end
+
+    it "counts a new copy as a repeat" do
+      expect(question).to be_invalid
+      expect(question.errors[:base]).to include("Answers must be different from each other")
+    end
   end
 
   context "when another unique index refuses the save" do

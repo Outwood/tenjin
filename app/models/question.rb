@@ -22,6 +22,7 @@ class Question < ApplicationRecord
   end
 
   before_update :check_boolean
+  before_save :note_answer_text_writes
   after_save :check_answer_texts_now
   before_update :check_short_answer
 
@@ -62,26 +63,6 @@ class Question < ApplicationRecord
     errors.add :base, "Question must have at least one correct answer."
   end
 
-  # Another save can commit the same answer after this one validated; the
-  # unique constraint then refuses it, and it reads as the validation error
-  def save(...)
-    super
-  rescue ActiveRecord::RecordNotUnique => e
-    raise unless answer_text_repeat?(e)
-
-    errors.add :base, ANSWERS_REPEAT
-    false
-  end
-
-  def save!(...)
-    super
-  rescue ActiveRecord::RecordNotUnique => e
-    raise unless answer_text_repeat?(e)
-
-    errors.add :base, ANSWERS_REPEAT
-    raise ActiveRecord::RecordInvalid, self
-  end
-
   def as_json(*)
     json = {question_text: question_text.body,
             question_type: question_type,
@@ -93,17 +74,37 @@ class Question < ApplicationRecord
   private
 
   # Options show as typed, so case tells them apart; a short answer is
-  # checked ignoring case, as Quiz::CheckAnswer compares it
+  # checked ignoring case, as Quiz::CheckAnswer compares it. A text written
+  # around the model is stored as given, so it is normalised here too.
   def answer_key(text)
-    short_answer? ? text.downcase(:fold) : text
+    key = Answer.normalize_value_for(:text, text)
+    short_answer? ? key.downcase(:fold) : key
   end
 
-  # The constraint waits for commit so a save can swap two options' texts;
-  # checking once every answer is written keeps a repeat inside this save,
-  # whatever transaction wraps it
+  # The constraint waits for commit so a save can swap two options' texts.
+  # Checking once every answer is written turns a repeat another save
+  # committed first into the validation error, inside this save. The
+  # savepoint is rolled back either way, which keeps the caller's
+  # transaction usable and its constraint mode as it was.
   def check_answer_texts_now
-    self.class.connection.execute("SET CONSTRAINTS #{Answer::TEXT_CONSTRAINT} IMMEDIATE")
-    self.class.connection.execute("SET CONSTRAINTS #{Answer::TEXT_CONSTRAINT} DEFERRED")
+    return unless @writes_answer_text
+
+    self.class.transaction(requires_new: true) do
+      self.class.connection.execute("SET CONSTRAINTS #{Answer::TEXT_CONSTRAINT} IMMEDIATE")
+      raise ActiveRecord::Rollback
+    end
+  rescue ActiveRecord::RecordNotUnique => e
+    raise unless answer_text_repeat?(e)
+
+    errors.add :base, ANSWERS_REPEAT
+    raise ActiveRecord::RecordInvalid, self
+  end
+
+  # Only answers already loaded can be written by this save
+  def note_answer_text_writes
+    @writes_answer_text = answers.target.any? do |answer|
+      !answer.marked_for_destruction? && (answer.new_record? || answer.text_changed?)
+    end
   end
 
   def answer_text_repeat?(error)
