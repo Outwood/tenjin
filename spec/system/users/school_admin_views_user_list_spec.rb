@@ -11,7 +11,7 @@ RSpec.describe "School admin views user list", :default_creates, :js do
   end
 
   describe "the Reset Password link" do
-    # One smoke for the password-reset Stimulus controller, which the employee table shares;
+    # One smoke for the password-reset Stimulus controller, which the employee table and classroom page share;
     # the password the action returns is covered in spec/requests/users_request_spec.rb
     it "replaces the Reset Password link with the new password" do
       within "#students-table" do
@@ -22,7 +22,7 @@ RSpec.describe "School admin views user list", :default_creates, :js do
   end
 
   describe "the student table" do
-    # Tabulator smoke; which users each table lists is covered in spec/requests/users_request_spec.rb
+    # Tabulator smoke, for the classroom page too; which users each table lists is covered in spec/requests/users_request_spec.rb
     context "with more than one page of students" do
       before do
         student.update!(surname: "Zzzqx")
