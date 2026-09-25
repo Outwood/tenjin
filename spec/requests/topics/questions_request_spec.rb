@@ -248,4 +248,14 @@ RSpec.describe "topic questions controller", :default_creates do
       end
     end
   end
+  describe "GET /topics/:topic_id/questions with a question saved without text" do
+    let!(:question) { create(:question, :without_text, topic: topic) }
+
+    before { get topic_questions_path(topic) }
+
+    it "links it to its editor under a placeholder" do
+      expect(Capybara.string(response.body))
+        .to have_link("(no question text)", href: edit_question_path(question))
+    end
+  end
 end
