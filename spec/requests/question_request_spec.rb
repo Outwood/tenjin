@@ -536,6 +536,20 @@ RSpec.describe "questions controller", :default_creates do
         )
       end
     end
+
+    context "when switching a question with one correct answer to boolean" do
+      let!(:correct_answer) { super() }
+      let!(:incorrect_answer) { create(:answer, question: question, correct: false) }
+
+      before { patch question_path(question), params: {question: {question_type: "boolean"}} }
+
+      it "keeps its answers, relabelled, with the correct one still correct" do
+        expect(question.answers.reload).to contain_exactly(
+          have_attributes(id: correct_answer.id, text: "False", correct: true),
+          have_attributes(id: incorrect_answer.id, text: "True", correct: false)
+        )
+      end
+    end
   end
 
   describe "DELETE /questions/:id" do
