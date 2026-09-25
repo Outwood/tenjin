@@ -29,7 +29,7 @@ section.page-section.text-center.pt-2#StudentProgress
               td
                 => h.user.forename[0]
                 = h.user.surname
-              td = boolean_icon(h.completed?)
+              td = boolean_icon(h.completed?, yes: "Complete", no: "Not complete")
               td
                 = h.progress.to_s
                 | %

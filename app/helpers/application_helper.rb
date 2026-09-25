@@ -14,12 +14,14 @@ module ApplicationHelper
     FLASH_CLASSES.fetch(type, "alert-warning")
   end
 
-  def boolean_icon(status)
-    if status
-      content_tag(:i, nil, class: "fas fa-check", style: "color:green")
-    else
-      content_tag(:i, nil, class: "fas fa-times", style: "color:red")
-    end
+  # A tick or a cross, named for screen readers by the label for its state
+  def boolean_icon(status, yes: "Yes", no: "No")
+    status ? status_icon("fas fa-check text-success", yes) : status_icon("fas fa-times text-danger", no)
+  end
+
+  # An icon that shows a state, with hidden text naming it
+  def status_icon(icon, label)
+    content_tag(:i, nil, class: icon, aria: {hidden: true}) + content_tag(:span, label, class: "visually-hidden")
   end
 
   # Links a navigation item, marking the current page for both styling and screen readers; css_class is the base class
