@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class ClassroomsController < ApplicationController
+  # The homework each pupil's strip shows, the latest due
+  RECENT_HOMEWORK = 5
+
   before_action :authenticate_user!
 
   def index
@@ -17,9 +20,10 @@ class ClassroomsController < ApplicationController
       .order(:surname, :forename)
     @homeworks = @classroom.homework_counts.preload(:lesson)
 
-    @homework_progress = HomeworkProgress.joins(:homework)
-      .where(homework: @homeworks.pluck(:id))
-      .order("homeworks.due_date desc")
+    # Taken from the table's homeworks, whose topics are already loaded
+    @recent_homeworks = @homeworks.sort_by { |h| [h.due_date, h.id] }.last(RECENT_HOMEWORK)
+    @recent_progress = HomeworkProgress.where(homework_id: @recent_homeworks.map(&:id))
+      .group_by(&:user_id).transform_values { |rows| rows.index_by(&:homework_id) }
   end
 
   def update

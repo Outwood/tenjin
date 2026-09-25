@@ -158,29 +158,43 @@ RSpec.describe "classrooms controller", :default_creates do
       end
     end
 
-    describe "a pupil's homework ticks" do
+    describe "a pupil's homework strip" do
       # Enrolled after the homeworks above, so the pupil has progress only on those set below
       let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
       let(:pupil_row) { "#students-table tr[data-id='#{student.id}']" }
 
-      context "with more homeworks than the row shows" do
+      def slot(homework) = "#{pupil_row} .homework-slot[data-homework='#{homework.id}']"
+
+      context "with more homeworks than the strip holds" do
+        # Due after every homework above, so these six hold the latest due dates
         let!(:pupil_homeworks) do
-          (1..6).map { |days| create(:homework, classroom: classroom, due_date: days.days.from_now) }
+          (10..15).map { |days| create(:homework, classroom: classroom, due_date: days.days.from_now) }
         end
 
         before do
-          pupil_homeworks[4].homework_progresses.find_by!(user: student).update!(completed: true)
+          pupil_homeworks[2].homework_progresses.find_by!(user: student).update!(completed: true)
           get classroom_path(classroom)
         end
 
-        it "shows five" do
-          expect(Capybara.string(response.body)).to have_css("#{pupil_row} i", count: 5)
+        it "shows the five due latest, earliest due first" do
+          expect(Capybara.string(response.body))
+            .to have_css("#{pupil_row} .homework-slot", count: 5)
+            .and have_css("#{pupil_row} .homework-slot:nth-child(1)[data-homework='#{pupil_homeworks[1].id}']")
+            .and have_css("#{pupil_row} .homework-slot:nth-child(5)[data-homework='#{pupil_homeworks[5].id}']")
         end
 
-        it "ticks a completed homework in its place, latest due first" do
+        it "marks a completed homework in its own slot" do
           expect(Capybara.string(response.body))
             .to have_css("#{pupil_row} i.fa-check", count: 1)
-            .and have_css("#{pupil_row} i:nth-child(2).fa-check")
+            .and have_css("#{slot(pupil_homeworks[2])} i.fa-check")
+        end
+      end
+
+      context "with homework set before the pupil joined" do
+        before { get classroom_path(classroom) }
+
+        it "gives it a slot marked as set before they joined" do
+          expect(Capybara.string(response.body)).to have_css("#{slot(homeworks.first)} i.fa-minus")
         end
       end
 
@@ -191,8 +205,10 @@ RSpec.describe "classrooms controller", :default_creates do
 
         before { get classroom_path(classroom) }
 
-        it "leaves it off the pupil's row" do
-          expect(Capybara.string(response.body)).to have_css(pupil_row).and have_no_css("#{pupil_row} i")
+        it "leaves it off the pupil's strip" do
+          expect(Capybara.string(response.body))
+            .to have_css(slot(homeworks.first))
+            .and have_no_css(slot(other_homework))
         end
       end
     end

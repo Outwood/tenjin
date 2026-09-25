@@ -36,15 +36,19 @@
   section.mb-5#students aria-labelledby='students-heading'
     h2.mb-3#students-heading Students
     / Names stay put on a narrow screen and the rest fold under each row. Folded columns
-      still copy and download, so an export has the same columns at any width.
+      still copy and download, so an export has the same columns at any width. The homework
+      strip exports nothing, since its text is the hidden labels run together.
     - export = { clipboard: true, download: true }
     - students_table_options = { pagination: false,
+        searchFields: %w[first_name last_name username],
         responsiveLayout: 'collapse',
         columns: [{ title: 'First Name', field: 'first_name', minWidth: 120, responsive: 0 },
           { title: 'Last Name', field: 'last_name', minWidth: 120, responsive: 0 },
           { title: 'Username', field: 'username', minWidth: 140, responsive: 2, **export },
           { title: 'Reset Password', field: 'reset_password', minWidth: 190, responsive: 1, **export },
-          { title: 'Homeworks', field: 'homeworks', minWidth: 140, responsive: 3, **export }] }.to_json
+          { title: 'Recent homework', field: 'recent_homework', minWidth: 150, responsive: 3,
+            headerSort: false, headerTooltip: 'The five homework due latest, earliest due first',
+            clipboard: false, download: false }] }.to_json
     div data-controller='datatable' data-datatable-options-value=students_table_options
       .d-flex.flex-wrap.gap-2
         .flex-grow-1 = render 'shared/table_search', label: 'Search students'
@@ -58,7 +62,7 @@
             th Last Name
             th Username
             th Reset Password
-            th Homeworks
+            th Recent homework
         tbody
           - @students.each do |s|
             tr.student-data data-id=s.id
@@ -68,5 +72,4 @@
               td = link_to('Reset Password', user_password_reset_path(s),
                 class: 'btn btn-dark reset-password reset-password-student',
                 data: { controller: 'password-reset', action: 'click->password-reset#reset' })
-              td = link_to(s) do
-                ==student_homeworks(s, @homework_progress)
+              td = homework_strip(@recent_homeworks, @recent_progress.fetch(s.id, {}))
