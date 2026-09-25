@@ -22,15 +22,29 @@ class Classroom < ApplicationRecord
     c
   end
 
-  # Left join so homework set on a class with no pupils still counts, as 0 of 0
+  # Counts only the pupils in the class now: one who leaves or moves class keeps their progress rows
   def homework_counts
     h_count = HomeworkProgress.arel_table[:id].count
 
     Homework.select(:id, h_count, homework_count_completed.sum.as("completed_count"), :due_date, :topic_id, :lesson_id)
-      .left_joins(:homework_progresses)
+      .joins(current_pupil_progress_join)
       .group(:id)
       .where(classroom: self)
       .preload(:topic)
+  end
+
+  private
+
+  # Left join, with the enrolment test in its condition, so homework set on a class
+  # with no pupils still counts, as 0 of 0
+  def current_pupil_progress_join
+    homeworks = Homework.arel_table
+    progresses = HomeworkProgress.arel_table
+    current_pupils = enrollments.select(:user_id).arel
+
+    homeworks.join(progresses, Arel::Nodes::OuterJoin)
+      .on(progresses[:homework_id].eq(homeworks[:id]).and(progresses[:user_id].in(current_pupils)))
+      .join_sources
   end
 
   def homework_count_completed
