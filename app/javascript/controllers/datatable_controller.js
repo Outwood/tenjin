@@ -1,26 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
-
-// Custom sorter for UK datetime strings like "DD/MM/YY HH:MM".
-// Tabulator defaults to a string sort which compares char-by-char and
-// breaks across year boundaries.
-const ukDateTimeSorter = (a, b) => {
-  const parse = (s) => {
-    const m = /^(\d{2})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2})$/.exec(s || "");
-    if (!m) return 0;
-    const [, d, mo, y, h, mi] = m;
-    return Date.UTC(
-      2000 + parseInt(y, 10),
-      parseInt(mo, 10) - 1,
-      parseInt(d, 10),
-      parseInt(h, 10),
-      parseInt(mi, 10),
-    );
-  };
-  return parse(a) - parse(b);
-};
-
-const namedSorters = { ukDateTime: ukDateTimeSorter };
+import * as namedSorters from "../lib/table_sorters";
 
 // Field name Tabulator will use to store each row's original source-DOM
 // position. Tabulator's HTML importer assigns `item[options.index] = i`
