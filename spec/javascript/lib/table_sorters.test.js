@@ -1,6 +1,31 @@
 // The named sorters a datatable column can ask for
 
-import { percent } from "../../../app/javascript/lib/table_sorters";
+import { percent, ukDateTime } from "../../../app/javascript/lib/table_sorters";
+
+describe("ukDateTime", () => {
+  const sorted = (values) => [...values].sort(ukDateTime);
+
+  it("orders across a year boundary", () => {
+    expect(sorted(["02/01/26 09:00", "31/12/25 09:00"])).toEqual([
+      "31/12/25 09:00",
+      "02/01/26 09:00",
+    ]);
+  });
+
+  it("orders across a month boundary", () => {
+    expect(sorted(["01/10/26 09:00", "30/09/26 09:00"])).toEqual([
+      "30/09/26 09:00",
+      "01/10/26 09:00",
+    ]);
+  });
+
+  it("puts a value it cannot parse below every date", () => {
+    expect(sorted(["01/01/00 00:00", "no date"])).toEqual([
+      "no date",
+      "01/01/00 00:00",
+    ]);
+  });
+});
 
 describe("percent", () => {
   const sorted = (values) => [...values].sort(percent);
