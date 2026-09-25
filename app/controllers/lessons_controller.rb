@@ -65,8 +65,10 @@ class LessonsController < ApplicationController
   # One query for new, edit and the invalid re-render: TopicPolicy scopes by
   # question_author, a role a lesson author need not hold. A lesson already in
   # an inactive topic keeps it on offer, or the form would post a different one.
+  # Loading through the association hands each topic its subject, which
+  # authorizing a new lesson reads.
   def topics_for(subject, current: nil)
-    Topic.where(active: true, subject: subject).or(Topic.where(id: current)).order(:name)
+    subject.topics.where(active: true).or(subject.topics.where(id: current)).order(:name)
   end
 
   def save_lesson
