@@ -13,9 +13,13 @@ export default class extends Controller {
     "resultStep",
     "password",
     "copyButton",
+    "resetButton",
+    "dismiss",
   ];
 
   confirm({ params: { url, name } }) {
+    // The modal cannot close while a reset waits, but a menu can still be reached by keyboard
+    if (this.pending) return;
     this.url = url;
     this.name = name;
     this.titleTarget.textContent = `Reset ${name}'s password?`;
@@ -25,22 +29,29 @@ export default class extends Controller {
     Modal.getOrCreateInstance(this.modalTarget).show();
   }
 
+  // Closing mid-reset would lose the new password, or let another user's
+  // confirmation take its place and show it under their name
+  holdOpen(event) {
+    if (this.pending) event.preventDefault();
+  }
+
   async reset() {
     // A second click before the first answers would reset the password again
     if (this.pending) return;
-    this.pending = true;
+    const { url, name } = this;
+    this.#setPending(true);
     try {
-      const response = await csrfFetch(this.url, { method: "POST" });
+      const response = await csrfFetch(url, { method: "POST" });
       const body = await response.json().catch(() => ({}));
       if (response.ok) {
-        this.#showPassword(body.password);
+        this.#showPassword(name, body.password);
       } else {
         this.#showError(body.errors?.join(", ") || "Password reset failed");
       }
     } catch {
       this.#showError("Password reset failed");
     } finally {
-      this.pending = false;
+      this.#setPending(false);
     }
   }
 
@@ -49,8 +60,18 @@ export default class extends Controller {
     this.copyButtonTarget.textContent = "Copied";
   }
 
-  #showPassword(password) {
-    this.titleTarget.textContent = `New password for ${this.name}`;
+  #setPending(pending) {
+    this.pending = pending;
+    this.resetLabel ??= this.resetButtonTarget.textContent;
+    this.resetButtonTarget.textContent = pending
+      ? "Resetting…"
+      : this.resetLabel;
+    this.resetButtonTarget.disabled = pending;
+    this.dismissTargets.forEach((button) => (button.disabled = pending));
+  }
+
+  #showPassword(name, password) {
+    this.titleTarget.textContent = `New password for ${name}`;
     this.passwordTarget.textContent = password;
     this.copyButtonTarget.textContent = "Copy";
     this.confirmStepTarget.hidden = true;

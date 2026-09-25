@@ -24,11 +24,14 @@ const FIXTURE = `
   <div data-controller="password-reset">
     ${menuItem(1, "Ada Lovelace")}
     ${menuItem(2, "Alan Turing")}
-    <div data-password-reset-target="modal">
+    <div data-password-reset-target="modal" data-action="hide.bs.modal->password-reset#holdOpen">
       <h2 data-password-reset-target="title"></h2>
+      <button type="button" id="close" data-password-reset-target="dismiss">Close</button>
       <div data-password-reset-target="confirmStep">
         <p data-password-reset-target="error" hidden></p>
-        <button type="button" id="confirm" data-action="password-reset#reset">Reset password</button>
+        <button type="button" id="cancel" data-password-reset-target="dismiss">Cancel</button>
+        <button type="button" id="confirm" data-password-reset-target="resetButton"
+          data-action="password-reset#reset">Reset password</button>
       </div>
       <div data-password-reset-target="resultStep" hidden>
         <p data-password-reset-target="password"></p>
@@ -55,6 +58,27 @@ describe("password-reset", () => {
 
   function answer(ok, body) {
     csrfFetch.mockResolvedValue({ ok, json: async () => body });
+  }
+
+  // A reply held back until the test releases it, as on a slow connection
+  function slowAnswer(body) {
+    let release;
+    csrfFetch.mockReturnValue(
+      new Promise((resolve) => {
+        release = () => resolve({ ok: true, json: async () => body });
+      }),
+    );
+    return async () => {
+      release();
+      await flush();
+    };
+  }
+
+  // Whether Bootstrap would be allowed to close the modal
+  function closable() {
+    const hide = new Event("hide.bs.modal", { cancelable: true });
+    target("modal").dispatchEvent(hide);
+    return !hide.defaultPrevented;
   }
 
   beforeEach(async () => {
@@ -133,5 +157,52 @@ describe("password-reset", () => {
 
     expect(writeText).toHaveBeenCalledWith("swift-otter-42");
     expect($("#copy").textContent).toBe("Copied");
+  });
+
+  describe("while a reset waits for its reply", () => {
+    let release;
+
+    beforeEach(async () => {
+      release = slowAnswer({ password: "swift-otter-42" });
+      await click("#reset-1");
+      await click("#confirm");
+    });
+
+    it("keeps the modal open until the reply arrives", async () => {
+      expect(closable()).toBe(false);
+
+      await release();
+
+      expect(closable()).toBe(true);
+    });
+
+    it("says the reset is under way and disables every way out", () => {
+      expect($("#confirm").disabled).toBe(true);
+      expect($("#confirm").textContent).toBe("Resetting…");
+      expect($("#cancel").disabled).toBe(true);
+      expect($("#close").disabled).toBe(true);
+    });
+
+    it("shows the reply under the name it was sent for, whoever is chosen meanwhile", async () => {
+      await click("#reset-2");
+
+      expect(target("title").textContent).toBe(
+        "Reset Ada Lovelace's password?",
+      );
+
+      await release();
+
+      expect(target("title").textContent).toBe("New password for Ada Lovelace");
+      expect(target("password").textContent).toBe("swift-otter-42");
+    });
+
+    it("gives the next user a working confirmation", async () => {
+      await release();
+      await click("#reset-2");
+
+      expect($("#confirm").disabled).toBe(false);
+      expect($("#confirm").textContent).toBe("Reset password");
+      expect($("#cancel").disabled).toBe(false);
+    });
   });
 });
