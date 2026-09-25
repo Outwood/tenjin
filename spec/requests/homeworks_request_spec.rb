@@ -69,6 +69,7 @@ RSpec.describe "homeworks controller", :default_creates do
       it "sets no homework and re-renders the form with the error" do
         expect { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(due_date: 1.day.ago)} }
           .not_to change(Homework, :count)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Capybara.string(response.body)).to have_css("form", text: "can't be in the past")
       end
     end

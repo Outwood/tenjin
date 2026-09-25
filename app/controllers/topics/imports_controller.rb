@@ -12,7 +12,7 @@ module Topics
     def create
       if params[:file].nil?
         flash.now[:alert] = "Please attach a file"
-        return render :new
+        return render :new, status: :unprocessable_content
       end
 
       case Question::ImportQuestions.call(data: params[:file].read, topic: @topic, filename: params[:file].original_filename)

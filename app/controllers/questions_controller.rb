@@ -28,7 +28,7 @@ class QuestionsController < ApplicationController
     if @question.save
       redirect_to edit_question_path(@question), notice: "Question successfully updated"
     else
-      render :edit
+      render :edit, status: :unprocessable_content
     end
   end
 
