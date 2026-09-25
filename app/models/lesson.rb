@@ -35,6 +35,8 @@ class Lesson < ApplicationRecord
 
   before_destroy { |record| Question.where(lesson: record).update_all(lesson_id: nil) }
 
+  normalizes :title, with: ->(title) { title.squish }
+
   validates :title, length: {minimum: 3}
   validate :check_video_link
   validate :topic_kept_by_questions, on: :update
