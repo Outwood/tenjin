@@ -14,8 +14,9 @@ export default class extends Controller {
     this.element.requestSubmit();
   }
 
-  // A submission Turbo abandoned for a newer one answers with no verdict, so
-  // the fields stay as they are for the newer write to settle
+  // Turbo abandons a submission in flight when any form on the page submits,
+  // and the abandoned one answers with no verdict. Only a newer write from
+  // this form settles it, so fields that save together belong in one form.
   settle(event) {
     if (event.detail.success === true) {
       this.accepted = this.#snapshot();

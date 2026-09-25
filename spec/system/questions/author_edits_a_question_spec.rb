@@ -21,11 +21,15 @@ RSpec.describe "Author edits a question", :default_creates do
       expect(page).to have_select("Default lesson", selected: "Photosynthesis")
     end
 
-    it "renames the page's heading once the name saves" do
+    # Latency keeps the rename in flight when the lesson changes, which is when Turbo cancels it
+    it "settles a rename and a lesson change made in quick succession" do
+      page.driver.browser.network.emulate_network_conditions(latency: 500)
       fill_in "Name", with: "Plant nutrition"
-      find_field("Name").send_keys(:tab)
-      expect(page).to have_css("h1", exact_text: "Plant nutrition")
+      select "Photosynthesis", from: "Default lesson"
+      expect(page).to have_css("[role=status]", exact_text: "Saved")
+        .and have_css("h1", exact_text: "Plant nutrition")
         .and have_css(".breadcrumb-item.active", exact_text: "Plant nutrition")
+      expect(page).to have_no_css("[role=status]", text: "Saving")
     end
   end
 
