@@ -10,7 +10,7 @@
       dt.col-sm-3 Times asked
       dd.col-sm-9 = times_asked(@question)
       dt.col-sm-3 Percent correct
-      dd.col-sm-9 = times_asked(@question).zero? ? 'Not asked yet' : percentage_correct(@question)
+      dd.col-sm-9 = percentage_correct(@question)
       dt.col-sm-3 Flags
       dd.col-sm-9 = @question.flagged_questions.size
     - if @question.flagged_questions.any?

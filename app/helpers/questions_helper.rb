@@ -30,12 +30,12 @@ module QuestionsHelper
     question.persisted? ? question_path(question) : topic_questions_path(question.topic)
   end
 
+  # A question nobody has answered has no score, which "0%" would misreport as all wrong
   def percentage_correct(question)
-    qs = question.question_statistic
-    return "0%" if qs.blank?
-    return "0%" if qs.number_asked.zero?
+    asked = times_asked(question)
+    return "Not asked yet" if asked.zero?
 
-    number_to_percentage((qs.number_correct.to_f / qs.number_asked) * 100, precision: 0)
+    number_to_percentage(question.question_statistic.number_correct.to_f / asked * 100, precision: 0)
   end
 
   def times_asked(question)
