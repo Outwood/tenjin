@@ -42,6 +42,8 @@ class LessonsController < ApplicationController
   def update
     @lesson = authorize find_lesson
     @lesson.assign_attributes(lesson_params)
+    # Once for the subject it leaves, again for the one a new topic moves it to
+    authorize @lesson
     save_lesson
   end
 

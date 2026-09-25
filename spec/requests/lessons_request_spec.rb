@@ -262,6 +262,16 @@ RSpec.describe "lessons controller", :default_creates do
       expect(response).to redirect_to(lessons_path(open: topic.id))
     end
 
+    context "when moving the lesson into a subject the author does not hold" do
+      let(:woodwork_topic) { create(:topic, subject: create(:subject, name: "Woodwork")) }
+
+      it "refuses the move" do
+        expect { patch lesson_path(lesson), params: {lesson: {topic_id: woodwork_topic.id}} }
+          .not_to change { lesson.reload.topic_id }
+        expect(flash[:alert]).to eq("You are not authorized to perform this action.")
+      end
+    end
+
     context "when the details are invalid" do
       let!(:inactive_topic) { create(:topic, subject: quiz_subject, name: "Photosynthesis", active: false) }
 
