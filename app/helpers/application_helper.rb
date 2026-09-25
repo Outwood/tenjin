@@ -40,6 +40,12 @@ module ApplicationHelper
     "background:linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url(#{rails_blob_url(style.image)}) no-repeat;"
   end
 
+  # A CSV download named for what it lists; a class name like 9X/Sc carries a path separator,
+  # which each browser would otherwise replace with a character of its own choosing
+  def csv_filename(name)
+    "#{name.gsub(%r{[/\\:*?"<>|]+}, "-")}.csv"
+  end
+
   def user_class_names(student)
     student.enrollments.map { |e| e.classroom.name }.join(", ")
   end
