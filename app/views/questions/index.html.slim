@@ -1,4 +1,7 @@
+- content_for :title
+  title Questions
 .container
+  h1.mt-3 Questions
   - @subjects.each do |s|
     .d-flex.flex-wrap.align-items-center.justify-content-between.gap-2.my-3
       .display-3 = s.name
