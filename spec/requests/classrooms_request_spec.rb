@@ -172,6 +172,11 @@ RSpec.describe "classrooms controller", :default_creates do
 
       before { get classroom_path(classroom) }
 
+      it "names each pupil's link with their full name, not just the first name it shows" do
+        expect(Capybara.string(response.body))
+          .to have_link("Ada Young", href: user_path(young), enable_aria_label: true)
+      end
+
       it "lists pupils by surname, then forename" do
         expect(Capybara.string(response.body))
           .to have_css("#students-table tbody tr:nth-child(1)[data-id='#{amy_adams.id}']")
