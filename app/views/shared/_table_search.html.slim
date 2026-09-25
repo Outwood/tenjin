@@ -1,4 +1,5 @@
-/ The label names the table searched, since one page can carry two
+/ The label names the table searched, since one page can carry two; the placeholder
+  shows it too, so a sighted user sees which table the box filters
 .mb-2
-  input.form-control[type='search' placeholder='Search…' aria-label=label
+  input.form-control[type='search' placeholder="#{label}…" aria-label=label
     data-datatable-target='search' data-action='input->datatable#filter']
