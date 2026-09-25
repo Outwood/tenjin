@@ -94,6 +94,9 @@ group :development, :test do
   # Create a fake API
   gem "vcr"
 
+  # Run specs across cores; its rake tasks provision the per-worker databases
+  gem "parallel_tests"
+
   # Linting
   gem "slim_lint"
   gem "standard"

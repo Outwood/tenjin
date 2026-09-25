@@ -42,8 +42,17 @@ bin/rails jobs:work
 
 ```bash
 bundle exec rspec        # Ruby
+bin/parallel_specs       # Ruby, across cores
 pnpm test:js             # JavaScript (Jest)
 ```
+
+Parallel runs give each worker its own database. Create them once, and reload their schema after a migration:
+
+```bash
+bin/rails parallel:create parallel:load_schema
+```
+
+`PARALLEL_TEST_PROCESSORS` sets the worker count; the default is one per core, or one per performance core on Apple Silicon. Pass paths or `parallel_rspec` options to `bin/parallel_specs` to run part of the suite.
 
 System specs run against a real Chrome via Cuprite; failure screenshots are saved to `tmp/screenshots/`.
 
