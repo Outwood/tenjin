@@ -1,5 +1,8 @@
-tr
+/ An answer marked for deletion stays in the form, hidden, so the next save deletes it
+tr hidden=f.object.marked_for_destruction?
   td
+    - if f.object.marked_for_destruction?
+      = f.hidden_field(:_destroy)
     = f.text_field(:text, id: "answer-text-#{f.index}",
                     placeholder: "Click here to add answer",
                     class: 'form-control text-answer',
@@ -12,7 +15,7 @@ tr
           class: 'form-check-input')
   - unless @question.boolean?
     td
-      - if @question.persisted?
+      - if f.object.persisted?
         = link_to 'Remove', '#',
           class: 'btn btn-danger',
           data: { object_name: f.object_name, action: 'click->nested-fields#removeRecord' }

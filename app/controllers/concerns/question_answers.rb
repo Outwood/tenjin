@@ -12,8 +12,9 @@ module QuestionAnswers
   end
 
   def setup_boolean_question(question)
-    question.answers.build until question.answers.length >= 2
-    answers = question.answers.to_a
+    # An answer the author has removed stays removed
+    answers = question.answers.reject(&:marked_for_destruction?)
+    (2 - answers.length).times { answers << question.answers.build }
     kept = boolean_answers_to_keep(answers)
     # Marked, not removed: replacing the association deletes them at once, even on a preview
     (answers - kept).each(&:mark_for_destruction)

@@ -135,6 +135,32 @@ RSpec.describe "questions controller", :default_creates do
       end
     end
 
+    context "when previewing as boolean a three-answer question with one answer removed" do
+      let!(:removed_answer) { create(:answer, question: question, correct: false, text: "Paris") }
+      let!(:other_answer) { create(:answer, question: question, correct: false, text: "Rome") }
+
+      before do
+        get edit_question_path(question, question: {question_type: "boolean",
+                                                    answers_attributes: {"0" => {id: removed_answer.id, _destroy: "true"}}})
+      end
+
+      def answer_row(answer)
+        Capybara.string(response.body)
+          .find("#table-answers tbody input[name$='[id]'][value='#{answer.id}']", visible: :all)
+          .find(:xpath, "preceding-sibling::tr[1]", visible: :all)
+      end
+
+      it "shows the two answers left" do
+        expect(Capybara.string(response.body)).to have_css("#table-answers tbody tr", count: 2)
+        expect(answer_row(other_answer)).to be_visible
+      end
+
+      it "keeps the removed answer hidden and marked for deletion" do
+        expect(answer_row(removed_answer)).not_to be_visible
+        expect(answer_row(removed_answer)).to have_css("input[name$='[_destroy]'][value='true']", visible: :all)
+      end
+    end
+
     context "when previewing as boolean a question with one True answer" do
       before do
         question.answers.first.update_columns(text: "True")
@@ -194,6 +220,11 @@ RSpec.describe "questions controller", :default_creates do
       it "shows a remove link for each answer" do
         expect(Capybara.string(response.body)).to have_link("Remove", count: 3)
       end
+
+      it "lets an added answer leave the form without a save" do
+        template = Capybara.string(response.body).find("[data-action='click->nested-fields#add']")["data-fields"]
+        expect(Capybara.string(template)).to have_css("[data-action='click->nested-fields#removeRow']")
+      end
     end
   end
 
@@ -237,6 +268,18 @@ RSpec.describe "questions controller", :default_creates do
           patch question_path(question),
             params: {question: {answers_attributes: {"0" => {id: incorrect_answer.id, _destroy: "true"}}}}
         end.to change { Answer.exists?(incorrect_answer.id) }.from(true).to(false)
+      end
+
+      context "when the save fails" do
+        before do
+          removal = {"0" => {id: incorrect_answer.id, _destroy: "true"}}
+          patch question_path(question), params: {question: {question_text: "", answers_attributes: removal}}
+        end
+
+        it "keeps the answer hidden and marked for deletion" do
+          expect(Capybara.string(response.body))
+            .to have_css("#table-answers tbody tr[hidden] input[name$='[_destroy]'][value='true']", visible: :all, count: 1)
+        end
       end
     end
 
@@ -341,6 +384,25 @@ RSpec.describe "questions controller", :default_creates do
       it "saves it with two answers" do
         expect(question.reload).to be_boolean
         expect(question.answers.count).to eq(2)
+      end
+    end
+
+    context "with a boolean question that has three answers and its False answer removed" do
+      let(:question) { create(:boolean_question, topic: topic) }
+      let!(:true_answer) { question.answers.find_by!(correct: true) }
+      let!(:removed_answer) { question.answers.find_by!(correct: false) }
+      let!(:other_answer) { create(:answer, question: question, correct: false, text: "Maybe") }
+
+      before do
+        patch question_path(question),
+          params: {question: {answers_attributes: {"0" => {id: removed_answer.id, _destroy: "true"}}}}
+      end
+
+      it "deletes the removed answer and relabels the one left False" do
+        expect(question.answers.reload).to contain_exactly(
+          have_attributes(id: true_answer.id, text: "True", correct: true),
+          have_attributes(id: other_answer.id, text: "False", correct: false)
+        )
       end
     end
 

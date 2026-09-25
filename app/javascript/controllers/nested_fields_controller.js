@@ -19,15 +19,15 @@ export default class extends Controller {
     event.currentTarget.closest("tr").remove();
   }
 
+  // A saved record stays in the form, hidden, for the next save to delete
   removeRecord(event) {
     event.preventDefault();
     const trigger = event.currentTarget;
-    const form = trigger.closest("form");
     const input = document.createElement("input");
     input.type = "hidden";
     input.name = `${trigger.dataset.objectName}[_destroy]`;
     input.value = "true";
-    form.appendChild(input);
-    form.submit();
+    trigger.after(input);
+    trigger.closest("tr").hidden = true;
   }
 }

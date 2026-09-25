@@ -1,6 +1,7 @@
 // The nested-fields controller, mounted through Stimulus on the answer table
-// the new-question form renders: Add Answer appends the link's row template
-// keyed by the time of the click, and a row's Remove takes it out of the form.
+// the question form renders: Add Answer appends the link's row template keyed
+// by the time of the click, an unsaved row's Remove takes it out of the form,
+// and a saved answer's Remove hides it and marks it for the next save to delete.
 // The add wiring keeps its browser smoke in
 // spec/system/questions/author_edits_a_question_spec.rb.
 
@@ -93,6 +94,59 @@ describe("nested-fields", () => {
       tbody.querySelector("tr:first-of-type a").click();
 
       expect(inputNames(tbody)).toEqual(answerNames(1));
+    });
+  });
+});
+
+// A saved answer's row as the editor renders it, with its id field beside it
+const SAVED_FIXTURE = `
+  <form data-controller="nested-fields">
+    <table id="table-answers">
+      <tbody data-nested-fields-target="fields">
+        <tr>
+          <td><input type="text" name="question[answers_attributes][0][text]" value="Glucose"></td>
+          <td>
+            <a class="btn btn-danger" href="#" data-object-name="question[answers_attributes][0]"
+               data-action="click->nested-fields#removeRecord">Remove</a>
+          </td>
+        </tr>
+        <input type="hidden" name="question[answers_attributes][0][id]" value="7">
+      </tbody>
+    </table>
+  </form>
+`;
+
+describe("nested-fields on a saved answer", () => {
+  let application, submit;
+
+  beforeEach(async () => {
+    application = await mountControllers(SAVED_FIXTURE, {
+      "nested-fields": NestedFieldsController,
+    });
+    submit = jest
+      .spyOn(HTMLFormElement.prototype, "submit")
+      .mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    submit.mockRestore();
+    unmount(application);
+  });
+
+  describe("removeRecord", () => {
+    beforeEach(() => document.querySelector("a.btn-danger").click());
+
+    it("hides the row and marks the answer for deletion", () => {
+      const form = document.querySelector("form");
+
+      expect(document.querySelector("tr").hidden).toBe(true);
+      expect(
+        new FormData(form).get("question[answers_attributes][0][_destroy]"),
+      ).toBe("true");
+    });
+
+    it("leaves the save to the form", () => {
+      expect(submit).not.toHaveBeenCalled();
     });
   });
 });

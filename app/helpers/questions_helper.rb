@@ -30,11 +30,4 @@ module QuestionsHelper
   def times_asked(question)
     question.question_statistic&.number_asked || 0
   end
-
-  # Leaves out the answers a boolean question has marked for its next save to delete
-  def answer_rows(question)
-    return question.answers unless question.boolean?
-
-    question.answers.reject(&:marked_for_destruction?)
-  end
 end
