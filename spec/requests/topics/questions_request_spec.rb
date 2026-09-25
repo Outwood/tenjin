@@ -9,18 +9,37 @@ RSpec.describe "topic questions controller", :default_creates do
 
   describe "GET /topics/:topic_id/questions" do
     let(:question) { create(:question, topic: topic) }
-    let!(:flags) { create_list(:flagged_question, 5, question: question) }
 
-    before { get topic_questions_path(topic) }
+    context "with a flagged question never asked" do
+      let!(:flags) { create_list(:flagged_question, 5, question: question) }
 
-    it "shows each question's flag count" do
-      expect(Capybara.string(response.body))
-        .to have_css("#question-#{question.id} td.flags", exact_text: "5")
+      before { get topic_questions_path(topic) }
+
+      it "shows each question's flag count" do
+        expect(Capybara.string(response.body))
+          .to have_css("#question-#{question.id} td.flags", exact_text: "5")
+      end
+
+      it "links each question to its editor" do
+        expect(Capybara.string(response.body))
+          .to have_css("#question-#{question.id} td.question-text a[href='#{edit_question_path(question)}']")
+      end
+
+      it "says so in place of a percentage correct" do
+        expect(Capybara.string(response.body))
+          .to have_css("#question-#{question.id} td.correct", exact_text: "Not asked yet")
+      end
     end
 
-    it "links each question to its editor" do
-      expect(Capybara.string(response.body))
-        .to have_css("#question-#{question.id} td.question-text a[href='#{edit_question_path(question)}']")
+    context "with a question asked four times, three answered correctly" do
+      let!(:statistic) { create(:question_statistic, question: question, number_asked: 4, number_correct: 3) }
+
+      before { get topic_questions_path(topic) }
+
+      it "shows the percentage correct" do
+        expect(Capybara.string(response.body))
+          .to have_css("#question-#{question.id} td.correct", exact_text: "75%")
+      end
     end
   end
 
