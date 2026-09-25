@@ -6,6 +6,9 @@
       ul.mb-0
         - question_error_messages(@question).each do |message|
           li = message
+  .my-2
+    = f.label(:question_text, 'Question', id: 'question-text-label', class: 'form-label')
+    = f.rich_text_area(:question_text, aria: { labelledby: 'question-text-label' })
   .row.my-2
     .col-sm-3
       = f.label(:question_type, 'Question Type', class: 'col-form-label')
@@ -15,10 +18,21 @@
         {},
         class: 'form-select',
         data: { action: 'change->reload-form#reload' } )
-  .my-2
-    = f.label(:question_text, 'Question', id: 'question-text-label', class: 'form-label')
-    = f.rich_text_area(:question_text, aria: { labelledby: 'question-text-label' })
-  .row.my-2
+  table.table.align-middle#table-answers
+    thead
+      tr
+        th#answer-text-header Answer Text
+        - if marks_correct_answers?(@question)
+          th#answer-correct-header Correct?
+        - unless @question.boolean?
+          th
+            span.visually-hidden Actions
+    tbody.fields data-nested-fields-target='fields'
+      = f.fields_for :answers do |a|
+        = render 'questions/answer', f: a
+  - unless @question.boolean?
+    = add_row_button('Add Answer', f, :answers, partial: 'questions/answer', class: 'btn btn-outline-primary')
+  .row.mt-4.mb-2
     .col-sm-3
       = f.label(:lesson_id, 'Lesson', class: 'col-form-label')
     .col-sm-9
@@ -37,20 +51,6 @@
             {},
             class: 'form-select',
             data: { action: 'change->reload-form#reload' })
-  table.table.align-middle#table-answers
-    thead
-      tr
-        th#answer-text-header Answer Text
-        - if marks_correct_answers?(@question)
-          th#answer-correct-header Correct?
-        - unless @question.boolean?
-          th
-            span.visually-hidden Actions
-    tbody.fields data-nested-fields-target='fields'
-      = f.fields_for :answers do |a|
-        = render 'questions/answer', f: a
-  - unless @question.boolean?
-    = add_row_button('Add Answer', f, :answers, partial: 'questions/answer', class: 'btn btn-outline-primary')
   .d-flex.flex-wrap.gap-2.mt-4
     = f.submit('Save Question', class: 'btn btn-primary')
     = link_to 'Cancel', topic_questions_path(@question.topic), class: 'btn btn-outline-secondary'

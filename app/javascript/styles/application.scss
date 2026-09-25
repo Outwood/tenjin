@@ -301,9 +301,22 @@ body {
   @extend .text-danger;
 }
 
-// Answers stack at phone width, so a long answer keeps the full row
+// Answers stack below desktop width, so a long answer keeps the full row
 #table-answers {
-  @include media-breakpoint-down(sm) {
+  // The toggle and Remove columns shrink to their content, leaving the rest to the answer
+  th:not(:first-child),
+  td:not(:first-child) {
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  @include media-breakpoint-down(lg) {
+    // Out of table layout, whose width would follow the cells' content
+    &,
+    tbody {
+      display: block;
+    }
+
     thead {
       @include visually-hidden;
     }
@@ -323,6 +336,12 @@ body {
 
     td:first-child {
       flex-basis: 100%;
+    }
+
+    td:not(:first-child) {
+      display: flex;
+      align-items: center;
+      width: auto;
     }
   }
 }

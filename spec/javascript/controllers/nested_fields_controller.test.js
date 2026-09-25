@@ -28,7 +28,7 @@ function answerRow(index) {
                id="answer-check-${index}">
       </td>
       <td>
-        <button type="button" class="btn btn-danger" data-action="click->nested-fields#removeRow">Remove</button>
+        <button type="button" class="btn btn-outline-secondary" data-action="click->nested-fields#removeRow">Remove</button>
       </td>
     </tr>
   `;
@@ -106,7 +106,7 @@ const SAVED_FIXTURE = `
         <tr>
           <td><input type="text" name="question[answers_attributes][0][text]" value="Glucose"></td>
           <td>
-            <button type="button" class="btn btn-danger" data-object-name="question[answers_attributes][0]"
+            <button type="button" class="btn btn-outline-secondary" data-object-name="question[answers_attributes][0]"
                     data-action="click->nested-fields#removeRecord">Remove</button>
           </td>
         </tr>
@@ -134,7 +134,7 @@ describe("nested-fields on a saved answer", () => {
   });
 
   describe("removeRecord", () => {
-    beforeEach(() => document.querySelector("button.btn-danger").click());
+    beforeEach(() => document.querySelector("tr button").click());
 
     it("hides the row and marks the answer for deletion", () => {
       const form = document.querySelector("form");
