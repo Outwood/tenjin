@@ -20,8 +20,6 @@ module QuestionAnswers
     # Marked, not removed: replacing the association deletes them at once, even on a preview
     (answers - kept).each(&:mark_for_destruction)
     label_boolean_answers(kept)
-    # Puts any remaining errors in front of the author in the editor
-    question.valid?
   end
 
   # The oldest answer meaning each label, then the rest oldest first; load

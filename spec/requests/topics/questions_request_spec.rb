@@ -67,6 +67,10 @@ RSpec.describe "topic questions controller", :default_creates do
       it "labels the answers False and True" do
         expect(Capybara.string(response.body)).to have_field(with: "False").and have_field(with: "True")
       end
+
+      it "shows no errors before a save" do
+        expect(Capybara.string(response.body)).to have_no_css(".alert-danger").and have_no_css(".is-invalid")
+      end
     end
   end
 
