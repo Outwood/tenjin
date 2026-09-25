@@ -7,9 +7,12 @@
       { title: 'Question', field: 'question', minWidth: 240, widthGrow: 4, cssClass: 'text-wrap' },
       { title: 'Times asked', field: 'times_asked', minWidth: 160, responsive: 2, **number },
       { title: 'Flags', field: 'flags', minWidth: 90, responsive: 1, **number },
-      { title: 'Percent correct', field: 'percent_correct', minWidth: 170, responsive: 2, **number, sorter: 'percent' },
-      { title: 'Lesson', field: 'lesson', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 3 }] }.to_json
-.table-wrapper data-controller='datatable' data-datatable-options-value=table_options
+      { title: 'Percent correct', field: 'percent_correct', minWidth: 170, responsive: 2, **number, sorter: 'percent' }] }
+/ A topic with no lessons would fill the column with dashes
+- lesson_column = @lessons.any?
+- if lesson_column
+  - table_options[:columns] << { title: 'Lesson', field: 'lesson', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 3 }
+.question-table data-controller='datatable' data-datatable-options-value=table_options.to_json
   = render 'shared/table_search', label: 'Search questions'
   table.table#questionTable data-datatable-target='table'
     thead
@@ -20,7 +23,8 @@
         th Times asked
         th Flags
         th Percent correct
-        th Lesson
+        - if lesson_column
+          th Lesson
     tbody
       - @questions.order(:created_at).each_with_index do |q, index|
         tr id="question-#{q.id}"
@@ -29,4 +33,5 @@
           td.amount = times_asked(q)
           td.flags = q.flagged_questions.size
           td.correct = percentage_correct(q)
-          td.lesson = q.lesson.present? ? q.lesson.title : '-'
+          - if lesson_column
+            td.lesson = q.lesson ? link_to(q.lesson.title, lesson_questions_path(q.lesson)) : '-'

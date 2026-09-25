@@ -18,6 +18,7 @@ module Topics
           @questions = Question.with_rich_text_question_text_and_embeds
             .includes(:question_statistic, :lesson)
             .where(topic: @topic, active: true)
+          @lessons = @topic.lessons.order(:title)
         end
         format.json do
           send_data Question.where(topic: @topic).to_json(include: :answers),
