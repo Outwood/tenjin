@@ -1,43 +1,36 @@
+- content_for :title
+  title = "Questions - #{@topic.name}"
 .container
-  .row.mt-3.mb-3
-    .col-sm-3
-      label for='topic-name' class='form-label' Topic Name:
-    .col-sm-9
-      = form_with url: topic_path(@topic),
-        method: :patch,
-        data: { turbo: true, controller: 'auto-submit', action: 'turbo:submit-end->auto-submit#settle' } do
+  = render('questions/breadcrumbs', topic: @topic)
+  .d-flex.flex-wrap.align-items-center.justify-content-between.gap-2.mb-3
+    h1.topic-name.mb-0 = @topic.name
+    .d-flex.flex-wrap.gap-2
+      = link_to 'Add Question', new_topic_question_path(@topic), class: 'btn btn-primary'
+      = link_to 'Download Questions (JSON)', topic_questions_path(@topic, format: :json), class: 'btn btn-outline-secondary'
+      = link_to 'Import Questions', new_topic_import_path(@topic), class: 'btn btn-outline-secondary'
+  / One form, because Turbo cancels a submission still in flight when another starts on the page;
+    the newer write then carries both fields, and its reply settles the status and heading
+  = form_with url: topic_path(@topic),
+    method: :patch,
+    class: 'mb-4',
+    data: { turbo: true, controller: 'auto-submit', action: 'turbo:submit-end->auto-submit#settle' } do
+    .row.mb-3
+      = label_tag 'topic_name', 'Name', class: 'col-sm-3 col-form-label'
+      .col-sm-9
         = text_field_tag 'topic[name]',
           @topic.name,
-          id: 'topic-name',
           class: 'form-control',
           data: { action: 'change->auto-submit#submit' }
-  .row.mb-3
-    .col-sm-3
-      label for="select-default-lesson" class='form-label' Select Default Lesson
-    .col-sm-9
-      = form_with url: topic_path(@topic),
-        method: :patch,
-        data: { turbo: true, controller: 'auto-submit', action: 'turbo:submit-end->auto-submit#settle' } do
+    .row
+      = label_tag 'topic_default_lesson_id', 'Default lesson', class: 'col-sm-3 col-form-label'
+      .col-sm-9
         = select_tag 'topic[default_lesson_id]',
           options_from_collection_for_select(Lesson.where(topic: @topic), :id, :title, selected: @topic.default_lesson_id),
           include_blank: 'No default lesson',
-          id: 'select-default-lesson',
           class: 'form-select',
           data: { action: 'change->auto-submit#submit' }
-  .row.my-2
-    .col
-      =link_to 'Add Question', new_topic_question_path(@topic), class:'btn btn-primary w-100'
-  .row.my-2
-    .col
-      = render 'questions/question_table'
-  .row.my-2
-    .col
-      = link_to 'Download Questions',
-          topic_questions_path(@topic, format: :json),
-          class:'btn btn-primary w-100'
-      = link_to 'Import Questions',
-          new_topic_import_path(@topic),
-          class:'btn btn-primary w-100'
+        .form-text role='status' data-auto-submit-target='status'
+  = render 'questions/question_table'
   section.mt-5.mb-5 aria-labelledby='danger-zone-heading'
     h2#danger-zone-heading Danger Zone
     p

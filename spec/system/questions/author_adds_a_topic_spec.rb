@@ -15,6 +15,6 @@ RSpec.describe "Author adds a topic", :default_creates do
     click_link "Add Topic"
     fill_in "Name", with: "Fractions"
     click_button "Create Topic"
-    expect(page).to have_field("Topic Name:", with: "Fractions")
+    expect(page).to have_css("h1", exact_text: "Fractions")
   end
 end

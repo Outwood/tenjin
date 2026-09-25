@@ -1,5 +1,9 @@
+/ With no current page named, the topic's own question page is the current one
 nav.mt-3 aria-label='Breadcrumb'
   ol.breadcrumb.mb-1
     li.breadcrumb-item = link_to 'Questions', questions_path
-    li.breadcrumb-item = link_to topic.name, topic_questions_path(topic)
-    li.breadcrumb-item.active aria-current='page' = current
+    - if local_assigns[:current]
+      li.breadcrumb-item = link_to topic.name, topic_questions_path(topic)
+      li.breadcrumb-item.active aria-current='page' = current
+    - else
+      li.breadcrumb-item.active.topic-name aria-current='page' = topic.name

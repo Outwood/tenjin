@@ -277,7 +277,7 @@ body:not(.admin-area) {
 }
 
 // :where keeps this at bare-class specificity, below Bootstrap's input-group sizing
-:where(body:not(.admin-area)) .form-control {
+:where(body:not(.admin-area)) :is(.form-control, .form-select) {
   font-size: 1.25rem;
 }
 
