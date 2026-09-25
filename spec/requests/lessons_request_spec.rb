@@ -181,6 +181,32 @@ RSpec.describe "lessons controller", :default_creates do
     end
   end
 
+  describe "GET /subjects/:subject_id/lessons/new" do
+    let!(:algebra) { create(:topic, subject: quiz_subject, name: "Algebra") }
+    let!(:fractions) { create(:topic, subject: quiz_subject, name: "Fractions") }
+    let!(:retired) { create(:topic, subject: quiz_subject, name: "Photosynthesis", active: false) }
+
+    before do
+      teacher.add_role :lesson_author, quiz_subject
+      sign_in teacher
+    end
+
+    it "starts in the first topic by name" do
+      get new_subject_lesson_path(quiz_subject)
+      expect(Capybara.string(response.body)).to have_select("Topic", selected: "Algebra")
+    end
+
+    it "starts in the topic the link names" do
+      get new_subject_lesson_path(quiz_subject, topic_id: fractions.id)
+      expect(Capybara.string(response.body)).to have_select("Topic", selected: "Fractions")
+    end
+
+    it "starts in the first topic when the named one is inactive" do
+      get new_subject_lesson_path(quiz_subject, topic_id: retired.id)
+      expect(Capybara.string(response.body)).to have_select("Topic", selected: "Algebra")
+    end
+  end
+
   describe "POST /lessons" do
     let(:title) { "Vimeo video lesson" }
     let(:params) do

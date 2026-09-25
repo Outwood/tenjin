@@ -22,7 +22,8 @@ class LessonsController < ApplicationController
     @topics = topics_for(subject)
     return redirect_to lessons_path, flash: {error: "No topics found for subject"} if @topics.empty?
 
-    @lesson = Lesson.new(topic: @topics.first)
+    # A topic page's Add a lesson link names its topic
+    @lesson = Lesson.new(topic: @topics.find { |topic| topic.id.to_s == params[:topic_id] } || @topics.first)
     authorize @lesson
   end
 
