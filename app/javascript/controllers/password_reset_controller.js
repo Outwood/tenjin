@@ -43,7 +43,9 @@ export default class extends Controller {
     try {
       const response = await csrfFetch(url, { method: "POST" });
       const body = await response.json().catch(() => ({}));
-      if (response.ok) {
+      // A refused authorization redirects, and fetch follows it to a page of
+      // HTML that answers 200, so only a reply carrying a password is a reset
+      if (response.ok && body.password) {
         this.#showPassword(name, body.password);
       } else {
         this.#showError(body.errors?.join(", ") || "Password reset failed");

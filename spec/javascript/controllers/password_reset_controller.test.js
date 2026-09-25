@@ -133,6 +133,31 @@ describe("password-reset", () => {
     expect(target("error").hidden).toBe(false);
   });
 
+  // A refused authorization redirects, and fetch follows it to a page of HTML
+  it("says the reset failed when the reply was redirected", async () => {
+    csrfFetch.mockResolvedValue({
+      ok: true,
+      redirected: true,
+      json: async () => {
+        throw new SyntaxError("Unexpected token '<'");
+      },
+    });
+    await click("#reset-1");
+    await click("#confirm");
+
+    expect(target("error").textContent).toBe("Password reset failed");
+    expect(target("resultStep").hidden).toBe(true);
+  });
+
+  it("says the reset failed when a successful reply carries no password", async () => {
+    answer(true, {});
+    await click("#reset-1");
+    await click("#confirm");
+
+    expect(target("error").textContent).toBe("Password reset failed");
+    expect(target("resultStep").hidden).toBe(true);
+  });
+
   it("starts the next user back at the confirmation", async () => {
     answer(false, { errors: ["Password is too short"] });
     await click("#reset-1");
