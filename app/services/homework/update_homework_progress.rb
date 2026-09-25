@@ -35,6 +35,7 @@ class Homework::UpdateHomeworkProgress < ApplicationCommand
     progress.progress = percentage if percentage > progress.progress
     if progress.progress >= progress.homework.required && !progress.completed
       progress.completed = true
+      progress.completed_at = Time.current
       @completed_homework = true
     end
     return unless progress.changed?

@@ -27,6 +27,11 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
       expect(progress.reload).to be_completed
     end
 
+    it "records when the homework was completed" do
+      described_class.call(quiz: quiz_full_marks)
+      expect(progress.reload.completed_at).to be_within(1.minute).of(Time.current)
+    end
+
     it "records partial progress and returns success with completed false below the required mark" do
       result = described_class.call(quiz: quiz_7_out_of_10)
       expect(result).to be_success
