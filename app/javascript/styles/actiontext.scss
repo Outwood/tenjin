@@ -10,7 +10,6 @@
 // images in galleries will be squished by the max-width: 33%; rule.
 
 .trix-content {
-  text-align: center;
   .attachment-gallery {
     > action-text-attachment,
     > .attachment {
@@ -49,9 +48,4 @@
 
 trix-editor.is-invalid {
   border-color: var(--bs-form-invalid-border-color);
-}
-
-// Authors write left-aligned; the quiz still centres the question
-trix-editor.trix-content {
-  text-align: start;
 }
