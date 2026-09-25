@@ -68,6 +68,8 @@ class LessonsController < ApplicationController
 
   def save_lesson
     unless @lesson.valid?
+      # A refused move re-renders with the topic the lesson stays in
+      @lesson.topic_id = @lesson.topic_id_in_database if @lesson.topic_locked?
       @topics = topics_for(@lesson.subject, current: @lesson.topic_id_in_database)
 
       return render :edit, status: :unprocessable_content if @lesson.persisted?

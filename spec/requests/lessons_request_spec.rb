@@ -325,6 +325,13 @@ RSpec.describe "lessons controller", :default_creates do
         expect(Capybara.string(response.body))
           .to have_css(".invalid-feedback", text: "can't change while the lesson has questions")
       end
+
+      it "shows the saved topic, explained once" do
+        patch lesson_path(lesson), params: {lesson: {topic_id: fractions.id}}
+        expect(Capybara.string(response.body))
+          .to have_select("Topic", selected: topic.name, disabled: true)
+          .and have_no_css(".lesson_topic .form-text")
+      end
     end
 
     context "when the details are invalid" do
