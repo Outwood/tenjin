@@ -1,6 +1,6 @@
 - content_for :title
-  title = "Edit Lesson - #{@lesson.topic.name}"
+  title = "Edit Lesson - #{@saved_topic.name}"
 .container
-  = render 'breadcrumbs', subject: @lesson.subject, topic: @lesson.topic, current: 'Edit Lesson'
+  = render 'breadcrumbs', subject: @saved_topic.subject, topic: @saved_topic, current: 'Edit Lesson'
   h1 Edit Lesson
-  = render 'form', cancel_path: lessons_path(open: @lesson.topic_id)
+  = render 'form', cancel_path: lessons_path(open: @saved_topic.id)

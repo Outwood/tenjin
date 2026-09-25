@@ -29,6 +29,7 @@ class LessonsController < ApplicationController
 
   def edit
     @lesson = find_lesson
+    @saved_topic = @lesson.topic
     @topics = topics_for(@lesson.subject, current: @lesson.topic_id)
     authorize @lesson
   end
@@ -41,6 +42,8 @@ class LessonsController < ApplicationController
 
   def update
     @lesson = authorize find_lesson
+    # A failed move re-renders the chosen topic, but links back to this one
+    @saved_topic = @lesson.topic
     @lesson.assign_attributes(lesson_params)
     # Once for the subject it leaves, again for the one a new topic moves it to
     authorize @lesson

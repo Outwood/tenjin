@@ -336,6 +336,20 @@ RSpec.describe "lessons controller", :default_creates do
       end
     end
 
+    context "when a move fails on another detail" do
+      let(:fractions) { create(:topic, subject: quiz_subject, name: "Fractions") }
+
+      before { patch lesson_path(lesson), params: {lesson: {title: "a", topic_id: fractions.id}} }
+
+      it "navigates by the topic the lesson is still in" do
+        expect(Capybara.string(response.body))
+          .to have_title("Edit Lesson - #{topic.name}")
+          .and have_link(topic.name, href: lessons_path(open: topic.id))
+          .and have_link("Cancel", href: lessons_path(open: topic.id))
+          .and have_no_link("Fractions")
+      end
+    end
+
     context "when the details are invalid" do
       let!(:inactive_topic) { create(:topic, subject: quiz_subject, name: "Photosynthesis", active: false) }
 
