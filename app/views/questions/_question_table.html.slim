@@ -1,7 +1,9 @@
-/ The Question column takes the spare width; on a narrow screen the numbers fold under each row
+/ The Question column takes the spare width; on a narrow screen the numbers fold under each row.
+/ The search box reads question and lesson text, not the statistics beside them.
 - number = { sorter: 'number', hozAlign: 'right', headerHozAlign: 'right' }
 - table_options = { paginationSize: 50,
     placeholder: 'No questions have been found',
+    searchFields: %w[question lesson],
     responsiveLayout: 'collapse',
     columns: [{ title: '#', field: 'number', width: 72, responsive: 3, **number },
       { title: 'Question', field: 'question', minWidth: 240, widthGrow: 4, cssClass: 'text-wrap' },
