@@ -95,6 +95,32 @@ RSpec.describe "classrooms controller", :default_creates do
       expect(topic_queries.size).to eq(1)
     end
 
+    describe "a homework's lesson" do
+      let!(:lesson_homeworks) do
+        Array.new(2) { |i| create(:homework, classroom: classroom, lesson: create(:lesson, topic: topic, title: "Lesson #{i}"), topic: topic) }
+      end
+
+      def lesson_cell(homework) = "#homework-table tr[data-id='#{homework.id}'] td:nth-child(2)"
+
+      it "names the lesson a homework was set on, or says it covers the whole topic" do
+        get classroom_path(classroom)
+        expect(Capybara.string(response.body))
+          .to have_css(lesson_cell(lesson_homeworks.first), exact_text: "Lesson 0")
+          .and have_css(lesson_cell(homeworks.first), exact_text: "Whole topic")
+      end
+
+      # Naming each lesson from its own row would load one lesson per homework
+      it "loads the lessons in one query" do
+        lesson_queries = []
+        recorder = ->(*, payload) { lesson_queries << payload[:sql] if payload[:sql].include?('FROM "lessons"') }
+        ActiveSupport::Notifications.subscribed(recorder, "sql.active_record") do
+          get classroom_path(classroom)
+        end
+
+        expect(lesson_queries.size).to eq(1)
+      end
+    end
+
     context "with no pupils enrolled" do
       it "says each homework has no pupils" do
         get classroom_path(classroom)
