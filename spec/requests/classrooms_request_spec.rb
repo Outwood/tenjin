@@ -188,7 +188,7 @@ RSpec.describe "classrooms controller", :default_creates do
 
       it "names the pupil CSV after the class, without the separator" do
         expect(Capybara.string(response.body))
-          .to have_css("#students [data-datatable-filename-value='9X-Sc students.csv']")
+          .to have_css("#students [data-datatable-filename-value='9X-Sc pupils.csv']")
       end
     end
 
