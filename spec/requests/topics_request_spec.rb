@@ -15,6 +15,16 @@ RSpec.describe "topics controller", :default_creates do
       expect(response).to have_http_status(:no_content)
     end
 
+    context "when renamed from the topic's page" do
+      before { patch topic_path(topic), params: {topic: {name: "Forces <b>&</b> motion"}}, headers: turbo_headers }
+
+      it "renames the page's headings with the name escaped" do
+        expect(response.body).to include(
+          %(<turbo-stream action="update" targets=".topic-name"><template>Forces &lt;b&gt;&amp;&lt;/b&gt; motion</template></turbo-stream>)
+        )
+      end
+    end
+
     context "with a lesson for the topic" do
       let(:lesson) { create(:lesson, topic: topic) }
 

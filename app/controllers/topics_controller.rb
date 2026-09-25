@@ -4,12 +4,15 @@ class TopicsController < ApplicationController
   before_action :authenticate_user!
 
   def update
-    topic = authorize find_topic
+    @topic = authorize find_topic
 
-    if topic.update(topic_params)
-      head :no_content
+    if @topic.update(topic_params)
+      respond_to do |format|
+        format.any { head :no_content }
+        format.turbo_stream
+      end
     else
-      refuse("Topic not renamed: #{topic.errors.full_messages.to_sentence}")
+      refuse("Topic not renamed: #{@topic.errors.full_messages.to_sentence}")
     end
   end
 

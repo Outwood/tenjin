@@ -13,11 +13,19 @@ RSpec.describe "Author edits a question", :default_creates do
 
     before { visit(topic_questions_path(topic)) }
 
-    # auto-submit smoke; TopicsController#update is covered in spec/requests/topics_request_spec.rb
+    # auto-submit smokes; TopicsController#update is covered in spec/requests/topics_request_spec.rb
     it "saves the default lesson on change" do
-      select "Photosynthesis", from: "Select Default Lesson"
+      select "Photosynthesis", from: "Default lesson"
+      expect(page).to have_css("[role=status]", exact_text: "Saved")
       visit(topic_questions_path(topic))
-      expect(page).to have_select("Select Default Lesson", selected: "Photosynthesis")
+      expect(page).to have_select("Default lesson", selected: "Photosynthesis")
+    end
+
+    it "renames the page's heading once the name saves" do
+      fill_in "Name", with: "Plant nutrition"
+      find_field("Name").send_keys(:tab)
+      expect(page).to have_css("h1", exact_text: "Plant nutrition")
+        .and have_css(".breadcrumb-item.active", exact_text: "Plant nutrition")
     end
   end
 

@@ -1,14 +1,25 @@
-- table_options = { paginationSize: 50, placeholder: 'No questions have been found' }.to_json
+/ The Question column takes the spare width; on a narrow screen the numbers fold under each row
+- number = { sorter: 'number', hozAlign: 'right', headerHozAlign: 'right' }
+- table_options = { paginationSize: 50,
+    placeholder: 'No questions have been found',
+    responsiveLayout: 'collapse',
+    columns: [{ title: '#', field: 'number', width: 72, responsive: 3, **number },
+      { title: 'Question', field: 'question', minWidth: 240, widthGrow: 4, cssClass: 'text-wrap' },
+      { title: 'Times asked', field: 'times_asked', minWidth: 160, responsive: 2, **number },
+      { title: 'Flags', field: 'flags', minWidth: 90, responsive: 1, **number },
+      { title: 'Percent correct', field: 'percent_correct', minWidth: 170, responsive: 2, **number, sorter: 'percent' },
+      { title: 'Lesson', field: 'lesson', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 3 }] }.to_json
 .table-wrapper data-controller='datatable' data-datatable-options-value=table_options
   = render 'shared/table_search', label: 'Search questions'
   table.table#questionTable data-datatable-target='table'
     thead
       tr
+        / Each heading must match its column's title above, which Tabulator pairs it by
         th #
         th Question
-        th Times Asked
+        th Times asked
         th Flags
-        th % Correct
+        th Percent correct
         th Lesson
     tbody
       - @questions.order(:created_at).each_with_index do |q, index|
