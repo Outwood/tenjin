@@ -21,7 +21,7 @@
         columns: [{ title: 'Topic', field: 'topic', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 0 },
           { title: 'Lesson', field: 'lesson', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 3 },
           { title: 'Completion', field: 'completion', minWidth: 150, sorter: 'percent', responsive: 2 },
-          { title: 'Due', field: 'due', minWidth: 150, sorter: 'ukDateTime', responsive: 1 }] }.to_json
+          { title: 'Due', field: 'due', minWidth: 150, sorter: 'timeDatetime', responsive: 1 }] }.to_json
     div data-controller='datatable' data-datatable-options-value=homework_table_options
       table.table.table-hover#homework-table data-datatable-target='table'
         / Each heading must match its column's title above, which Tabulator pairs it by
@@ -37,7 +37,8 @@
               td = link_to h.topic.name, homework_path(h)
               td = h.lesson&.title || 'Whole topic'
               td = report_progress(h)
-              td = h.due_date.strftime("%d/%m/%y %H:%M")
+              / The due time is the clock time the teacher entered, stored without a zone, so the datetime carries none
+              td = tag.time(h.due_date.strftime("%-d %b %Y, %H:%M"), datetime: h.due_date.strftime("%Y-%m-%dT%H:%M"))
   section.mb-5#students aria-labelledby='students-heading'
     h2.mb-3#students-heading Pupils
     / Names stay put on a narrow screen and the rest fold under each row. Folded columns

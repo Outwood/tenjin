@@ -95,6 +95,18 @@ RSpec.describe "classrooms controller", :default_creates do
       expect(topic_queries.size).to eq(1)
     end
 
+    describe "a homework's due date" do
+      let!(:dated_homework) { create(:homework, classroom: classroom, topic: topic, due_date: Time.zone.local(2030, 10, 5, 9, 0)) }
+
+      before { get classroom_path(classroom) }
+
+      it "reads with the month as a word and a full year, and carries the datetime the column sorts by" do
+        expect(Capybara.string(response.body))
+          .to have_css("#homework-table tr[data-id='#{dated_homework.id}'] time[datetime='2030-10-05T09:00']",
+            exact_text: "5 Oct 2030, 09:00")
+      end
+    end
+
     describe "a homework's lesson" do
       let!(:lesson_homeworks) do
         Array.new(2) { |i| create(:homework, classroom: classroom, lesson: create(:lesson, topic: topic, title: "Lesson #{i}"), topic: topic) }
