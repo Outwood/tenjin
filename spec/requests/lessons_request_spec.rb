@@ -240,7 +240,26 @@ RSpec.describe "lessons controller", :default_creates do
       it "offers the subject's active topics in the re-rendered form" do
         post lessons_path, params: params
         expect(Capybara.string(response.body))
-          .to have_select("lesson[topic_id]", options: ["", topic.name])
+          .to have_select("lesson[topic_id]", options: [topic.name])
+      end
+    end
+  end
+
+  describe "GET /lessons/:id/edit" do
+    before do
+      teacher.add_role :lesson_author, quiz_subject
+      sign_in teacher
+    end
+
+    context "with the lesson in an inactive topic" do
+      let!(:algebra) { create(:topic, subject: quiz_subject, name: "Algebra") }
+      let!(:retired) { create(:topic, subject: quiz_subject, name: "Photosynthesis", active: false) }
+      let(:lesson) { create(:lesson, topic: retired) }
+
+      it "keeps the topic selected and says it is inactive" do
+        get edit_lesson_path(lesson)
+        expect(Capybara.string(response.body))
+          .to have_select("Topic", selected: "Photosynthesis (inactive)", options: ["Algebra", "Photosynthesis (inactive)"])
       end
     end
   end
@@ -287,7 +306,17 @@ RSpec.describe "lessons controller", :default_creates do
       it "offers the subject's active topics in the re-rendered form" do
         patch lesson_path(lesson), params: {lesson: {title: "ab"}}
         expect(Capybara.string(response.body))
-          .to have_select("lesson[topic_id]", options: ["", topic.name])
+          .to have_select("lesson[topic_id]", options: [topic.name])
+      end
+
+      context "with the lesson in the inactive topic" do
+        let(:lesson) { create(:lesson, topic: inactive_topic) }
+
+        it "keeps the topic selected in the re-rendered form" do
+          patch lesson_path(lesson), params: {lesson: {title: "ab"}}
+          expect(Capybara.string(response.body))
+            .to have_select("Topic", selected: "Photosynthesis (inactive)")
+        end
       end
     end
   end

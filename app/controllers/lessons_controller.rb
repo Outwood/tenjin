@@ -29,7 +29,7 @@ class LessonsController < ApplicationController
 
   def edit
     @lesson = find_lesson
-    @topics = topics_for(@lesson.subject)
+    @topics = topics_for(@lesson.subject, current: @lesson.topic_id)
     authorize @lesson
   end
 
@@ -60,14 +60,15 @@ class LessonsController < ApplicationController
   end
 
   # One query for new, edit and the invalid re-render: TopicPolicy scopes by
-  # question_author, a role a lesson author need not hold.
-  def topics_for(subject)
-    Topic.where(active: true, subject: subject).order(:name)
+  # question_author, a role a lesson author need not hold. A lesson already in
+  # an inactive topic keeps it on offer, or the form would post a different one.
+  def topics_for(subject, current: nil)
+    Topic.where(active: true, subject: subject).or(Topic.where(id: current)).order(:name)
   end
 
   def save_lesson
     unless @lesson.valid?
-      @topics = topics_for(@lesson.subject)
+      @topics = topics_for(@lesson.subject, current: @lesson.topic_id_in_database)
 
       return render :edit, status: :unprocessable_content if @lesson.persisted?
 
