@@ -2,7 +2,8 @@
 / A refused move's error already says what the hint would
 - topic_hint = topic_locked && @lesson.errors[:topic].none?
 = simple_form_for @lesson, wrapper: :horizontal_form, wrapper_mappings: { select: :horizontal_select } do |f|
-  = f.input :title
+  / A length check alone doesn't mark a field required
+  = f.input :title, required: true
   / simple_form renders hints without linking them to their input
   = f.input :video_link, as: :url,
     hint: 'A YouTube or Vimeo link. Leave blank for a lesson without a video.',

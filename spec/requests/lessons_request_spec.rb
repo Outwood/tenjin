@@ -196,6 +196,13 @@ RSpec.describe "lessons controller", :default_creates do
       expect(Capybara.string(response.body)).to have_select("Topic", selected: "Algebra")
     end
 
+    it "marks the title, not the video link, as required" do
+      get new_subject_lesson_path(quiz_subject)
+      expect(Capybara.string(response.body))
+        .to have_css("label[for='lesson_title'] abbr[title='required']")
+        .and have_no_css("label[for='lesson_video_link'] abbr")
+    end
+
     it "starts in the topic the link names" do
       get new_subject_lesson_path(quiz_subject, topic_id: fractions.id)
       expect(Capybara.string(response.body)).to have_select("Topic", selected: "Fractions")
