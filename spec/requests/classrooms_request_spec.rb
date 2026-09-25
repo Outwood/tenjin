@@ -102,5 +102,57 @@ RSpec.describe "classrooms controller", :default_creates do
           .to have_css("#homework-table tbody tr", count: 3, text: "0 / 0 - 0%")
       end
     end
+
+    context "with some of a homework completed" do
+      before do
+        create_list(:homework_progress, 2, homework: homeworks.first, completed: false)
+        create_list(:homework_progress, 3, homework: homeworks.first, completed: true)
+        get classroom_path(classroom)
+      end
+
+      it "reports the share completed" do
+        expect(Capybara.string(response.body))
+          .to have_css("#homework-table tr[data-id='#{homeworks.first.id}'] td", exact_text: "3 / 5 - 60%")
+      end
+    end
+
+    describe "a pupil's homework ticks" do
+      # Enrolled after the homeworks above, so the pupil has progress only on those set below
+      let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
+      let(:pupil_row) { "#students-table tr[data-id='#{student.id}']" }
+
+      context "with more homeworks than the row shows" do
+        let!(:pupil_homeworks) do
+          (1..6).map { |days| create(:homework, classroom: classroom, due_date: days.days.from_now) }
+        end
+
+        before do
+          pupil_homeworks[4].homework_progresses.find_by!(user: student).update!(completed: true)
+          get classroom_path(classroom)
+        end
+
+        it "shows five" do
+          expect(Capybara.string(response.body)).to have_css("#{pupil_row} i", count: 5)
+        end
+
+        it "ticks a completed homework in its place, latest due first" do
+          expect(Capybara.string(response.body))
+            .to have_css("#{pupil_row} i.fa-check", count: 1)
+            .and have_css("#{pupil_row} i:nth-child(2).fa-check")
+        end
+      end
+
+      context "with the pupil's homework from another classroom" do
+        let(:other_classroom) { create(:classroom, school: school) }
+        let!(:other_enrollment) { create(:enrollment, classroom: other_classroom, user: student) }
+        let!(:other_homework) { create(:homework, classroom: other_classroom) }
+
+        before { get classroom_path(classroom) }
+
+        it "leaves it off the pupil's row" do
+          expect(Capybara.string(response.body)).to have_css(pupil_row).and have_no_css("#{pupil_row} i")
+        end
+      end
+    end
   end
 end
