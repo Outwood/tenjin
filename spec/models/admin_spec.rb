@@ -11,5 +11,6 @@ RSpec.describe Admin do
     subject { build(:admin) }
 
     it { is_expected.to validate_presence_of(:role) }
+    it { is_expected.to validate_length_of(:password).is_at_least(15).is_at_most(128) }
   end
 end

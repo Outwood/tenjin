@@ -4,8 +4,8 @@ if Rails.env.development? || Rails.env.test?
     task prime: "db:setup" do
       Admin.create!(
         email: `git config user.email`.chomp,
-        password: "password",
-        password_confirmation: "password",
+        password: "correct horse battery",
+        password_confirmation: "correct horse battery",
         role: "super"
       )
     end
