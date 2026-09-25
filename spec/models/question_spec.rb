@@ -346,32 +346,6 @@ RSpec.describe Question, :default_creates do
     expect { question.destroy }.to change(described_class, :count).by(-1)
   end
 
-  describe ".check_boolean" do
-    context "when changing a question type to a boolean question" do
-      let(:question) { create(:question, question_type: "multiple") }
-
-      # update_attribute intentional: update! runs the "two answers" validation before
-      # the check_boolean callback creates them, so validation fires before the callback can run.
-      before { question.update_attribute(:question_type, "boolean") }
-
-      it "replaces all existing answers with exactly two boolean answers" do
-        expect(question.reload.answers).to contain_exactly(
-          have_attributes(text: "False", correct: false),
-          have_attributes(text: "True", correct: false)
-        )
-      end
-    end
-
-    context "when not changing to a boolean question type" do
-      let(:question) { create(:question, question_type: "multiple") }
-
-      it "does not replace existing answers" do
-        expect { question.update!(question_text: "updated text") }
-          .not_to change { question.reload.answers.pluck(:id) }
-      end
-    end
-  end
-
   describe ".check_short_answer" do
     let(:question) { create(:question, question_type: "multiple") }
     let(:answer) { create(:answer, question: question, correct: false) }

@@ -22,7 +22,6 @@ class Question < ApplicationRecord
     joins(topic: :subject).group("topics.subject_id").count
   end
 
-  before_update :check_boolean
   before_save :note_answer_text_writes
   after_save :check_answer_texts_now
   before_update :check_short_answer
@@ -132,14 +131,6 @@ class Question < ApplicationRecord
   # Answers removed through nested attributes stay loaded until the save
   def kept_answers
     answers.reject(&:marked_for_destruction?)
-  end
-
-  def check_boolean
-    return unless question_type_changed? && boolean?
-
-    answers.destroy_all
-    Answer.create(question: self, correct: false, text: "False")
-    Answer.create(question: self, correct: false, text: "True")
   end
 
   def check_short_answer
