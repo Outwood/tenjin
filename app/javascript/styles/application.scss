@@ -43,8 +43,9 @@ a:hover {
   text-decoration: none;
 }
 
-// Links share the body colour, so the question table underlines its question and lesson links to set them apart
-.question-table a {
+// Links share the body colour, so a datatable underlines the links in its rows to set them apart;
+// a link drawn as a button carries its own border
+.tabulator .tabulator-tableholder a:not(.btn) {
   text-decoration: underline;
   text-decoration-color: rgba(var(--bs-body-color-rgb), 0.35);
   text-underline-offset: 0.2em;
