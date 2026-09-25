@@ -1,40 +1,54 @@
 - content_for :title
   title = "Classroom - #{@classroom.name}"
 .container
-  h1.h1.mt-3.text-center = @classroom.name
-  section.page-section.text-center.pt-2#homework
-    h2.page-section-header.text-uppercase Homework
-    ==render_small_separator
-    .row.justify-content-center
-      = link_to 'Set Homework', new_classroom_homework_path(@classroom), class: 'btn w-100 btn-primary'
-      - homework_table_options = { paginationSize: 5,
-          placeholder: 'No homeworks have been found',
-          initialSort: [{ column: 'due', dir: 'desc' }],
-          columns: [{ title: 'Topic', field: 'topic' },
-            { title: 'Completion', field: 'completion' },
-            { title: 'Due', field: 'due', sorter: 'ukDateTime' }] }.to_json
-      .col.mx-auto data-controller='datatable' data-datatable-options-value=homework_table_options
-        table.table.table-hover#homework-table data-datatable-target='table'
-          thead
-            tr
-              th Topic
-              th Completion
-              th Due
-          tbody
-            - @homeworks.each do |h|
-              tr.homework-data data-id=h.id
-                td = link_to h.topic.name, homework_path(h)
-                td = report_progress(h)
-                td = h.due_date.strftime("%d/%m/%y %H:%M")
-  section.page-section.text-center.pt-2#students
-    h2.page-section-header.text-uppercase Students
-    ==render_small_separator
-    .row.justify-content-center data-controller='datatable' data-datatable-options-value=({ pagination: false }.to_json)
-      = render 'shared/table_search', label: 'Search students'
-      .mb-2
-        button.btn.btn-secondary.btn-sm.me-2 type='button' data-action='click->datatable#copy' Copy
-        button.btn.btn-secondary.btn-sm type='button' data-action='click->datatable#downloadCsv' CSV
-      table.table#students-table style="width:100%" data-datatable-target='table'
+  .mt-3.mb-4
+    h1.mb-0 = @classroom.name
+    - if @classroom.subject
+      p.lead.mb-0#classroom-subject = @classroom.subject.name
+  section.mb-5#homework aria-labelledby='homework-heading'
+    .d-flex.flex-wrap.align-items-center.justify-content-between.gap-2.mb-3
+      h2.mb-0#homework-heading Homework
+      = link_to 'Set Homework', new_classroom_homework_path(@classroom), class: 'btn btn-primary'
+    / Topic takes the spare width; on a narrow screen the other columns fold under each row
+    - homework_table_options = { placeholder: 'No homeworks have been found',
+        initialSort: [{ column: 'due', dir: 'desc' }],
+        responsiveLayout: 'collapse',
+        columns: [{ title: 'Topic', field: 'topic', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 0 },
+          { title: 'Completion', field: 'completion', minWidth: 150, responsive: 2 },
+          { title: 'Due', field: 'due', minWidth: 150, sorter: 'ukDateTime', responsive: 1 }] }.to_json
+    div data-controller='datatable' data-datatable-options-value=homework_table_options
+      table.table.table-hover#homework-table data-datatable-target='table'
+        / Each heading must match its column's title above, which Tabulator pairs it by
+        thead
+          tr
+            th Topic
+            th Completion
+            th Due
+        tbody
+          - @homeworks.each do |h|
+            tr.homework-data data-id=h.id
+              td = link_to h.topic.name, homework_path(h)
+              td = report_progress(h)
+              td = h.due_date.strftime("%d/%m/%y %H:%M")
+  section.mb-5#students aria-labelledby='students-heading'
+    h2.mb-3#students-heading Students
+    / Names stay put on a narrow screen and the rest fold under each row. Folded columns
+      still copy and download, so an export has the same columns at any width.
+    - export = { clipboard: true, download: true }
+    - students_table_options = { pagination: false,
+        responsiveLayout: 'collapse',
+        columns: [{ title: 'First Name', field: 'first_name', minWidth: 120, responsive: 0 },
+          { title: 'Last Name', field: 'last_name', minWidth: 120, responsive: 0 },
+          { title: 'Username', field: 'username', minWidth: 140, responsive: 2, **export },
+          { title: 'Reset Password', field: 'reset_password', minWidth: 190, responsive: 1, **export },
+          { title: 'Homeworks', field: 'homeworks', minWidth: 140, responsive: 3, **export }] }.to_json
+    div data-controller='datatable' data-datatable-options-value=students_table_options
+      .d-flex.flex-wrap.gap-2
+        .flex-grow-1 = render 'shared/table_search', label: 'Search students'
+        .d-flex.gap-2.mb-2
+          button.btn.btn-outline-secondary type='button' data-action='click->datatable#copy' Copy
+          button.btn.btn-outline-secondary type='button' data-action='click->datatable#downloadCsv' CSV
+      table.table#students-table data-datatable-target='table'
         thead
           tr
             th First Name

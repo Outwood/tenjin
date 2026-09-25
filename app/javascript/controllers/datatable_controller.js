@@ -66,6 +66,16 @@ export default class extends Controller {
         this.tabulator.getColumn(SRC_INDEX_FIELD).hide();
       }
     });
+
+    // Page buttons for a single page offer nothing, and a search can shrink
+    // or grow the page count, so the footer is rechecked after every render
+    this.tabulator.on("renderComplete", () => this.#toggleFooter());
+  }
+
+  #toggleFooter() {
+    if (!this.tabulator.options.pagination) return;
+    const footer = this.tabulator.element.querySelector(".tabulator-footer");
+    footer?.classList.toggle("d-none", this.tabulator.getPageMax() <= 1);
   }
 
   disconnect() {
