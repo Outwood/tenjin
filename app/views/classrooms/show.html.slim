@@ -10,7 +10,7 @@
       h2.mb-0#homework-heading Homework
       = link_to 'Set Homework', new_classroom_homework_path(@classroom), class: 'btn btn-primary'
     / Topic takes the spare width; on a narrow screen the other columns fold under each row
-    - homework_table_options = { placeholder: 'No homeworks have been found',
+    - homework_table_options = { placeholder: 'No homework set yet',
         initialSort: [{ column: 'due', dir: 'desc' }],
         responsiveLayout: 'collapse',
         columns: [{ title: 'Topic', field: 'topic', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 0 },
@@ -40,10 +40,11 @@
       strip and the actions menu export nothing: the strip's text is its hidden labels run together.
     - export = { clipboard: true, download: true }
     - students_table_options = { pagination: false,
+        placeholder: 'No pupils are enrolled in this class.',
         searchFields: %w[first_name last_name username],
         responsiveLayout: 'collapse',
-        columns: [{ title: 'First Name', field: 'first_name', minWidth: 120, responsive: 0 },
-          { title: 'Last Name', field: 'last_name', minWidth: 120, responsive: 0 },
+        columns: [{ title: 'First name', field: 'first_name', minWidth: 120, responsive: 0 },
+          { title: 'Last name', field: 'last_name', minWidth: 120, responsive: 0 },
           { title: 'Username', field: 'username', minWidth: 140, responsive: 2, **export },
           { title: 'Recent homework', field: 'recent_homework', minWidth: 150, responsive: 3,
             headerSort: false, headerTooltip: 'The five homework due latest, earliest due first',
@@ -61,8 +62,8 @@
       table.table#students-table data-datatable-target='table'
         thead
           tr
-            th First Name
-            th Last Name
+            th First name
+            th Last name
             th Username
             th Recent homework
             th Actions
