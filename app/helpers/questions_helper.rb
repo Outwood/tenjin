@@ -9,6 +9,11 @@ module QuestionsHelper
     end
   end
 
+  # Leaves out the bare "Answers is invalid", which each answer's own error says better
+  def question_error_messages(question)
+    question.errors.reject { |error| error.attribute == :answers }.map(&:full_message).uniq
+  end
+
   # A new question is created in the topic it was started from
   def question_form_url(question)
     question.persisted? ? question_path(question) : topic_questions_path(question.topic)

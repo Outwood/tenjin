@@ -1,5 +1,11 @@
 = form_with model: @question, url: question_form_url(@question), id: 'questionForm', local: true,
   data: { controller: 'nested-fields reload-form' } do |f|
+  - if @question.errors.any?
+    .alert.alert-danger.my-2 role='alert'
+      p.fw-bold.mb-1 Fix these before saving the question:
+      ul.mb-0
+        - question_error_messages(@question).each do |message|
+          li = message
   .row.my-2
     .col-sm-3
       = f.label(:question_type, 'Question Type')
@@ -12,10 +18,6 @@
   .row.my-2
     .col.justify-content-center
       = f.rich_text_area :question_text
-      - @question.errors[:question_text].each do |e|
-        p.error = e
-      - @question.errors[:base].each do |e|
-        p.error = e
   .row.my-2
     .col-sm-3
       = f.label(:lesson_id, 'Lesson:')

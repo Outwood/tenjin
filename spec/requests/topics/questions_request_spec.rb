@@ -89,7 +89,9 @@ RSpec.describe "topic questions controller", :default_creates do
         expect { post topic_questions_path(topic), params: {question: question_params} }
           .not_to change(Question, :count)
         expect(response).to have_http_status(:unprocessable_content)
-        expect(Capybara.string(response.body)).to have_css("p.error", text: "can't be blank")
+        expect(Capybara.string(response.body))
+          .to have_css(".alert-danger li", exact_text: "Question text can't be blank")
+          .and have_css("trix-editor.is-invalid + p.error", exact_text: "can't be blank")
       end
     end
 

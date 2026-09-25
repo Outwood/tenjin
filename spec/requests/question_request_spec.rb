@@ -262,6 +262,19 @@ RSpec.describe "questions controller", :default_creates do
       end
     end
 
+    context "when an answer is left blank" do
+      before do
+        patch question_path(question), params: {question: {answers_attributes: {"0" => {id: correct_answer.id, text: ""}}}}
+      end
+
+      it "re-renders the editor with the error summarised and the answer marked" do
+        expect(Capybara.string(response.body))
+          .to have_css(".alert-danger li", exact_text: "Answer can't be blank")
+          .and have_no_css(".alert-danger li", text: "is invalid")
+          .and have_css("input#answer-text-0.is-invalid + p.error", exact_text: "can't be blank")
+      end
+    end
+
     context "with a short answer question" do
       let(:question) { create(:short_answer_question, topic: topic) }
 
