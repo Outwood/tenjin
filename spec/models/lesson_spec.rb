@@ -44,6 +44,16 @@ RSpec.describe Lesson do
   describe "validations" do
     it { is_expected.to validate_length_of(:title).is_at_least(3) }
 
+    it "stores its title with whitespace collapsed, non-breaking spaces included" do
+      expect(build(:lesson, title: " Adding   fractions\t").title).to eq("Adding fractions")
+    end
+
+    it "counts only the title's visible characters towards its length" do
+      lesson = build(:lesson, title: " a ")
+      expect(lesson).not_to be_valid
+      expect(lesson.errors[:title]).to contain_exactly("is too short (minimum is 3 characters)")
+    end
+
     describe "video links" do
       let(:lesson) { build(:lesson) }
 
