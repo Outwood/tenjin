@@ -51,6 +51,16 @@ RSpec.describe "topic questions controller", :default_creates do
   end
 
   describe "GET /topics/:topic_id/questions/new" do
+    context "with no type chosen" do
+      before { get new_topic_question_path(topic) }
+
+      it "starts a short answer question" do
+        expect(Capybara.string(response.body))
+          .to have_select("Question Type", selected: "Short answer")
+          .and have_no_css("#table-answers th", text: "Correct?")
+      end
+    end
+
     context "when previewing the question as boolean" do
       before { get new_topic_question_path(topic, question: {question_type: "boolean"}) }
 

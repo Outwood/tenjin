@@ -29,6 +29,8 @@ module Topics
 
     def new
       @question = authorize @topic.questions.new(question_params)
+      # Matches the type select, which shows its first option until one is chosen
+      @question.question_type ||= :short_answer
       check_answers(@question)
     end
 
