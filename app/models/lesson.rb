@@ -30,6 +30,7 @@ class Lesson < ApplicationRecord
 
   validates :title, length: {minimum: 3}
   validate :check_video_link
+  validate :topic_kept_by_questions, on: :update
 
   def video_link=(value)
     self.category, self.video_id = extract_id(value)
@@ -45,6 +46,11 @@ class Lesson < ApplicationRecord
     format && (format % video_id)
   end
 
+  # A question's topic must match its lesson's, so moving the lesson would strand them
+  def topic_locked?
+    persisted? && questions.exists?
+  end
+
   def thumbnail_url
     format = CATEGORY_THUMBNAILS[category&.to_sym]
     format && (format % video_id)
@@ -58,6 +64,10 @@ class Lesson < ApplicationRecord
     end
 
     kind.first || [:no_content, nil]
+  end
+
+  def topic_kept_by_questions
+    errors.add :topic, "can't change while the lesson has questions" if topic_id_changed? && topic_locked?
   end
 
   def check_video_link

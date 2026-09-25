@@ -262,6 +262,28 @@ RSpec.describe "lessons controller", :default_creates do
           .to have_select("Topic", selected: "Photosynthesis (inactive)", options: ["Algebra", "Photosynthesis (inactive)"])
       end
     end
+
+    context "with questions on the lesson" do
+      let(:lesson) { create(:lesson, topic: topic) }
+
+      before { create(:question, topic: topic, lesson: lesson) }
+
+      it "locks the topic and says why" do
+        get edit_lesson_path(lesson)
+        expect(Capybara.string(response.body))
+          .to have_select("Topic", selected: topic.name, disabled: true)
+          .and have_css(".lesson_topic .form-text", text: "can't change while the lesson has questions")
+      end
+    end
+
+    context "without questions on the lesson" do
+      let(:lesson) { create(:lesson, topic: topic) }
+
+      it "lets the topic change" do
+        get edit_lesson_path(lesson)
+        expect(Capybara.string(response.body)).to have_select("Topic", disabled: false)
+      end
+    end
   end
 
   describe "PATCH /lessons/:id" do
@@ -288,6 +310,27 @@ RSpec.describe "lessons controller", :default_creates do
         expect { patch lesson_path(lesson), params: {lesson: {topic_id: woodwork_topic.id}} }
           .not_to change { lesson.reload.topic_id }
         expect(flash[:alert]).to eq("You are not authorized to perform this action.")
+      end
+    end
+
+    context "when moving a lesson that has questions" do
+      let(:fractions) { create(:topic, subject: quiz_subject, name: "Fractions") }
+
+      before { create(:question, topic: topic, lesson: lesson) }
+
+      it "keeps the lesson in its topic" do
+        expect { patch lesson_path(lesson), params: {lesson: {topic_id: fractions.id}} }
+          .not_to change { lesson.reload.topic_id }
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(Capybara.string(response.body))
+          .to have_css(".invalid-feedback", text: "can't change while the lesson has questions")
+      end
+
+      it "shows the saved topic, explained once" do
+        patch lesson_path(lesson), params: {lesson: {topic_id: fractions.id}}
+        expect(Capybara.string(response.body))
+          .to have_select("Topic", selected: topic.name, disabled: true)
+          .and have_no_css(".lesson_topic .form-text")
       end
     end
 
