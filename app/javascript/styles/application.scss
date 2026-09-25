@@ -43,6 +43,18 @@ a:hover {
   text-decoration: none;
 }
 
+// Links share the body colour, so the question table underlines its question and lesson links to set them apart
+.question-table a {
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--bs-body-color-rgb), 0.35);
+  text-underline-offset: 0.2em;
+
+  &:hover {
+    color: inherit;
+    text-decoration-color: currentColor;
+  }
+}
+
 .spinner {
   width: 40px;
   height: 40px;

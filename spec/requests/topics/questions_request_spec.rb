@@ -69,6 +69,85 @@ RSpec.describe "topic questions controller", :default_creates do
     end
   end
 
+  describe "GET /topics/:topic_id/questions lessons" do
+    let!(:question) { create(:question, topic: topic) }
+
+    context "with a lesson for the topic" do
+      let!(:lesson) { create(:lesson, topic: topic, title: "Leaf structure") }
+      let!(:lesson_question) { create(:question, topic: topic, lesson: lesson) }
+
+      before { get topic_questions_path(topic) }
+
+      it "links each question's lesson to its questions" do
+        expect(Capybara.string(response.body))
+          .to have_css("#questionTable th", exact_text: "Lesson")
+          .and have_css("#question-#{lesson_question.id} td.lesson a[href='#{lesson_questions_path(lesson)}']", exact_text: "Leaf structure")
+      end
+
+      it "offers the lesson as the default" do
+        expect(Capybara.string(response.body)).to have_select("Default lesson", options: ["No default lesson", "Leaf structure"])
+      end
+    end
+
+    context "with a lesson no question is in" do
+      let!(:lesson) { create(:lesson, topic: topic, title: "Leaf structure") }
+
+      before { get topic_questions_path(topic) }
+
+      it "leaves out the lesson column but offers the lesson as the default" do
+        expect(Capybara.string(response.body))
+          .to have_no_css("#questionTable th", exact_text: "Lesson")
+          .and have_select("Default lesson", options: ["No default lesson", "Leaf structure"])
+      end
+    end
+
+    context "with no lessons for the topic" do
+      before { get topic_questions_path(topic) }
+
+      it "leaves out the lesson column" do
+        expect(Capybara.string(response.body))
+          .to have_css("#questionTable th", exact_text: "Question")
+          .and have_no_css("#questionTable th", exact_text: "Lesson")
+      end
+
+      it "says so in place of the default lesson choice" do
+        expect(Capybara.string(response.body))
+          .to have_css("#no-lessons", text: "This topic has no lessons yet.")
+          .and have_no_select("Default lesson")
+      end
+
+      it "offers no lesson to an author who cannot write lessons" do
+        expect(Capybara.string(response.body)).to have_no_link("Add a lesson")
+      end
+    end
+
+    context "with no lessons for the topic and a lesson author" do
+      before do
+        author.add_role :lesson_author, quiz_subject
+        get topic_questions_path(topic)
+      end
+
+      it "links to a new lesson in the topic" do
+        expect(Capybara.string(response.body))
+          .to have_link("Add a lesson", href: new_subject_lesson_path(quiz_subject, topic_id: topic.id))
+      end
+    end
+
+    context "with no lessons for an inactive topic and a lesson author" do
+      let(:inactive_topic) { create(:topic, subject: quiz_subject, active: false) }
+
+      before do
+        author.add_role :lesson_author, quiz_subject
+        get topic_questions_path(inactive_topic)
+      end
+
+      it "offers no lesson, which only an active topic can take" do
+        expect(Capybara.string(response.body))
+          .to have_css("#no-lessons").and have_no_link("Add a lesson")
+      end
+    end
+  end
+
   describe "GET /topics/:topic_id/questions/new" do
     context "with no type chosen" do
       before { get new_topic_question_path(topic) }

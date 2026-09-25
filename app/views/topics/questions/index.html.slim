@@ -22,14 +22,25 @@
           class: 'form-control',
           data: { action: 'change->auto-submit#submit' }
     .row
-      = label_tag 'topic_default_lesson_id', 'Default lesson', class: 'col-sm-3 col-form-label'
-      .col-sm-9
-        = select_tag 'topic[default_lesson_id]',
-          options_from_collection_for_select(Lesson.where(topic: @topic), :id, :title, selected: @topic.default_lesson_id),
-          include_blank: 'No default lesson',
-          class: 'form-select',
-          data: { action: 'change->auto-submit#submit' }
-        .form-text role='status' data-auto-submit-target='status'
+      - if @lessons.empty?
+        .col-sm-3.col-form-label Default lesson
+        .col-sm-9
+          p.form-control-plaintext.mb-0#no-lessons
+            | This topic has no lessons yet.
+            / New lessons go only in active topics
+            - if @topic.active? && policy(Lesson.new(topic: @topic)).new?
+              =< link_to 'Add a lesson', new_subject_lesson_path(@topic.subject, topic_id: @topic.id),
+                class: 'btn btn-sm btn-outline-secondary ms-2'
+          .form-text role='status' data-auto-submit-target='status'
+      - else
+        = label_tag 'topic_default_lesson_id', 'Default lesson', class: 'col-sm-3 col-form-label'
+        .col-sm-9
+          = select_tag 'topic[default_lesson_id]',
+            options_from_collection_for_select(@lessons, :id, :title, selected: @topic.default_lesson_id),
+            include_blank: 'No default lesson',
+            class: 'form-select',
+            data: { action: 'change->auto-submit#submit' }
+          .form-text role='status' data-auto-submit-target='status'
   = render 'questions/question_table'
   section.mt-5.mb-5 aria-labelledby='danger-zone-heading'
     h2#danger-zone-heading Danger Zone

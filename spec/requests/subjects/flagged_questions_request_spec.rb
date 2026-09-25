@@ -18,5 +18,15 @@ RSpec.describe "subject flagged questions controller", :default_creates do
     end
 
     it "does not list unflagged questions"
+
+    context "with a flagged question in a lesson" do
+      let(:lesson) { create(:lesson, topic: topic, title: "Leaf structure") }
+      let!(:flagged_question) { create(:question, topic: topic, lesson: lesson, flagged_questions_count: 5) }
+
+      it "links the question's lesson" do
+        expect(Capybara.string(response.body))
+          .to have_link("Leaf structure", href: lesson_questions_path(lesson))
+      end
+    end
   end
 end
