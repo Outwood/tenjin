@@ -23,7 +23,7 @@ class HomeworksController < ApplicationController
       redirect_to @homework
     else
       @lessons = lessons_for_classroom(@classroom)
-      render(:new)
+      render :new, status: :unprocessable_content
     end
   end
 

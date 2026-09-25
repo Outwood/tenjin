@@ -66,9 +66,9 @@ class LessonsController < ApplicationController
     unless @lesson.valid?
       @topics = topics_for(@lesson.subject)
 
-      return render :edit if @lesson.persisted?
+      return render :edit, status: :unprocessable_content if @lesson.persisted?
 
-      return render :new
+      return render :new, status: :unprocessable_content
     end
 
     @lesson.save!

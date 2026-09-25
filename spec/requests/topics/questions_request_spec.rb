@@ -88,6 +88,7 @@ RSpec.describe "topic questions controller", :default_creates do
       it "creates nothing and re-renders the form with the error" do
         expect { post topic_questions_path(topic), params: {question: question_params} }
           .not_to change(Question, :count)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Capybara.string(response.body)).to have_css("p.error", text: "can't be blank")
       end
     end

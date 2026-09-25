@@ -205,6 +205,7 @@ RSpec.describe "lessons controller", :default_creates do
 
       it "re-renders the new form with errors" do
         expect { post lessons_path, params: params }.not_to change(Lesson, :count)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Capybara.string(response.body))
           .to have_css("h1", text: "Create Lesson")
           .and have_css(".invalid-feedback", text: "too short")
@@ -241,6 +242,7 @@ RSpec.describe "lessons controller", :default_creates do
       it "re-renders the edit form with errors" do
         expect { patch lesson_path(lesson), params: {lesson: {title: "ab"}} }
           .not_to change { lesson.reload.title }
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Capybara.string(response.body))
           .to have_css("h1", text: "Update Lesson")
           .and have_css(".invalid-feedback", text: "too short")

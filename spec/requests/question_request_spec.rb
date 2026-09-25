@@ -257,7 +257,7 @@ RSpec.describe "questions controller", :default_creates do
       end
 
       it "re-renders the editor with an error" do
-        expect(response).to have_http_status(:ok)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include("Question must have at least one correct answer")
       end
     end

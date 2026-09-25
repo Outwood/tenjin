@@ -12,7 +12,7 @@ RSpec.describe "topic imports controller", :default_creates do
       it "re-renders the import form with an alert" do
         post topic_import_path(topic)
 
-        expect(response).to have_http_status(:success)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include("Please attach a file")
       end
     end

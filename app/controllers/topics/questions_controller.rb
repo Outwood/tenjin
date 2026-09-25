@@ -39,7 +39,7 @@ module Topics
       if @question.save
         redirect_to topic_questions_path(@topic), notice: "Question successfully created"
       else
-        render :new
+        render :new, status: :unprocessable_content
       end
     end
 
