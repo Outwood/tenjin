@@ -109,8 +109,8 @@ RSpec.describe "homeworks controller", :default_creates do
 
       it "names each pupil's status beside its icon" do
         expect(Capybara.string(response.body))
-          .to have_css("tr.student-row td:nth-child(2)", exact_text: "Complete", count: 1)
-          .and have_css("tr.student-row td:nth-child(2)", exact_text: "Not complete", count: 9)
+          .to have_css("tr.student-row td:nth-child(3)", exact_text: "Complete", count: 1)
+          .and have_css("tr.student-row td:nth-child(3)", exact_text: "Not complete", count: 9)
       end
     end
 
@@ -142,8 +142,35 @@ RSpec.describe "homeworks controller", :default_creates do
         get homework_path(homework)
       end
 
-      it "shows the student's progress percentage" do
-        expect(Capybara.string(response.body)).to have_css("tr.student-row td", text: "50%")
+      it "shows the student's best score" do
+        expect(Capybara.string(response.body)).to have_css("tr.student-row td:nth-child(4)", exact_text: "50%", count: 1)
+      end
+    end
+
+    context "with pupils who share a surname" do
+      let(:named_classroom) { create(:classroom, school: school, subject: quiz_subject) }
+      let!(:pupils) do
+        [%w[Ben Brown], %w[Amelia Brown], %w[Chloe Adams]].map do |forename, surname|
+          create(:student, school: school, forename: forename, surname: surname)
+            .tap { |pupil| create(:enrollment, classroom: named_classroom, user: pupil) }
+        end
+      end
+      let!(:homework) { create(:homework, classroom: named_classroom) }
+
+      before { get homework_path(homework) }
+
+      it "orders them by forename within the surname" do
+        ben, amelia, chloe = pupils
+        expect(Capybara.string(response.body))
+          .to have_css("tr.student-row:nth-child(1)[data-user='#{chloe.id}']")
+          .and have_css("tr.student-row:nth-child(2)[data-user='#{amelia.id}']")
+          .and have_css("tr.student-row:nth-child(3)[data-user='#{ben.id}']")
+      end
+
+      it "links each first name to the pupil, labelled with the full name" do
+        amelia = pupils.second
+        expect(Capybara.string(response.body))
+          .to have_css("a[href='#{user_path(amelia)}'][aria-label='Amelia Brown']", exact_text: "Amelia")
       end
     end
 
