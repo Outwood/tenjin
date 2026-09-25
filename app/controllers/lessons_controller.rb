@@ -52,8 +52,10 @@ class LessonsController < ApplicationController
 
   def destroy
     lesson = authorize find_lesson
-    lesson.destroy
-    redirect_to_topic(lesson.topic)
+    return redirect_to_topic(lesson.topic) if lesson.destroy
+
+    redirect_to_topic(lesson.topic,
+      alert: "This lesson can't be deleted: it has been set as homework or used in a quiz.")
   end
 
   private
