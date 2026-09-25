@@ -7,6 +7,7 @@ module QuestionAnswers
   private
 
   def check_answers(question)
+    mark_chosen_answer(question)
     setup_boolean_question(question) if question.boolean?
     question.answers.each { |a| a.correct = true } if question.short_answer? || question.question_type.nil?
   end
@@ -34,6 +35,15 @@ module QuestionAnswers
 
   def boolean_label(answer)
     BOOLEAN_LABELS.find { |label| label.casecmp?(Answer.normalize_value_for(:text, answer.text.to_s)) }
+  end
+
+  # A boolean question's radio buttons post the label of its one correct
+  # answer, which still holds when the author switches type before saving
+  def mark_chosen_answer(question)
+    label = params.dig(:question, :correct_answer)
+    return if label.blank?
+
+    question.answers.reject(&:marked_for_destruction?).each { |answer| answer.correct = boolean_label(answer) == label }
   end
 
   # Labels by meaning, so each answer keeps its correct flag; only answers

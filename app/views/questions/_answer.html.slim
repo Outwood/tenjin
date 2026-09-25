@@ -9,10 +9,15 @@ tr hidden=f.object.marked_for_destruction?
                     readonly: (@question.boolean? ? true : false))
   - unless @question.short_answer? || @question.question_type.nil?
     td
-      = f.check_box(:correct,
-          onchange: "this.setAttribute('data-params', '#{f.object_name}[correct]=' + this.checked*this.checked)",
-          id: "answer-check-#{f.index}",
-          class: 'form-check-input')
+      - if @question.boolean?
+        = radio_button_tag('question[correct_answer]', f.object.text, f.object.text == chosen_boolean_label(@question),
+            id: "answer-check-#{f.index}",
+            class: 'form-check-input')
+      - else
+        = f.check_box(:correct,
+            onchange: "this.setAttribute('data-params', '#{f.object_name}[correct]=' + this.checked*this.checked)",
+            id: "answer-check-#{f.index}",
+            class: 'form-check-input')
   - unless @question.boolean?
     td
       - if f.object.persisted?

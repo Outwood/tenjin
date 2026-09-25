@@ -9,6 +9,12 @@ module QuestionsHelper
     end
   end
 
+  # The label of a boolean question's one correct answer; none while that is in doubt
+  def chosen_boolean_label(question)
+    correct = question.answers.reject(&:marked_for_destruction?).select(&:correct)
+    correct.first.text if correct.one?
+  end
+
   # Leaves out the bare "Answers is invalid", which each answer's own error says better
   def question_error_messages(question)
     question.errors.reject { |error| error.attribute == :answers }.map(&:full_message).uniq

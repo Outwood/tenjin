@@ -85,6 +85,15 @@ RSpec.describe Question, :default_creates do
         expect(boolean_question).not_to be_valid
       end
     end
+
+    context "with both answers marked correct" do
+      before { boolean_question.answers.each { |answer| answer.correct = true } }
+
+      it "is invalid" do
+        expect(boolean_question).to be_invalid
+        expect(boolean_question.errors[:base]).to contain_exactly("Boolean question must have only one correct answer")
+      end
+    end
   end
 
   describe "answer texts" do

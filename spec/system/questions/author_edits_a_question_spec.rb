@@ -37,6 +37,18 @@ RSpec.describe "Author edits a question", :default_creates do
       end
     end
 
+    context "with a boolean question" do
+      let(:question) { create(:boolean_question, topic: topic) }
+
+      # rack_test form-wiring smoke; marking is covered in spec/requests/question_request_spec.rb
+      it "chooses the correct answer" do
+        find("#table-answers input[type=radio][value='False']").choose
+        click_button("Save Question")
+        expect(page).to have_css(".alert-info", text: "Question successfully updated")
+          .and have_checked_field(type: :radio, with: "False")
+      end
+    end
+
     # turbo_confirm smoke; QuestionsController#destroy is covered in spec/requests/question_request_spec.rb
     it "deletes the question", :js do
       page.accept_confirm { click_button("Delete Question") }

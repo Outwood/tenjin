@@ -36,6 +36,7 @@ class Question < ApplicationRecord
   validate :at_least_one_correct_answer
   validate :answers_distinct
   validate :boolean_true_or_false
+  validate :boolean_one_correct_answer
   validate :lesson_is_for_topic
 
   def lesson_is_for_topic
@@ -54,6 +55,12 @@ class Question < ApplicationRecord
     return errors.add :base, "Boolean must be true or false only" unless labels.all? { |label| %w[true false].include?(label) }
 
     errors.add :base, "Boolean question must have one True and one False answer"
+  end
+
+  def boolean_one_correct_answer
+    return unless boolean? && kept_answers.count(&:correct) > 1
+
+    errors.add :base, "Boolean question must have only one correct answer"
   end
 
   def answers_distinct
