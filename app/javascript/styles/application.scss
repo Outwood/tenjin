@@ -199,6 +199,11 @@ hr.small {
   }
 }
 
+// A row's ⋮ button explains itself, so its column's heading is for screen readers only
+.tabulator .tabulator-col.actions-column .tabulator-col-title {
+  @include visually-hidden;
+}
+
 // Clears the fixed navbar when a subject link or the reopened topic scrolls here
 .lesson-subject,
 .lesson-topic {

@@ -10,14 +10,21 @@ RSpec.describe "School admin views user list", :default_creates, :js do
     visit(users_path)
   end
 
-  describe "the Reset Password link" do
-    # One smoke for the password-reset Stimulus controller, which the employee table and classroom page share;
-    # the password the action returns is covered in spec/requests/users_request_spec.rb
-    it "replaces the Reset Password link with the new password" do
-      within "#students-table" do
-        click_link("Reset Password")
-        expect(page).to have_no_link("Reset Password").and have_css(".new-password")
+  describe "a row's password reset" do
+    # One smoke for the actions menu, its Bootstrap dropdown and modal, and the password-reset Stimulus
+    # controller, which the employee table and classroom page share; the controller's branches are in
+    # spec/javascript/controllers/password_reset_controller.test.js
+    it "asks first, then shows the new password" do
+      name = "#{student.forename} #{student.surname}"
+      within("#students-table") do
+        click_button("Actions for #{name}", enable_aria_label: true)
+        click_button("Reset password…")
       end
+
+      within(".modal", text: "Reset #{name}'s password?") { click_button("Reset password") }
+
+      expect(page).to have_css(".modal-title", exact_text: "New password for #{name}")
+        .and have_css("[data-password-reset-target='password']", text: /\S/)
     end
   end
 
