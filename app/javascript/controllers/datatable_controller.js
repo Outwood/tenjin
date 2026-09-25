@@ -13,7 +13,10 @@ const SRC_INDEX_FIELD = "__tabulatorSrcIdx__";
 // `data-controller="datatable"` markup keeps working.
 export default class extends Controller {
   static targets = ["table", "search"];
-  static values = { options: { type: Object, default: {} } };
+  static values = {
+    options: { type: Object, default: {} },
+    filename: { type: String, default: "data.csv" },
+  };
 
   connect() {
     // Snapshot source <tr> id/class/data-* before Tabulator regenerates rows.
@@ -104,7 +107,7 @@ export default class extends Controller {
   }
 
   downloadCsv() {
-    this.tabulator.download("csv", "data.csv");
+    this.tabulator.download("csv", this.filenameValue);
   }
 
   reapplyRowAttrs(row) {

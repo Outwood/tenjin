@@ -7,7 +7,9 @@ h2.page-section-header.text-uppercase Employees
       { title: 'Classes', field: 'classes' },
       { title: 'Actions', field: 'actions', width: 64, headerSort: false,
         cssClass: 'actions-column', clipboard: false, download: false }] }.to_json
-.col.table-responsive data-controller='datatable password-reset' data-datatable-options-value=employees_table_options
+.col.table-responsive[data-controller='datatable password-reset'
+  data-datatable-options-value=employees_table_options
+  data-datatable-filename-value=csv_filename("#{current_user.school.name} employees")]
   = render 'shared/table_search', label: 'Search employees'
   .mb-2
     button.btn.btn-secondary.btn-sm.me-2 type='button' data-action='click->datatable#copy' Copy

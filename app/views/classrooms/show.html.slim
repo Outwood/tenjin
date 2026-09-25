@@ -50,7 +50,9 @@
             clipboard: false, download: false },
           { title: 'Actions', field: 'actions', width: 64, responsive: 0, headerSort: false,
             cssClass: 'actions-column', clipboard: false, download: false }] }.to_json
-    div data-controller='datatable password-reset' data-datatable-options-value=students_table_options
+    div[data-controller='datatable password-reset'
+      data-datatable-options-value=students_table_options
+      data-datatable-filename-value=csv_filename("#{@classroom.name} students")]
       .d-flex.flex-wrap.gap-2
         .flex-grow-1 = render 'shared/table_search', label: 'Search students'
         .d-flex.gap-2.mb-2

@@ -158,6 +158,18 @@ RSpec.describe "classrooms controller", :default_creates do
       end
     end
 
+    context "with a class name holding a path separator" do
+      before do
+        classroom.update!(name: "9X/Sc")
+        get classroom_path(classroom)
+      end
+
+      it "names the pupil CSV after the class, without the separator" do
+        expect(Capybara.string(response.body))
+          .to have_css("#students [data-datatable-filename-value='9X-Sc students.csv']")
+      end
+    end
+
     describe "a pupil's actions menu" do
       let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
 
