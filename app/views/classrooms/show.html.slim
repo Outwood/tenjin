@@ -47,7 +47,7 @@
           { title: 'Username', field: 'username', minWidth: 140, responsive: 2, **export },
           { title: 'Reset Password', field: 'reset_password', minWidth: 190, responsive: 1, **export },
           { title: 'Recent homework', field: 'recent_homework', minWidth: 150, responsive: 3,
-            headerSort: false, headerTooltip: 'The latest five homework set, oldest first',
+            headerSort: false, headerTooltip: 'The five homework due latest, earliest due first',
             clipboard: false, download: false }] }.to_json
     div data-controller='datatable' data-datatable-options-value=students_table_options
       .d-flex.flex-wrap.gap-2

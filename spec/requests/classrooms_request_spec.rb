@@ -176,7 +176,7 @@ RSpec.describe "classrooms controller", :default_creates do
           get classroom_path(classroom)
         end
 
-        it "shows the five latest due, oldest first" do
+        it "shows the five due latest, earliest due first" do
           expect(Capybara.string(response.body))
             .to have_css("#{pupil_row} .homework-slot", count: 5)
             .and have_css("#{pupil_row} .homework-slot:nth-child(1)[data-homework='#{pupil_homeworks[1].id}']")
