@@ -130,6 +130,32 @@ RSpec.describe "questions controller", :default_creates do
       end
     end
 
+    context "with a boolean question whose answers are both marked correct" do
+      let(:question) { create(:boolean_question, topic: topic) }
+
+      before do
+        question.answers.update_all(correct: true)
+        get edit_question_path(question)
+      end
+
+      it "leaves the choice of correct answer to the author" do
+        expect(Capybara.string(response.body))
+          .to have_css("#table-answers input[type=radio]", count: 2)
+          .and have_no_css("#table-answers input[type=radio][checked]")
+      end
+    end
+
+    context "when previewing as multiple choice a boolean question with False chosen" do
+      let(:question) { create(:boolean_question, topic: topic) }
+
+      before { get edit_question_path(question, question: {question_type: "multiple", correct_answer: "False"}) }
+
+      it "ticks only the False answer" do
+        expect(Capybara.string(response.body))
+          .to have_css(ticked_answer("false")).and have_no_css(ticked_answer("true"))
+      end
+    end
+
     context "with a boolean question whose stored labels carry stray whitespace" do
       let(:question) { create(:boolean_question, topic: topic) }
 

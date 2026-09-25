@@ -10,7 +10,7 @@ tr hidden=f.object.marked_for_destruction?
   - unless @question.short_answer? || @question.question_type.nil?
     td
       - if @question.boolean?
-        = radio_button_tag('question[correct_answer]', f.object.text, f.object.correct,
+        = radio_button_tag('question[correct_answer]', f.object.text, f.object.text == chosen_boolean_label(@question),
             id: "answer-check-#{f.index}",
             class: 'form-check-input')
       - else
