@@ -45,7 +45,7 @@
         th
           span.visually-hidden Actions
     tbody.fields data-nested-fields-target='fields'
-      = f.fields_for :answers, answer_rows(@question) do |a|
+      = f.fields_for :answers do |a|
         = render 'questions/answer', f: a
   - unless @question.question_type == 'boolean'
     .row.my-2
