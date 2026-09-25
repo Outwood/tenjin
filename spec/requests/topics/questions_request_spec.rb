@@ -69,6 +69,27 @@ RSpec.describe "topic questions controller", :default_creates do
     end
   end
 
+  describe "GET /topics/:topic_id/questions activity" do
+    context "with an active topic" do
+      before { get topic_questions_path(topic) }
+
+      it "says nothing about activity" do
+        expect(Capybara.string(response.body)).to have_css("h1").and have_no_css("#inactive-topic")
+      end
+    end
+
+    context "with an inactive topic" do
+      let(:inactive_topic) { create(:topic, subject: quiz_subject, active: false) }
+
+      before { get topic_questions_path(inactive_topic) }
+
+      it "says where the topic no longer appears" do
+        expect(Capybara.string(response.body))
+          .to have_css("#inactive-topic", text: "This topic is inactive")
+      end
+    end
+  end
+
   describe "GET /topics/:topic_id/questions lessons" do
     let!(:question) { create(:question, topic: topic) }
 

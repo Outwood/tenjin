@@ -8,6 +8,11 @@
       = link_to 'Add Question', new_topic_question_path(@topic), class: 'btn btn-primary'
       = link_to 'Download Questions (JSON)', topic_questions_path(@topic, format: :json), class: 'btn btn-outline-secondary'
       = link_to 'Import Questions', new_topic_import_path(@topic), class: 'btn btn-outline-secondary'
+  - unless @topic.active?
+    / Mirrors the active filters in QuizzesController, Quiz::CreateQuiz, Challenge, LessonsController and QuestionsController
+    p.alert.alert-secondary#inactive-topic
+      | This topic is inactive: it isn't offered for quizzes, challenges or new lessons, and the Questions page
+        doesn't list it. Teachers can still set homework on it.
   / One form, because Turbo cancels a submission still in flight when another starts on the page;
     the newer write then carries both fields, and its reply settles the status and heading
   = form_with url: topic_path(@topic),
