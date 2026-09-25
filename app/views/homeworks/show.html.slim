@@ -49,13 +49,14 @@
             th Status
             th Best score
         tbody
-          - @homework_progress.each do |h|
-            tr.student-row data-user=h.user.id
+          - @pupils.each do |pupil|
+            - progress = @progress[pupil.id]
+            tr.student-row data-user=pupil.id
               / Visible as the first name, which its column heads; spoken as the full name
-              td = link_to h.user.forename, user_path(h.user), aria: { label: "#{h.user.forename} #{h.user.surname}" }
-              td = h.user.surname
-              td = boolean_icon(h.completed?, yes: 'Complete', no: 'Not complete')
-              td = number_to_percentage(h.progress, precision: 0)
+              td = link_to pupil.forename, user_path(pupil), aria: { label: "#{pupil.forename} #{pupil.surname}" }
+              td = pupil.surname
+              td = homework_status(@homework, progress)
+              td = number_to_percentage(progress.progress, precision: 0) if progress
   section.mb-5 aria-labelledby='danger-zone-heading'
     h2#danger-zone-heading Danger Zone
     = button_to 'Delete Homework', homework_path(@homework),

@@ -5,10 +5,11 @@ class HomeworksController < ApplicationController
 
   def show
     @homework = authorize find_homework
-    # Matches the class's completion figure, which leaves out pupils who have left or moved class
-    @homework_progress = HomeworkProgress.includes(:user)
-      .where(homework: @homework, user_id: @homework.classroom.enrollments.select(:user_id))
-      .order("users.surname", "users.forename")
+    # The pupils in the class now, as the completion figure counts them; one who joined after
+    # the homework was set has no progress row
+    @pupils = User.joins(:enrollments).where(role: "student", enrollments: {classroom: @homework.classroom})
+      .order(:surname, :forename)
+    @progress = @homework.homework_progresses.where(user: @pupils).index_by(&:user_id)
     @homework_counts = @homework.classroom.homework_counts.find_by(id: @homework)
   end
 

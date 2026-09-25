@@ -43,6 +43,12 @@ module ClassroomsHelper
     end
   end
 
+  # A pupil's state on the homework, in words beside its icon
+  def homework_status(homework, progress)
+    slot = HOMEWORK_SLOTS.fetch(homework_state(homework, progress))
+    content_tag(:i, nil, class: "#{slot[:icon]} fa-fw me-1", aria: {hidden: true}) + slot[:text].upcase_first
+  end
+
   # No row means the homework was set before the pupil joined the class
   def homework_state(homework, progress)
     return :not_set if progress.nil?
