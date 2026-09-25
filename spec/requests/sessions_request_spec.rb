@@ -3,6 +3,8 @@
 require "rails_helper"
 
 RSpec.describe "Sessions", :default_creates do
+  include ActiveSupport::Testing::TimeHelpers
+
   describe "signing in" do
     let(:disabled_student) { create(:student, school: school, disabled: true, password: "correct horse") }
     let(:credentials) { {user: {login: disabled_student.username, password: "correct horse"}} }
@@ -36,6 +38,52 @@ RSpec.describe "Sessions", :default_creates do
       post user_session_path, params: {user: {login: [student.username], password: student.password}}
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include("Invalid login or password")
+    end
+  end
+
+  describe "an admin's failed sign-ins" do
+    let(:right_password) { {admin: {email: super_admin.email, password: super_admin.password}} }
+    let(:wrong_password) { {admin: {email: super_admin.email, password: "not the password"}} }
+
+    context "with four in a row" do
+      before { 4.times { post admin_session_path, params: wrong_password } }
+
+      it "still accepts the right password" do
+        post admin_session_path, params: right_password
+        expect(response).to redirect_to(system_root_path)
+      end
+    end
+
+    context "with five in a row" do
+      before { 4.times { post admin_session_path, params: wrong_password } }
+
+      it "emails unlock instructions" do
+        expect { post admin_session_path, params: wrong_password }
+          .to change(ActionMailer::Base.deliveries, :count).by(1)
+        expect(ActionMailer::Base.deliveries.last).to have_attributes(to: [super_admin.email], subject: "Unlock instructions")
+      end
+
+      describe "the right password" do
+        before { post admin_session_path, params: wrong_password }
+
+        it "is refused with the same message as a wrong one" do
+          post admin_session_path, params: right_password
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response.body).to include("Invalid email or password")
+        end
+
+        it "is still refused 59 minutes later" do
+          travel 59.minutes
+          post admin_session_path, params: right_password
+          expect(response).to have_http_status(:unprocessable_content)
+        end
+
+        it "is accepted again an hour later" do
+          travel 1.hour + 1.second
+          post admin_session_path, params: right_password
+          expect(response).to redirect_to(system_root_path)
+        end
+      end
     end
   end
 
