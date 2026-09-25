@@ -399,5 +399,15 @@ RSpec.describe "lessons controller", :default_creates do
       expect { delete lesson_path(lesson) }.to change(Lesson, :count).by(-1)
       expect(response).to redirect_to(lessons_path(open: topic.id))
     end
+
+    context "when pupils have been quizzed on it" do
+      before { create(:quiz, user: student, topic: topic, subject: quiz_subject, lesson: lesson) }
+
+      it "keeps the lesson and says why" do
+        expect { delete lesson_path(lesson) }.not_to change(Lesson, :count)
+        expect(response).to redirect_to(lessons_path(open: topic.id))
+        expect(flash[:alert]).to eq("This lesson can't be deleted: it has been set as homework or used in a quiz.")
+      end
+    end
   end
 end

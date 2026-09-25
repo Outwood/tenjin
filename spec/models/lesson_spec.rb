@@ -201,5 +201,50 @@ RSpec.describe Lesson do
 
       expect { lesson.destroy! }.to change { topic.reload.default_lesson_id }.from(lesson.id).to(nil)
     end
+
+    context "with pupils' work pointing at it" do
+      let(:lesson) { create(:lesson) }
+      let!(:question) { create(:question, topic: lesson.topic, lesson: lesson) }
+
+      shared_examples "a refused delete" do
+        it "keeps the lesson and its questions" do
+          expect(lesson.destroy).to be false
+          expect(lesson.errors[:base]).to be_present
+          expect(question.reload.lesson).to eq(lesson)
+        end
+      end
+
+      context "when set as homework" do
+        before { create(:homework, topic: lesson.topic, lesson: lesson) }
+
+        include_examples "a refused delete"
+      end
+
+      context "when quizzed on" do
+        # Creating a quiz also records usage statistics; clear them so only the quiz holds the lesson
+        before do
+          create(:quiz, topic: lesson.topic, subject: lesson.subject, lesson: lesson)
+          UsageStatistic.where(lesson: lesson).delete_all
+        end
+
+        include_examples "a refused delete"
+      end
+
+      context "when only its usage statistics remain" do
+        before { create(:usage_statistic, topic: lesson.topic, lesson: lesson) }
+
+        include_examples "a refused delete"
+      end
+    end
+
+    context "with only questions pointing at it" do
+      let(:lesson) { create(:lesson) }
+      let!(:question) { create(:question, topic: lesson.topic, lesson: lesson) }
+
+      it "deletes the lesson and unlinks its questions" do
+        expect(lesson.destroy).to be_truthy
+        expect(question.reload.lesson_id).to be_nil
+      end
+    end
   end
 end

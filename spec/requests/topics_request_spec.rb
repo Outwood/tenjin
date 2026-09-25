@@ -75,11 +75,11 @@ RSpec.describe "topics controller", :default_creates do
       expect(response).to redirect_to(questions_path)
     end
 
-    context "when a callback halts the delete" do
-      # No callback halts a topic destroy today, so the refusal is stubbed; the
-      # branch is what keeps one added later from reading as a delete
+    context "when pupils have been quizzed on one of its lessons" do
+      # The lesson refuses its delete, which halts the topic's cascade
       before do
-        allow_any_instance_of(Topic).to receive(:destroy).and_return(false)
+        lesson = create(:lesson, topic: topic)
+        create(:quiz, user: student, topic: topic, subject: topic.subject, lesson: lesson)
         delete topic_path(topic), headers: turbo_headers
       end
 

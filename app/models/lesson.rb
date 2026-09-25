@@ -23,9 +23,11 @@ class Lesson < ApplicationRecord
   enum :category, {youtube: 0, vimeo: 1, no_content: 2}
 
   belongs_to :topic
-  has_many :homeworks
+  # Pupils' homework and quiz history point here, so a lesson they have used stays
+  has_many :homeworks, dependent: :restrict_with_error
   has_many :questions
-  has_many :quizzes
+  has_many :quizzes, dependent: :restrict_with_error
+  has_many :usage_statistics, dependent: :restrict_with_error
 
   has_one :subject, through: :topic
 
