@@ -1,5 +1,5 @@
 // The auto-submit controller, mounted through Stimulus on the markup the
-// classroom subject select and the topic name field render
+// classroom subject select and the topic settings fields render
 
 import AutoSubmitController from "../../../app/javascript/controllers/auto_submit_controller";
 import { mountControllers, unmount } from "../support/stimulus";
@@ -118,5 +118,74 @@ describe("auto-submit", () => {
     submitEnds(false);
 
     expect(select.value).toBe("1");
+  });
+});
+
+// The topic settings fields carry a status line; the classroom select does not
+describe("auto-submit with a status", () => {
+  let application, form, input, status;
+
+  beforeEach(async () => {
+    application = await mountControllers(
+      `
+      <form id="name-form"
+            data-controller="auto-submit"
+            data-action="turbo:submit-end->auto-submit#settle">
+        <input name="topic[name]" value="Forces" data-action="change->auto-submit#submit">
+        <div role="status" data-auto-submit-target="status"></div>
+      </form>
+      `,
+      { "auto-submit": AutoSubmitController },
+    );
+    form = document.querySelector("#name-form");
+    input = document.querySelector("input");
+    status = document.querySelector("[role=status]");
+    jest.spyOn(form, "requestSubmit").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    unmount(application);
+  });
+
+  function rename(value) {
+    input.value = value;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function submitEnds(detail) {
+    form.dispatchEvent(
+      new CustomEvent("turbo:submit-end", { bubbles: true, detail }),
+    );
+  }
+
+  it("says the write is in flight", () => {
+    rename("Motion");
+
+    expect(status.textContent).toBe("Saving…");
+  });
+
+  it("says saved once the write lands", () => {
+    rename("Motion");
+    submitEnds({ success: true });
+
+    expect(status.textContent).toBe("Saved");
+  });
+
+  it("claims nothing when the write is refused", () => {
+    rename("Motion");
+    submitEnds({ success: true });
+    rename("");
+    submitEnds({ success: false });
+
+    expect(status.textContent).toBe("");
+  });
+
+  it("stays in flight while an abandoned write waits for the newer one", () => {
+    rename("Motion");
+    rename("Motion and forces");
+    submitEnds({});
+
+    expect(status.textContent).toBe("Saving…");
   });
 });
