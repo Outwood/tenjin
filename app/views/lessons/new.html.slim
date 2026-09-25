@@ -1,6 +1,6 @@
+- content_for :title
+  title = "New Lesson - #{@lesson.subject.name}"
 .container
-  section.page-section.text-center.pt-2#createLesson
-    h1.page-section-header.text-uppercase Create Lesson
-    h3.text-uppercase = @lesson.subject.name
-    ==render_small_separator
-    =render 'form'
+  = render 'breadcrumbs', subject: @lesson.subject, current: 'New Lesson'
+  h1 New Lesson
+  = render 'form', cancel_path: lessons_path(anchor: dom_id(@lesson.subject))

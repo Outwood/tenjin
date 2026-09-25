@@ -29,6 +29,7 @@ class LessonsController < ApplicationController
 
   def edit
     @lesson = find_lesson
+    @saved_topic = @lesson.topic
     @topics = topics_for(@lesson.subject, current: @lesson.topic_id)
     authorize @lesson
   end
@@ -41,6 +42,8 @@ class LessonsController < ApplicationController
 
   def update
     @lesson = authorize find_lesson
+    # A failed move re-renders the chosen topic, but links back to this one
+    @saved_topic = @lesson.topic
     @lesson.assign_attributes(lesson_params)
     # Once for the subject it leaves, again for the one a new topic moves it to
     authorize @lesson
@@ -77,14 +80,15 @@ class LessonsController < ApplicationController
       return render :new, status: :unprocessable_content
     end
 
+    notice = @lesson.new_record? ? "Lesson created" : "Lesson updated"
     @lesson.save!
 
-    redirect_to_topic(@lesson.topic)
+    redirect_to_topic(@lesson.topic, notice: notice)
   end
 
   # The index starts with every topic closed, so reopen the one just changed
-  def redirect_to_topic(topic)
-    redirect_to lessons_path(open: topic.id)
+  def redirect_to_topic(topic, **flash)
+    redirect_to lessons_path(open: topic.id), **flash
   end
 
   def lesson_params

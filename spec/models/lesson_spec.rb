@@ -126,16 +126,16 @@ RSpec.describe Lesson do
       expect(lesson).not_to have_received(:video_url)
     end
 
-    it "delegates to #video_url when a link is not provided" do
-      lesson = described_class.new
-      allow(lesson).to receive(:video_url)
-      lesson.video_link
-      expect(lesson).to have_received(:video_url)
+    it "links to the video's own page when a link is not provided", :aggregate_failures do
+      expect(described_class.new(category: "youtube", video_id: "VFZNvj-HfBU").video_link)
+        .to eq("https://www.youtube.com/watch?v=VFZNvj-HfBU")
+      expect(described_class.new(category: "vimeo", video_id: "122054187").video_link)
+        .to eq("https://vimeo.com/122054187")
     end
 
-    # The edit form pre-fills the URL field with this value, so the setter must accept it
+    # The edit form pre-fills the video link field with this value, so the setter must accept it
     it "round-trips through #video_link= for every video category", :aggregate_failures do
-      described_class::CATEGORY_VIDEOS.each_key do |category|
+      described_class::CATEGORY_PAGES.each_key do |category|
         stored = described_class.new(category: category, video_id: "371104836")
         expect(described_class.new(video_link: stored.video_link))
           .to have_attributes(category: category.to_s, video_id: "371104836")

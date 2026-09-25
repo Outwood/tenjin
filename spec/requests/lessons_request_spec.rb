@@ -223,6 +223,7 @@ RSpec.describe "lessons controller", :default_creates do
       expect(Lesson.find_by!(title: title))
         .to have_attributes(topic: topic, category: "vimeo", video_id: "371104836")
       expect(response).to redirect_to(lessons_path(open: topic.id))
+      expect(flash[:notice]).to eq("Lesson created")
     end
 
     context "when the details are invalid" do
@@ -233,7 +234,7 @@ RSpec.describe "lessons controller", :default_creates do
         expect { post lessons_path, params: params }.not_to change(Lesson, :count)
         expect(response).to have_http_status(:unprocessable_content)
         expect(Capybara.string(response.body))
-          .to have_css("h1", text: "Create Lesson")
+          .to have_css("h1", text: "New Lesson")
           .and have_css(".invalid-feedback", text: "too short")
       end
 
@@ -295,12 +296,13 @@ RSpec.describe "lessons controller", :default_creates do
     end
 
     it "saves the new details and keeps the video from the pre-filled link" do
-      # The edit form posts back the embed link, not the link the author typed
+      # The edit form posts back the video page link, not the link the author typed
       patch lesson_path(lesson),
-        params: {lesson: {title: "Fantastic new title", video_link: lesson.video_url}}
+        params: {lesson: {title: "Fantastic new title", video_link: lesson.video_link}}
       expect(lesson.reload)
         .to have_attributes(title: "Fantastic new title", category: "youtube", video_id: "VFZNvj-HfBU")
       expect(response).to redirect_to(lessons_path(open: topic.id))
+      expect(flash[:notice]).to eq("Lesson updated")
     end
 
     context "when moving the lesson into a subject the author does not hold" do
@@ -334,6 +336,20 @@ RSpec.describe "lessons controller", :default_creates do
       end
     end
 
+    context "when a move fails on another detail" do
+      let(:fractions) { create(:topic, subject: quiz_subject, name: "Fractions") }
+
+      before { patch lesson_path(lesson), params: {lesson: {title: "a", topic_id: fractions.id}} }
+
+      it "navigates by the topic the lesson is still in" do
+        expect(Capybara.string(response.body))
+          .to have_title("Edit Lesson - #{topic.name}")
+          .and have_link(topic.name, href: lessons_path(open: topic.id))
+          .and have_link("Cancel", href: lessons_path(open: topic.id))
+          .and have_no_link("Fractions")
+      end
+    end
+
     context "when the details are invalid" do
       let!(:inactive_topic) { create(:topic, subject: quiz_subject, name: "Photosynthesis", active: false) }
 
@@ -342,7 +358,7 @@ RSpec.describe "lessons controller", :default_creates do
           .not_to change { lesson.reload.title }
         expect(response).to have_http_status(:unprocessable_content)
         expect(Capybara.string(response.body))
-          .to have_css("h1", text: "Update Lesson")
+          .to have_css("h1", text: "Edit Lesson")
           .and have_css(".invalid-feedback", text: "too short")
       end
 

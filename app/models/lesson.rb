@@ -11,6 +11,11 @@ class Lesson < ApplicationRecord
     youtube: "https://www.youtube.com/embed/%s",
     vimeo: "https://player.vimeo.com/video/%s"
   }.freeze
+  # Where the edit form points an author: the page they would have copied the link from
+  CATEGORY_PAGES = {
+    youtube: "https://www.youtube.com/watch?v=%s",
+    vimeo: "https://vimeo.com/%s"
+  }.freeze
   CATEGORY_THUMBNAILS = {
     youtube: "https://img.youtube.com/vi/%s/hqdefault.jpg"
   }.freeze
@@ -38,7 +43,7 @@ class Lesson < ApplicationRecord
   end
 
   def video_link
-    super || video_url
+    super || video_page_url
   end
 
   def video_url
@@ -58,6 +63,11 @@ class Lesson < ApplicationRecord
 
   private
 
+  def video_page_url
+    format = CATEGORY_PAGES[category&.to_sym]
+    format && (format % video_id)
+  end
+
   def extract_id(url)
     kind = LINK_REGEX.lazy.filter_map do |c, r|
       (vid = r.match(url)) && [c, vid&.captures&.first]
@@ -73,6 +83,6 @@ class Lesson < ApplicationRecord
   def check_video_link
     return unless video_link.present? && video_id.nil?
 
-    errors.add :video_link, "Must be a YouTube or Vimeo link e.g https://youtu.be/z1aIdcb43RE"
+    errors.add :video_link, "must be a YouTube or Vimeo link"
   end
 end
