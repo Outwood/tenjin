@@ -1,2 +1,5 @@
+- content_for :title
+  title = "New Question - #{@topic.name}"
 .container#questionEditor
-  =render('questions/question_edit_form')
+  h1.mt-3 New Question
+  = render('questions/question_edit_form')

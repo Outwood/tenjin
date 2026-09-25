@@ -44,13 +44,13 @@ module ApplicationHelper
     student.enrollments.map { |e| e.classroom.name }.join(", ")
   end
 
-  def link_to_add_row(name, form, association, partial: association.to_s.singularize, **args)
+  def add_row_button(name, form, association, partial: association.to_s.singularize, **args)
     new_object = form.object.send(association).klass.new
     id = new_object.object_id
     fields = form.simple_fields_for(association, new_object, child_index: id) do |builder|
       render(partial, f: builder)
     end
-    link_to(name, "#",
+    button_tag(name, type: "button",
       class: args[:class].to_s,
       data: {action: "click->nested-fields#add", id: id, fields: fields.delete("\n")})
   end

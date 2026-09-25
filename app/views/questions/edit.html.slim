@@ -1,4 +1,7 @@
+- content_for :title
+  title = "Edit Question - #{@question.topic.name}"
 .container#questionEditor
+  h1.mt-3 Edit Question
   = render('question_edit_form')
   .row.mt-3
     .col
@@ -7,7 +10,7 @@
         class: 'btn w-100 btn-secondary'
   .row.mt-5
     .col
-      h1 Statistics
+      h2 Statistics
   .row.text-center
     .col
       p

@@ -8,7 +8,7 @@
 import NestedFieldsController from "../../../app/javascript/controllers/nested_fields_controller";
 import { mountControllers, unmount } from "../support/stimulus";
 
-// link_to_add_row keys its template by the unsaved answer's object_id
+// add_row_button keys its template by the unsaved answer's object_id
 const PLACEHOLDER = 1032;
 const NOW = 1700000000000;
 
@@ -28,7 +28,7 @@ function answerRow(index) {
                id="answer-check-${index}">
       </td>
       <td>
-        <a class="btn btn-danger" href="#" data-action="click->nested-fields#removeRow">Remove</a>
+        <button type="button" class="btn btn-danger" data-action="click->nested-fields#removeRow">Remove</button>
       </td>
     </tr>
   `;
@@ -45,8 +45,8 @@ const FIXTURE = `
         ${answerRow(1)}
       </tbody>
     </table>
-    <a class="btn btn-primary" href="#" data-action="click->nested-fields#add"
-       data-id="${PLACEHOLDER}" data-fields="${attribute(answerRow(PLACEHOLDER))}">Add Answer</a>
+    <button type="button" class="btn btn-primary" data-action="click->nested-fields#add"
+       data-id="${PLACEHOLDER}" data-fields="${attribute(answerRow(PLACEHOLDER))}">Add Answer</button>
   </form>
 `;
 
@@ -77,7 +77,7 @@ describe("nested-fields", () => {
     afterEach(() => jest.useRealTimers());
 
     it("appends the template row keyed throughout by the time of the click", () => {
-      document.querySelector("a.btn-primary").click();
+      document.querySelector("button.btn-primary").click();
 
       expect(inputNames(tbody)).toEqual([
         ...answerNames(0),
@@ -91,7 +91,7 @@ describe("nested-fields", () => {
 
   describe("removeRow", () => {
     it("takes the clicked row out of the form", () => {
-      tbody.querySelector("tr:first-of-type a").click();
+      tbody.querySelector("tr:first-of-type button").click();
 
       expect(inputNames(tbody)).toEqual(answerNames(1));
     });
@@ -106,8 +106,8 @@ const SAVED_FIXTURE = `
         <tr>
           <td><input type="text" name="question[answers_attributes][0][text]" value="Glucose"></td>
           <td>
-            <a class="btn btn-danger" href="#" data-object-name="question[answers_attributes][0]"
-               data-action="click->nested-fields#removeRecord">Remove</a>
+            <button type="button" class="btn btn-danger" data-object-name="question[answers_attributes][0]"
+                    data-action="click->nested-fields#removeRecord">Remove</button>
           </td>
         </tr>
         <input type="hidden" name="question[answers_attributes][0][id]" value="7">
@@ -134,7 +134,7 @@ describe("nested-fields on a saved answer", () => {
   });
 
   describe("removeRecord", () => {
-    beforeEach(() => document.querySelector("a.btn-danger").click());
+    beforeEach(() => document.querySelector("button.btn-danger").click());
 
     it("hides the row and marks the answer for deletion", () => {
       const form = document.querySelector("form");

@@ -63,7 +63,7 @@ RSpec.describe "questions controller", :default_creates do
     it "labels each select" do
       get edit_question_path(question)
       expect(Capybara.string(response.body))
-        .to have_select("Question Type").and have_select("Lesson:").and have_select("Topic:")
+        .to have_select("Question Type").and have_select("Lesson").and have_select("Topic")
     end
 
     context "with a short answer question" do
@@ -74,13 +74,19 @@ RSpec.describe "questions controller", :default_creates do
       it "hides the correct answer toggle" do
         expect(Capybara.string(response.body)).to have_no_css("#table-answers th", text: "Correct?")
       end
+
+      it "heads each answer column and no other" do
+        expect(Capybara.string(response.body))
+          .to have_css("#table-answers thead th", count: 2)
+          .and have_css("#table-answers tbody tr:first-of-type td", count: 2)
+      end
     end
 
     context "when previewing the question as boolean" do
       before { get edit_question_path(question, question: {question_type: "boolean"}) }
 
-      it "hides the remove answer links" do
-        expect(Capybara.string(response.body)).to have_no_link("Remove")
+      it "hides the remove answer buttons" do
+        expect(Capybara.string(response.body)).to have_no_button("Remove")
       end
 
       it "labels the answers False and True" do
@@ -127,6 +133,12 @@ RSpec.describe "questions controller", :default_creates do
         expect(Capybara.string(response.body))
           .to have_css("#table-answers input[type=radio][name='question[correct_answer]']", count: 2)
           .and have_no_css("#table-answers input[type=checkbox]")
+      end
+
+      it "heads each answer column and no other" do
+        expect(Capybara.string(response.body))
+          .to have_css("#table-answers thead th", count: 2)
+          .and have_css("#table-answers tbody tr:first-of-type td", count: 2)
       end
     end
 
@@ -255,8 +267,8 @@ RSpec.describe "questions controller", :default_creates do
           .and have_css("#table-answers tbody input.form-check-input", count: 3)
       end
 
-      it "shows a remove link for each answer" do
-        expect(Capybara.string(response.body)).to have_link("Remove", count: 3)
+      it "shows a remove button for each answer" do
+        expect(Capybara.string(response.body)).to have_button("Remove", count: 3)
       end
 
       it "lets an added answer leave the form without a save" do
