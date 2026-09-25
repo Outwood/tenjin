@@ -1,7 +1,7 @@
 h1.visually-hidden Users
 section.page-section.text-center.pt-2#Users
   .container
-    h2.page-section-header.text-uppercase Students
+    h2.page-section-header.text-uppercase Pupils
     ==render_small_separator
     - students_table_options = { paginationSize: 10,
         searchFields: %w[name username classes],
@@ -13,8 +13,8 @@ section.page-section.text-center.pt-2#Users
             cssClass: 'actions-column', clipboard: false, download: false }] }.to_json
     .col.table-responsive[data-controller='datatable password-reset'
       data-datatable-options-value=students_table_options
-      data-datatable-filename-value=csv_filename("#{current_user.school.name} students")]
-      = render 'shared/table_search', label: 'Search students'
+      data-datatable-filename-value=csv_filename("#{current_user.school.name} pupils")]
+      = render 'shared/table_search', label: 'Search pupils'
       .mb-2
         button.btn.btn-secondary.btn-sm.me-2 type='button' data-action='click->datatable#copy' Copy
         button.btn.btn-secondary.btn-sm type='button' data-action='click->datatable#downloadCsv' CSV

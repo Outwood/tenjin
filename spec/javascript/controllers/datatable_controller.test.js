@@ -115,10 +115,10 @@ describe("datatable CSV download", () => {
   });
 
   it("names the file as the page asks", async () => {
-    await mount('data-datatable-filename-value="9X-Sc students.csv"');
+    await mount('data-datatable-filename-value="9X-Sc pupils.csv"');
     document.querySelector("button").click();
 
-    expect(table.download).toHaveBeenCalledWith("csv", "9X-Sc students.csv");
+    expect(table.download).toHaveBeenCalledWith("csv", "9X-Sc pupils.csv");
   });
 
   it("falls back to data.csv when the page names no file", async () => {

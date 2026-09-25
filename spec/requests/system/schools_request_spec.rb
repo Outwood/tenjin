@@ -154,7 +154,7 @@ RSpec.describe "System::Schools", :default_creates, type: :request do
         before { get system_school_path(school) }
 
         it "counts each role" do
-          expect(Capybara.string(response.body)).to have_xpath("//tr[td='Students'][td='2']")
+          expect(Capybara.string(response.body)).to have_xpath("//tr[td='Pupils'][td='2']")
             .and have_xpath("//tr[td='Employees'][td='1']")
         end
       end

@@ -34,7 +34,7 @@
               td = report_progress(h)
               td = h.due_date.strftime("%d/%m/%y %H:%M")
   section.mb-5#students aria-labelledby='students-heading'
-    h2.mb-3#students-heading Students
+    h2.mb-3#students-heading Pupils
     / Names stay put on a narrow screen and the rest fold under each row. Folded columns
       still copy and download, so an export has the same columns at any width. The homework
       strip and the actions menu export nothing: the strip's text is its hidden labels run together.
@@ -52,9 +52,9 @@
             cssClass: 'actions-column', clipboard: false, download: false }] }.to_json
     div[data-controller='datatable password-reset'
       data-datatable-options-value=students_table_options
-      data-datatable-filename-value=csv_filename("#{@classroom.name} students")]
+      data-datatable-filename-value=csv_filename("#{@classroom.name} pupils")]
       .d-flex.flex-wrap.gap-2
-        .flex-grow-1 = render 'shared/table_search', label: 'Search students'
+        .flex-grow-1 = render 'shared/table_search', label: 'Search pupils'
         .d-flex.gap-2.mb-2
           button.btn.btn-outline-secondary type='button' data-action='click->datatable#copy' Copy
           button.btn.btn-outline-secondary type='button' data-action='click->datatable#downloadCsv' CSV
