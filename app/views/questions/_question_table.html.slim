@@ -1,6 +1,6 @@
 - table_options = { paginationSize: 50, placeholder: 'No questions have been found' }.to_json
 .table-wrapper data-controller='datatable' data-datatable-options-value=table_options
-  = render 'shared/table_search'
+  = render 'shared/table_search', label: 'Search questions'
   table.table#questionTable data-datatable-target='table'
     thead
       tr
