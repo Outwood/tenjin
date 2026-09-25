@@ -1,5 +1,5 @@
 // The datatable controller's pagination footer, which it hides while the table
-// fits on one page, its CSV download, and its empty-table message. Tabulator lays its table out with the browser's geometry,
+// fits on one page, its CSV download, its empty-table message, and sorting from the keyboard. Tabulator lays its table out with the browser's geometry,
 // which jsdom lacks, so a stand-in records the options and events it is given.
 
 jest.mock("tabulator-tables", () => {
@@ -10,7 +10,11 @@ jest.mock("tabulator-tables", () => {
       this.handlers = {};
       this.pageMax = 1;
       this.element = document.createElement("div");
-      this.element.innerHTML = '<div class="tabulator-footer"></div>';
+      this.element.innerHTML = `
+        <div class="tabulator-col tabulator-sortable" id="sortable"></div>
+        <div class="tabulator-col" id="unsortable"></div>
+        <div class="tabulator-footer"></div>
+      `;
       table.replaceWith(this.element);
       this.download = jest.fn();
       this.setFilter = jest.fn();
@@ -24,6 +28,15 @@ jest.mock("tabulator-tables", () => {
 
     getPageMax() {
       return this.pageMax;
+    }
+
+    getColumns() {
+      return [];
+    }
+
+    // Stands in for Tabulator finishing its first build
+    build() {
+      this.handlers.tableBuilt?.();
     }
 
     // Stands in for a render that leaves the table on the given number of pages
@@ -181,5 +194,53 @@ describe("datatable empty-table message", () => {
     await mount({});
 
     expect(table.options.placeholder).toBeUndefined();
+  });
+});
+
+describe("datatable keyboard sort", () => {
+  let application, table, sortable;
+
+  beforeEach(async () => {
+    application = await mountControllers(fixture({}), {
+      datatable: DatatableController,
+    });
+    table = instances.at(-1);
+    table.build();
+    sortable = table.element.querySelector("#sortable");
+  });
+
+  afterEach(() => {
+    unmount(application);
+    instances.length = 0;
+  });
+
+  const press = (heading, key) =>
+    heading.dispatchEvent(
+      new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }),
+    );
+
+  it("lets a sortable heading take focus, and no other", () => {
+    expect(sortable.tabIndex).toBe(0);
+    expect(
+      table.element.querySelector("#unsortable").hasAttribute("tabindex"),
+    ).toBe(false);
+  });
+
+  it.each(["Enter", " "])("sorts on %p as a click would", (key) => {
+    const click = jest.fn();
+    sortable.addEventListener("click", click);
+
+    press(sortable, key);
+
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves other keys alone", () => {
+    const click = jest.fn();
+    sortable.addEventListener("click", click);
+
+    press(sortable, "a");
+
+    expect(click).not.toHaveBeenCalled();
   });
 });

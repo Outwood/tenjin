@@ -76,11 +76,27 @@ export default class extends Controller {
       if (hasIdxColumn) {
         this.tabulator.getColumn(SRC_INDEX_FIELD).hide();
       }
+      this.#sortFromKeyboard();
     });
 
     // Page buttons for a single page offer nothing, and a search can shrink
     // or grow the page count, so the footer is rechecked after every render
     this.tabulator.on("renderComplete", () => this.#toggleFooter());
+  }
+
+  // Tabulator sorts on a click on the heading alone, so a sortable heading
+  // also takes focus and sorts on Enter or Space by clicking itself
+  #sortFromKeyboard() {
+    this.tabulator.element
+      .querySelectorAll(".tabulator-col.tabulator-sortable")
+      .forEach((heading) => {
+        heading.tabIndex = 0;
+        heading.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          heading.click();
+        });
+      });
   }
 
   #toggleFooter() {

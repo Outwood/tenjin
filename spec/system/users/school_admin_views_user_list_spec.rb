@@ -47,5 +47,17 @@ RSpec.describe "School admin views user list", :default_creates, :js do
         end
       end
     end
+
+    # Smoke for the synthetic click reaching Tabulator's sort; the key handling is in
+    # spec/javascript/controllers/datatable_controller.test.js
+    it "sorts by a heading from the keyboard" do
+      heading = find("#students-table .tabulator-col[tabulator-field='name']")
+      expect(heading["aria-sort"]).to eq("ascending")
+
+      execute_script("arguments[0].focus()", heading)
+      page.driver.browser.keyboard.type(:Enter)
+
+      expect(page).to have_css("#students-table .tabulator-col[tabulator-field='name'][aria-sort='descending']")
+    end
   end
 end
