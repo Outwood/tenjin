@@ -69,6 +69,15 @@ RSpec.describe "topic questions controller", :default_creates do
     end
   end
 
+  describe "GET /topics/:topic_id/questions search" do
+    before { get topic_questions_path(topic) }
+
+    it "searches question and lesson text only" do
+      options = Capybara.string(response.body).find(".question-table")["data-datatable-options-value"]
+      expect(JSON.parse(options)["searchFields"]).to contain_exactly("question", "lesson")
+    end
+  end
+
   describe "GET /topics/:topic_id/questions activity" do
     context "with an active topic" do
       before { get topic_questions_path(topic) }

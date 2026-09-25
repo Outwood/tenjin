@@ -1,20 +1,13 @@
 import { Controller } from "@hotwired/stimulus";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import * as namedSorters from "../lib/table_sorters";
+import { searchableText, stripHtml } from "../lib/table_search";
 
 // Field name Tabulator will use to store each row's original source-DOM
 // position. Tabulator's HTML importer assigns `item[options.index] = i`
 // for rows that don't already carry a value for the configured index
 // field, which gives us a per-row source index that survives sort/filter.
 const SRC_INDEX_FIELD = "__tabulatorSrcIdx__";
-
-// Tabulator stores cell.innerHTML as the data value; strip tags for export.
-const stripHtml = (value) => {
-  if (typeof value !== "string") return value;
-  const tmp = document.createElement("div");
-  tmp.innerHTML = value;
-  return (tmp.textContent || "").trim();
-};
 
 // Named "datatable" (rather than "tabulator") so existing
 // `data-controller="datatable"` markup keeps working.
@@ -32,7 +25,10 @@ export default class extends Controller {
       dataset: { ...tr.dataset },
     }));
 
-    const opts = { ...this.optionsValue };
+    // searchFields is ours rather than Tabulator's, which warns on options it does not know
+    const { searchFields, ...opts } = this.optionsValue;
+    this.searchFields = searchFields;
+    this.searchText = new WeakMap();
     if (Array.isArray(opts.columns)) {
       opts.columns = opts.columns.map((col) =>
         typeof col.sorter === "string" && namedSorters[col.sorter]
@@ -79,15 +75,18 @@ export default class extends Controller {
   filter(event) {
     const needle = event.target.value.toLowerCase();
     if (needle) {
-      this.tabulator.setFilter((row) =>
-        Object.values(row).some(
-          (cell) =>
-            typeof cell === "string" && cell.toLowerCase().includes(needle),
-        ),
-      );
+      this.tabulator.setFilter((row) => this.#textOf(row).includes(needle));
     } else {
       this.tabulator.clearFilter();
     }
+  }
+
+  // Rows never change after import, so each is parsed once, not per keystroke
+  #textOf(row) {
+    if (!this.searchText.has(row)) {
+      this.searchText.set(row, searchableText(row, this.searchFields));
+    }
+    return this.searchText.get(row);
   }
 
   copy() {
