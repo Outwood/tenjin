@@ -14,6 +14,7 @@ class ClassroomsController < ApplicationController
     @classroom = find_classroom
     authorize @classroom
     @students = User.joins(enrollments: :classroom).where(role: "student", enrollments: {classroom: @classroom})
+      .order(:surname, :forename)
     @homeworks = @classroom.homework_counts
 
     @homework_progress = HomeworkProgress.joins(:homework)

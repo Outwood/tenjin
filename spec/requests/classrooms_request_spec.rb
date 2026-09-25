@@ -116,6 +116,22 @@ RSpec.describe "classrooms controller", :default_creates do
       end
     end
 
+    describe "the pupil list" do
+      # Enrolled out of name order, so the listing cannot pass on creation order
+      let!(:young) { create(:enrollment, classroom: classroom, user: create(:student, school: school, forename: "Ada", surname: "Young")).user }
+      let!(:ben_adams) { create(:enrollment, classroom: classroom, user: create(:student, school: school, forename: "Ben", surname: "Adams")).user }
+      let!(:amy_adams) { create(:enrollment, classroom: classroom, user: create(:student, school: school, forename: "Amy", surname: "Adams")).user }
+
+      before { get classroom_path(classroom) }
+
+      it "lists pupils by surname, then forename" do
+        expect(Capybara.string(response.body))
+          .to have_css("#students-table tbody tr:nth-child(1)[data-id='#{amy_adams.id}']")
+          .and have_css("#students-table tbody tr:nth-child(2)[data-id='#{ben_adams.id}']")
+          .and have_css("#students-table tbody tr:nth-child(3)[data-id='#{young.id}']")
+      end
+    end
+
     describe "a pupil's homework ticks" do
       # Enrolled after the homeworks above, so the pupil has progress only on those set below
       let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
