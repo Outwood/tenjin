@@ -17,7 +17,7 @@ const menuItem = (id, name) => `
   <button type="button" id="reset-${id}"
     data-action="password-reset#confirm"
     data-password-reset-url-param="/users/${id}/password_reset"
-    data-password-reset-name-param="${name}">Reset password…</button>
+    data-password-reset-name-param="${name}">Reset password</button>
 `;
 
 const FIXTURE = `

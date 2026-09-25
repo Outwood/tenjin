@@ -18,7 +18,7 @@ RSpec.describe "School admin views user list", :default_creates, :js do
       name = "#{student.forename} #{student.surname}"
       within("#students-table") do
         click_button("Actions for #{name}", enable_aria_label: true)
-        click_button("Reset password…")
+        click_button("Reset password")
       end
 
       within(".modal", text: "Reset #{name}'s password?") { click_button("Reset password") }

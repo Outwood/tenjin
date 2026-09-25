@@ -166,7 +166,7 @@ RSpec.describe "classrooms controller", :default_creates do
       it "is named for the pupil and resets their password" do
         row = Capybara.string(response.body).find("#students-table tr[data-id='#{student.id}']")
         expect(row).to have_button("Actions for #{student.forename} #{student.surname}", enable_aria_label: true)
-          .and have_button("Reset password…")
+          .and have_button("Reset password")
           .and have_css("button[data-password-reset-url-param='#{user_password_reset_path(student)}']")
       end
     end
