@@ -1,29 +1,38 @@
 // The named sorters a datatable column can ask for
 
-import { percent, ukDateTime } from "../../../app/javascript/lib/table_sorters";
+import {
+  percent,
+  timeDatetime,
+} from "../../../app/javascript/lib/table_sorters";
 
-describe("ukDateTime", () => {
-  const sorted = (values) => [...values].sort(ukDateTime);
+describe("timeDatetime", () => {
+  const sorted = (values) => [...values].sort(timeDatetime);
+  const time = (datetime, text) =>
+    `<time datetime="${datetime}">${text}</time>`;
 
-  it("orders across a year boundary", () => {
-    expect(sorted(["02/01/26 09:00", "31/12/25 09:00"])).toEqual([
-      "31/12/25 09:00",
-      "02/01/26 09:00",
+  it("orders by the datetime rather than the words shown", () => {
+    const october = time("2026-10-05T09:00", "5 Oct 2026, 09:00");
+    const december = time("2026-12-01T09:00", "1 Dec 2026, 09:00");
+    const january = time("2027-01-02T09:00", "2 Jan 2027, 09:00");
+
+    expect(sorted([january, october, december])).toEqual([
+      october,
+      december,
+      january,
     ]);
   });
 
-  it("orders across a month boundary", () => {
-    expect(sorted(["01/10/26 09:00", "30/09/26 09:00"])).toEqual([
-      "30/09/26 09:00",
-      "01/10/26 09:00",
-    ]);
+  it("orders two times on one day", () => {
+    const morning = time("2026-10-05T09:00", "5 Oct 2026, 09:00");
+    const afternoon = time("2026-10-05T15:30", "5 Oct 2026, 15:30");
+
+    expect(sorted([afternoon, morning])).toEqual([morning, afternoon]);
   });
 
-  it("puts a value it cannot parse below every date", () => {
-    expect(sorted(["01/01/00 00:00", "no date"])).toEqual([
-      "no date",
-      "01/01/00 00:00",
-    ]);
+  it("puts a value with no datetime below every date", () => {
+    const dated = time("2000-01-01T00:00", "1 Jan 2000, 00:00");
+
+    expect(sorted([dated, "no date"])).toEqual(["no date", dated]);
   });
 });
 
