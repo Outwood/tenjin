@@ -43,6 +43,8 @@ en:
       unknown: Unknown
   activerecord:
     attributes:
+      question/answers:
+        text: Answer
       school:
         client_id: Client ID
     errors:

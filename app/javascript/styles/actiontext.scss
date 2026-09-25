@@ -46,3 +46,7 @@
   flex-wrap: wrap !important;
   justify-content: space-between;
 }
+
+trix-editor.is-invalid {
+  border-color: var(--bs-form-invalid-border-color);
+}
