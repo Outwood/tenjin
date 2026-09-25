@@ -70,6 +70,12 @@ RSpec.describe "user controller", :default_creates do
         .and have_css("#school-menu a.active[aria-current='page'][href='#{users_path}']", exact_text: "Users")
     end
 
+    it "names each search box after its table" do
+      expect(Capybara.string(response.body))
+        .to have_css("input[type='search'][aria-label='Search students']", count: 1)
+        .and have_css("input[type='search'][aria-label='Search employees']", count: 1)
+    end
+
     it "hides employees from other schools"
   end
 

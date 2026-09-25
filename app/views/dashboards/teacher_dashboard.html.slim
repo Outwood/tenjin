@@ -32,7 +32,7 @@ section.page-section.text-center#myClassrooms
       - other_classrooms_options = { paginationSize: 25, placeholder: 'No other classrooms have been found' }.to_json
       .row.justify-content-center
         .table-responsive data-controller='datatable' data-datatable-options-value=other_classrooms_options
-          = render 'shared/table_search'
+          = render 'shared/table_search', label: 'Search other classrooms'
           table.table.table-hover#otherClassroomTable data-datatable-target='table'
             thead
               tr

@@ -38,7 +38,7 @@
     .col
       h2.admin-section-heading Users
     .table-responsive data-controller='datatable' data-datatable-options-value=({ paginationSize: 10 }.to_json)
-      = render 'shared/table_search'
+      = render 'shared/table_search', label: 'Search users'
       table.table#users-table data-datatable-target='table'
         thead
           tr

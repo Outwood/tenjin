@@ -13,7 +13,7 @@
     - datatable_options = { paginationSize: 25, placeholder: 'No classrooms have been found' }.to_json
     .row.justify-content-center
       .col.mx-auto data-controller='datatable' data-datatable-options-value=datatable_options
-        = render 'shared/table_search'
+        = render 'shared/table_search', label: 'Search classrooms'
         table.table.table-hover#classroom-table data-datatable-target='table'
           thead
             tr

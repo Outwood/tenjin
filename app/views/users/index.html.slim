@@ -11,7 +11,7 @@ section.page-section.text-center.pt-2#Users
           { title: 'Classes', field: 'classes' },
           { title: 'Reset Password?', field: 'reset_password' }] }.to_json
     .col.table-responsive data-controller='datatable' data-datatable-options-value=students_table_options
-      = render 'shared/table_search'
+      = render 'shared/table_search', label: 'Search students'
       .mb-2
         button.btn.btn-secondary.btn-sm.me-2 type='button' data-action='click->datatable#copy' Copy
         button.btn.btn-secondary.btn-sm type='button' data-action='click->datatable#downloadCsv' CSV

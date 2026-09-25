@@ -30,7 +30,7 @@
     h2.page-section-header.text-uppercase Students
     ==render_small_separator
     .row.justify-content-center data-controller='datatable' data-datatable-options-value=({ pagination: false }.to_json)
-      = render 'shared/table_search'
+      = render 'shared/table_search', label: 'Search students'
       .mb-2
         button.btn.btn-secondary.btn-sm.me-2 type='button' data-action='click->datatable#copy' Copy
         button.btn.btn-secondary.btn-sm type='button' data-action='click->datatable#downloadCsv' CSV
