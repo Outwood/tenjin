@@ -118,6 +118,18 @@ RSpec.describe "questions controller", :default_creates do
       end
     end
 
+    context "with a boolean question" do
+      let(:question) { create(:boolean_question, topic: topic) }
+
+      before { get edit_question_path(question) }
+
+      it "offers its answers as one choice of correct answer" do
+        expect(Capybara.string(response.body))
+          .to have_css("#table-answers input[type=radio][name='question[correct_answer]']", count: 2)
+          .and have_no_css("#table-answers input[type=checkbox]")
+      end
+    end
+
     context "with a boolean question whose stored labels carry stray whitespace" do
       let(:question) { create(:boolean_question, topic: topic) }
 
@@ -371,6 +383,19 @@ RSpec.describe "questions controller", :default_creates do
         expect(question.answers.reload).to contain_exactly(
           have_attributes(text: "True", correct: true),
           have_attributes(text: "False", correct: false)
+        )
+      end
+    end
+
+    context "when choosing False as a boolean question's correct answer" do
+      let(:question) { create(:boolean_question, topic: topic) }
+
+      before { patch question_path(question), params: {question: {correct_answer: "False"}} }
+
+      it "marks only the False answer correct" do
+        expect(question.answers.reload).to contain_exactly(
+          have_attributes(text: "True", correct: false),
+          have_attributes(text: "False", correct: true)
         )
       end
     end

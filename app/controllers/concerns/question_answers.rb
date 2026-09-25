@@ -19,6 +19,7 @@ module QuestionAnswers
     # Marked, not removed: replacing the association deletes them at once, even on a preview
     (answers - kept).each(&:mark_for_destruction)
     label_boolean_answers(kept)
+    mark_correct_boolean_answer(kept)
     # Puts any remaining errors in front of the author in the editor
     question.valid?
   end
@@ -34,6 +35,14 @@ module QuestionAnswers
 
   def boolean_label(answer)
     BOOLEAN_LABELS.find { |label| label.casecmp?(Answer.normalize_value_for(:text, answer.text.to_s)) }
+  end
+
+  # The editor's radio buttons post the label of the one correct answer
+  def mark_correct_boolean_answer(answers)
+    label = params.dig(:question, :correct_answer)
+    return if label.blank?
+
+    answers.each { |answer| answer.correct = answer.text == label }
   end
 
   # Labels by meaning, so each answer keeps its correct flag; only answers
