@@ -8,6 +8,12 @@ FactoryBot.define do
     active { true }
     lesson { nil }
 
+    # A row saved before question text was required
+    trait :without_text do
+      question_text { "" }
+      to_create { |instance| instance.save!(validate: false) }
+    end
+
     factory :short_answer_question do
       question_type { "short_answer" }
     end
