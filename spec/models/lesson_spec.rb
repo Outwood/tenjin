@@ -68,6 +68,28 @@ RSpec.describe Lesson do
     end
   end
 
+  describe "moving to another topic" do
+    let(:lesson) { create(:lesson) }
+    let(:other_topic) { create(:topic, subject: lesson.subject) }
+
+    context "with questions" do
+      before { create(:question, topic: lesson.topic, lesson: lesson) }
+
+      it "is refused" do
+        lesson.topic = other_topic
+        expect(lesson).not_to be_valid
+        expect(lesson.errors[:topic]).to contain_exactly("can't change while the lesson has questions")
+      end
+    end
+
+    context "without questions" do
+      it "is allowed" do
+        lesson.topic = other_topic
+        expect(lesson).to be_valid
+      end
+    end
+  end
+
   describe "#video_link=" do
     let(:lesson) { described_class.new }
 
