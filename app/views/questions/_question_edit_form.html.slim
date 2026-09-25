@@ -8,19 +8,19 @@
           li = message
   .row.my-2
     .col-sm-3
-      = f.label(:question_type, 'Question Type')
+      = f.label(:question_type, 'Question Type', class: 'col-form-label')
     .col-sm-9
       = f.select( :question_type,
         options_for_select(Question.question_types.to_a.map { |k| [k[0].humanize, k[0]] }, selected: @question.question_type ),
         {},
-        class: 'form-select reload-page',
+        class: 'form-select',
         data: { action: 'change->reload-form#reload' } )
-  .row.my-2
-    .col.justify-content-center
-      = f.rich_text_area :question_text
+  .my-2
+    = f.label(:question_text, 'Question', id: 'question-text-label', class: 'form-label')
+    = f.rich_text_area(:question_text, aria: { labelledby: 'question-text-label' })
   .row.my-2
     .col-sm-3
-      = f.label(:lesson_id, 'Lesson:')
+      = f.label(:lesson_id, 'Lesson', class: 'col-form-label')
     .col-sm-9
       = f.select( :lesson_id,
           options_from_collection_for_select(@question.topic.lessons, :id, :title, selected: @question.lesson_id),
@@ -29,28 +29,30 @@
   - if @question.persisted?
     .row.my-2
       .col-sm-3
-        = f.label(:topic_id, 'Topic:')
+        = f.label(:topic_id, 'Topic', class: 'col-form-label')
       .col-sm-9
         = f.select( :topic_id,
             options_from_collection_for_select( @question.topic.subject.topics.order(:name),
               :id, :name, selected: @question.topic_id),
             {},
-            class: 'form-select reload-page',
+            class: 'form-select',
             data: { action: 'change->reload-form#reload' })
   table.table#table-answers
     thead
       tr
-        th Answer Text
-        th = "Correct?" unless @question.short_answer?
-        th
-          span.visually-hidden Actions
+        th#answer-text-header Answer Text
+        - if marks_correct_answers?(@question)
+          th#answer-correct-header Correct?
+        - unless @question.boolean?
+          th
+            span.visually-hidden Actions
     tbody.fields data-nested-fields-target='fields'
       = f.fields_for :answers do |a|
         = render 'questions/answer', f: a
-  - unless @question.question_type == 'boolean'
+  - unless @question.boolean?
     .row.my-2
       .col
-        = link_to_add_row('Add Answer', f, :answers, partial: 'questions/answer', class: 'btn btn-primary w-100')
+        = add_row_button('Add Answer', f, :answers, partial: 'questions/answer', class: 'btn btn-primary w-100')
   .row.my-2
     .col
       = f.submit("Save Question", class: 'btn w-100 btn-success')

@@ -15,6 +15,11 @@ module QuestionsHelper
     correct.first.text if correct.one?
   end
 
+  # Whether the answer table has a Correct column, in its header and in every row
+  def marks_correct_answers?(question)
+    question.question_type.present? && !question.short_answer?
+  end
+
   # Leaves out the bare "Answers is invalid", which each answer's own error says better
   def question_error_messages(question)
     question.errors.reject { |error| error.attribute == :answers }.map(&:full_message).uniq

@@ -31,7 +31,7 @@ RSpec.describe "Author edits a question", :default_creates do
 
       # rack_test form-wiring smoke; the persisted state is covered in spec/requests/question_request_spec.rb
       it "assigns a lesson" do
-        select "Photosynthesis", from: "Lesson:"
+        select "Photosynthesis", from: "Lesson"
         click_button("Save Question")
         expect(page).to have_css(".alert-info", text: "Question successfully updated")
       end
@@ -66,7 +66,7 @@ RSpec.describe "Author edits a question", :default_creates do
     # spec/javascript/controllers/nested_fields_controller.test.js, answers_attributes
     # handling in spec/requests/question_request_spec.rb
     it "adds an answer", :js do
-      click_link("Add Answer")
+      click_button("Add Answer")
       find("#table-answers tbody tr:nth-of-type(2) .text-answer").set("Photosynthesis")
       click_button("Save Question")
       expect(page).to have_field(with: "Photosynthesis")

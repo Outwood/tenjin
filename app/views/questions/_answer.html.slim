@@ -1,28 +1,30 @@
 / An answer marked for deletion stays in the form, hidden, so the next save deletes it
+/ Columns stay in step with the answer table's header in _question_edit_form
 tr hidden=f.object.marked_for_destruction?
   td
     - if f.object.marked_for_destruction?
       = f.hidden_field(:_destroy)
     = f.text_field(:text, id: "answer-text-#{f.index}",
-                    placeholder: "Click here to add answer",
+                    placeholder: "Type an answer",
                     class: 'form-control text-answer',
-                    readonly: (@question.boolean? ? true : false))
-  - unless @question.short_answer? || @question.question_type.nil?
+                    aria: { labelledby: 'answer-text-header' },
+                    readonly: @question.boolean?)
+  - if marks_correct_answers?(@question)
     td
+      - correct_label = { labelledby: "answer-correct-header answer-text-#{f.index}" }
       - if @question.boolean?
         = radio_button_tag('question[correct_answer]', f.object.text, f.object.text == chosen_boolean_label(@question),
             id: "answer-check-#{f.index}",
-            class: 'form-check-input')
+            class: 'form-check-input',
+            aria: correct_label)
       - else
-        = f.check_box(:correct,
-            onchange: "this.setAttribute('data-params', '#{f.object_name}[correct]=' + this.checked*this.checked)",
-            id: "answer-check-#{f.index}",
-            class: 'form-check-input')
+        = f.check_box(:correct, id: "answer-check-#{f.index}", class: 'form-check-input', aria: correct_label)
   - unless @question.boolean?
     td
+      - remove = { type: 'button', id: "answer-remove-#{f.index}", class: 'btn btn-danger',
+          aria: { labelledby: "answer-remove-#{f.index} answer-text-#{f.index}" } }
       - if f.object.persisted?
-        = link_to 'Remove', '#',
-          class: 'btn btn-danger',
+        = button_tag 'Remove', **remove,
           data: { object_name: f.object_name, action: 'click->nested-fields#removeRecord' }
       - else
-        = link_to 'Remove', '#', class: 'btn btn-danger', data: { action: 'click->nested-fields#removeRow' }
+        = button_tag 'Remove', **remove, data: { action: 'click->nested-fields#removeRow' }
