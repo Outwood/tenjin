@@ -6,7 +6,7 @@ FactoryBot.define do
   factory :admin do
     email { FFaker::Internet.email }
     role { "super" }
-    password { FFaker::Internet.password }
+    password { FFaker::Internet.password(15, 20) }
 
     factory :super_admin do
       role { "super" }
