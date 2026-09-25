@@ -1,18 +1,19 @@
-= simple_form_for @lesson do |f|
-  = f.input :title,
-    input_html: { class: 'col-sm-9 form-control' },
-    label_html: { class: 'col-sm-3 col-form-label' },
-    wrapper_html: { class: 'row mb-3' }
-  = f.input :video_link, label: 'URL:',
-    input_html: { class: 'col-sm-9 form-control' },
-    label_html: { class: 'col-sm-3 col-form-label' },
-    wrapper_html: { class: 'row mb-3' }
-  / A refused move's error already says what the hint would
+- topic_locked = @lesson.topic_locked?
+/ A refused move's error already says what the hint would
+- topic_hint = topic_locked && @lesson.errors[:topic].none?
+= simple_form_for @lesson, wrapper: :horizontal_form, wrapper_mappings: { select: :horizontal_select } do |f|
+  = f.input :title
+  / simple_form renders hints without linking them to their input
+  = f.input :video_link, as: :url,
+    hint: 'A YouTube or Vimeo link. Leave blank for a lesson without a video.',
+    hint_html: { id: 'lesson_video_link_hint' },
+    input_html: { aria: { describedby: 'lesson_video_link_hint' } }
   = f.association :topic, collection: @topics, include_blank: false,
     label_method: ->(topic) { topic.active? ? topic.name : "#{topic.name} (inactive)" },
-    disabled: @lesson.topic_locked?,
-    hint: ("The topic can't change while the lesson has questions." if @lesson.topic_locked? && @lesson.errors[:topic].none?),
-    input_html: { class: 'col-sm-9 form-control' },
-    label_html: { class: 'col-sm-3 col-form-label' },
-    wrapper_html: { class: 'row mb-3' }
-  = f.button :submit, class: 'btn w-100 btn-primary'
+    disabled: topic_locked,
+    hint: ("The topic can't change while the lesson has questions." if topic_hint),
+    hint_html: { id: 'lesson_topic_hint' },
+    input_html: { aria: { describedby: ('lesson_topic_hint' if topic_hint) } }
+  .d-flex.flex-wrap.gap-2.mt-4
+    = f.button :submit, 'Save Lesson', class: 'btn-primary'
+    = link_to 'Cancel', cancel_path, class: 'btn btn-outline-secondary'

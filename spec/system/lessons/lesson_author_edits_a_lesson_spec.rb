@@ -16,10 +16,10 @@ RSpec.describe "Lesson author edits a lesson", :default_creates do
     before { visit(new_subject_lesson_path(quiz_subject)) }
 
     it "creates a lesson" do
-      fill_in "URL", with: "https://vimeo.com/371104836"
+      fill_in "Video link", with: "https://vimeo.com/371104836"
       fill_in "Title", with: "Vimeo video lesson"
       select topic.name, from: "Topic"
-      click_button("Create Lesson")
+      click_button("Save Lesson")
       expect(page).to have_css(".lesson-title", text: "Vimeo video lesson")
     end
   end

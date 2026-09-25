@@ -77,14 +77,15 @@ class LessonsController < ApplicationController
       return render :new, status: :unprocessable_content
     end
 
+    notice = @lesson.new_record? ? "Lesson created" : "Lesson updated"
     @lesson.save!
 
-    redirect_to_topic(@lesson.topic)
+    redirect_to_topic(@lesson.topic, notice: notice)
   end
 
   # The index starts with every topic closed, so reopen the one just changed
-  def redirect_to_topic(topic)
-    redirect_to lessons_path(open: topic.id)
+  def redirect_to_topic(topic, **flash)
+    redirect_to lessons_path(open: topic.id), **flash
   end
 
   def lesson_params

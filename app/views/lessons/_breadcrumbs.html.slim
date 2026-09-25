@@ -1,0 +1,7 @@
+nav.mt-3 aria-label='Breadcrumb'
+  ol.breadcrumb.mb-1
+    li.breadcrumb-item = link_to 'Lessons', lessons_path
+    li.breadcrumb-item = link_to subject.name, lessons_path(anchor: dom_id(subject))
+    - if local_assigns[:topic]
+      li.breadcrumb-item = link_to topic.name, lessons_path(open: topic.id)
+    li.breadcrumb-item.active aria-current='page' = current
