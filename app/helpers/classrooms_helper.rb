@@ -24,12 +24,13 @@ module ClassroomsHelper
     safe_join(entries.take(5).map { |e| boolean_icon(e.completed?) })
   end
 
+  # Leads with the percentage, which the classroom page sorts the column by
   def report_progress(homework)
     count = homework.count
-    return "0 / 0 - 0%" if count.zero?
+    return "No pupils" if count.zero?
 
     percent = number_to_percentage(homework.completed_count / count.to_f * 100, precision: 0)
-    "#{homework.completed_count} / #{count} - #{percent}"
+    "#{percent} (#{homework.completed_count} of #{count})"
   end
 
   private

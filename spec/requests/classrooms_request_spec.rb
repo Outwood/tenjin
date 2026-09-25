@@ -96,10 +96,10 @@ RSpec.describe "classrooms controller", :default_creates do
     end
 
     context "with no pupils enrolled" do
-      it "lists each homework as none complete out of none" do
+      it "says each homework has no pupils" do
         get classroom_path(classroom)
         expect(Capybara.string(response.body))
-          .to have_css("#homework-table tbody tr", count: 3, text: "0 / 0 - 0%")
+          .to have_css("#homework-table tbody td", count: 3, exact_text: "No pupils")
       end
     end
 
@@ -112,7 +112,7 @@ RSpec.describe "classrooms controller", :default_creates do
 
       it "reports the share completed" do
         expect(Capybara.string(response.body))
-          .to have_css("#homework-table tr[data-id='#{homeworks.first.id}'] td", exact_text: "3 / 5 - 60%")
+          .to have_css("#homework-table tr[data-id='#{homeworks.first.id}'] td", exact_text: "60% (3 of 5)")
       end
     end
 

@@ -34,6 +34,14 @@ describe("percent", () => {
     expect(sorted(["5%", "100%", "75%"])).toEqual(["5%", "75%", "100%"]);
   });
 
+  it("orders by the percentage a value opens with", () => {
+    expect(sorted(["5% (1 of 20)", "100% (1 of 1)", "40% (2 of 5)"])).toEqual([
+      "5% (1 of 20)",
+      "40% (2 of 5)",
+      "100% (1 of 1)",
+    ]);
+  });
+
   it("puts a value with no percentage below every percentage", () => {
     expect(sorted(["0%", "Not asked yet", "50%"])).toEqual([
       "Not asked yet",

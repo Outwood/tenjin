@@ -14,7 +14,7 @@
         initialSort: [{ column: 'due', dir: 'desc' }],
         responsiveLayout: 'collapse',
         columns: [{ title: 'Topic', field: 'topic', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 0 },
-          { title: 'Completion', field: 'completion', minWidth: 150, responsive: 2 },
+          { title: 'Completion', field: 'completion', minWidth: 150, sorter: 'percent', responsive: 2 },
           { title: 'Due', field: 'due', minWidth: 150, sorter: 'ukDateTime', responsive: 1 }] }.to_json
     div data-controller='datatable' data-datatable-options-value=homework_table_options
       table.table.table-hover#homework-table data-datatable-target='table'

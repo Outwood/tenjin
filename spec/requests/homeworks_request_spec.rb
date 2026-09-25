@@ -104,7 +104,7 @@ RSpec.describe "homeworks controller", :default_creates do
       end
 
       it "reports the class completion percentage" do
-        expect(Capybara.string(response.body)).to have_css(".display-4", text: "1 / 10 - 10%")
+        expect(Capybara.string(response.body)).to have_css(".display-4", exact_text: "10% (1 of 10)")
       end
     end
 
@@ -123,9 +123,9 @@ RSpec.describe "homeworks controller", :default_creates do
       let(:empty_classroom) { create(:classroom, school: school, subject: quiz_subject) }
       let(:homework) { create(:homework, classroom: empty_classroom) }
 
-      it "reports no completions out of none" do
+      it "says the homework has no pupils" do
         get homework_path(homework)
-        expect(Capybara.string(response.body)).to have_css(".display-4", text: "0 / 0 - 0%")
+        expect(Capybara.string(response.body)).to have_css(".display-4", exact_text: "No pupils")
       end
     end
 
