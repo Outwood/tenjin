@@ -18,8 +18,9 @@ export const ukDateTime = (a, b) => {
   return parse(a) - parse(b);
 };
 
-// Percentages like "75%", which a string sort puts "100%" before "5%"; text
-// with no number, such as "Not asked yet", sorts below every percentage
+// Values that open with a percentage, like "75%" or "75% (3 of 4)", which a
+// string sort puts "100%" before "5%"; text with no number, such as "No
+// pupils", sorts below every percentage
 export const percent = (a, b) => {
   const parse = (s) => {
     const n = parseFloat(s);
