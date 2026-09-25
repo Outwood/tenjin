@@ -51,7 +51,7 @@ RSpec.describe "Author edits a question", :default_creates do
 
     # turbo_confirm smoke; QuestionsController#destroy is covered in spec/requests/question_request_spec.rb
     it "deletes the question", :js do
-      page.accept_confirm { click_button("Delete Question") }
+      page.accept_confirm("Delete this question? Students will no longer be asked it.") { click_button("Delete Question") }
       expect(page).to have_current_path(topic_questions_path(topic))
     end
 
@@ -81,7 +81,7 @@ RSpec.describe "Author edits a question", :default_creates do
       # spec/javascript/controllers/nested_fields_controller.test.js, _destroy handling
       # in spec/requests/question_request_spec.rb
       it "removes an answer on save" do
-        find("#table-answers tbody tr:last-of-type .btn-danger").click
+        find("#table-answers tbody tr:last-of-type").click_button("Remove")
         click_button("Save Question")
         expect(page).to have_css(".alert-info", text: "Question successfully updated")
           .and have_css("#table-answers tbody tr", count: 1, visible: :all)

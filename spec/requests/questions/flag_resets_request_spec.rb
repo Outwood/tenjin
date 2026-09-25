@@ -15,6 +15,7 @@ RSpec.describe "question flag resets controller", :default_creates do
       expect { post question_flag_reset_path(question) }
         .to change { question.reload.flagged_questions_count }.from(1).to(0)
       expect(response).to redirect_to(edit_question_path(question))
+      expect(flash[:notice]).to eq("Flags cleared")
     end
 
     context "when not authorized for the question's subject" do

@@ -1,0 +1,5 @@
+nav.mt-3 aria-label='Breadcrumb'
+  ol.breadcrumb.mb-1
+    li.breadcrumb-item = link_to 'Questions', questions_path
+    li.breadcrumb-item = link_to topic.name, topic_questions_path(topic)
+    li.breadcrumb-item.active aria-current='page' = current

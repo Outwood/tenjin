@@ -60,6 +60,44 @@ RSpec.describe "questions controller", :default_creates do
 
     def ticked_answer(label) = "#table-answers tbody tr:has(input.text-answer[value='#{label}']) input.form-check-input[checked]"
 
+    it "offers a lesson-free question as no lesson" do
+      get edit_question_path(question)
+      expect(Capybara.string(response.body)).to have_css("#question_lesson_id option:first-child[value='']", exact_text: "No lesson")
+    end
+
+    it "cancels back to the topic's questions" do
+      get edit_question_path(question)
+      expect(Capybara.string(response.body)).to have_link("Cancel", href: topic_questions_path(topic))
+    end
+
+    context "with a question never asked" do
+      before { get edit_question_path(question) }
+
+      it "says so in place of a percentage correct" do
+        expect(Capybara.string(response.body)).to have_css("#question-statistics dd", exact_text: "Not asked yet")
+      end
+
+      it "offers no flag reset" do
+        expect(Capybara.string(response.body)).to have_no_button("Reset Question Flags")
+      end
+    end
+
+    context "with a question asked four times, three answered correctly, and flagged" do
+      before do
+        create(:question_statistic, question: question, number_asked: 4, number_correct: 3)
+        create(:flagged_question, question: question, user: student)
+        get edit_question_path(question)
+      end
+
+      it "shows the percentage correct" do
+        expect(Capybara.string(response.body)).to have_css("#question-statistics dd", exact_text: "75%")
+      end
+
+      it "offers a flag reset" do
+        expect(Capybara.string(response.body)).to have_button("Reset Question Flags")
+      end
+    end
+
     it "labels each select" do
       get edit_question_path(question)
       expect(Capybara.string(response.body))
@@ -509,6 +547,7 @@ RSpec.describe "questions controller", :default_creates do
       expect { delete question_path(question) }
         .to change { question.reload.active }.from(true).to(false)
       expect(response).to redirect_to(topic_questions_path(topic))
+      expect(flash[:notice]).to eq("Question deleted")
     end
   end
 end

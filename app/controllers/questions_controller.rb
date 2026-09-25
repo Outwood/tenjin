@@ -36,7 +36,7 @@ class QuestionsController < ApplicationController
     question = authorize find_question
     topic = question.topic
     question.update_attribute(:active, false)
-    redirect_to topic_questions_path(topic)
+    redirect_to topic_questions_path(topic), notice: "Question deleted"
   end
 
   private
