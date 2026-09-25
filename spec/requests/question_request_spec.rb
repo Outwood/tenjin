@@ -132,6 +132,14 @@ RSpec.describe "questions controller", :default_creates do
       end
     end
 
+    context "when previewing as boolean with the question text cleared" do
+      before { get edit_question_path(question, question: {question_type: "boolean", question_text: ""}) }
+
+      it "shows no errors before a save" do
+        expect(Capybara.string(response.body)).to have_no_css(".alert-danger").and have_no_css(".is-invalid")
+      end
+    end
+
     context "when previewing a three-answer question as boolean" do
       before do
         create_list(:answer, 2, question: question, correct: false)
