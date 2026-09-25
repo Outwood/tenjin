@@ -26,7 +26,7 @@ class Classroom < ApplicationRecord
   def homework_counts
     h_count = HomeworkProgress.arel_table[:id].count
 
-    Homework.select(:id, h_count, homework_count_completed.sum.as("completed_count"), :due_date, :topic_id)
+    Homework.select(:id, h_count, homework_count_completed.sum.as("completed_count"), :due_date, :topic_id, :lesson_id)
       .left_joins(:homework_progresses)
       .group(:id)
       .where(classroom: self)

@@ -14,6 +14,7 @@
         initialSort: [{ column: 'due', dir: 'desc' }],
         responsiveLayout: 'collapse',
         columns: [{ title: 'Topic', field: 'topic', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 0 },
+          { title: 'Lesson', field: 'lesson', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 3 },
           { title: 'Completion', field: 'completion', minWidth: 150, sorter: 'percent', responsive: 2 },
           { title: 'Due', field: 'due', minWidth: 150, sorter: 'ukDateTime', responsive: 1 }] }.to_json
     div data-controller='datatable' data-datatable-options-value=homework_table_options
@@ -22,12 +23,14 @@
         thead
           tr
             th Topic
+            th Lesson
             th Completion
             th Due
         tbody
           - @homeworks.each do |h|
             tr.homework-data data-id=h.id
               td = link_to h.topic.name, homework_path(h)
+              td = h.lesson&.title || 'Whole topic'
               td = report_progress(h)
               td = h.due_date.strftime("%d/%m/%y %H:%M")
   section.mb-5#students aria-labelledby='students-heading'
