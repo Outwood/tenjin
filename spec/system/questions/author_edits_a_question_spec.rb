@@ -65,11 +65,14 @@ RSpec.describe "Author edits a question", :default_creates do
 
       before { visit(edit_question_path(question)) }
 
-      # nested-fields#removeRecord smoke; _destroy handling is covered in spec/requests/question_request_spec.rb
-      it "removes an answer" do
-        expect(page).to have_css("#table-answers tbody tr", count: 2)
+      # nested-fields#removeRecord smoke; the hiding is in
+      # spec/javascript/controllers/nested_fields_controller.test.js, _destroy handling
+      # in spec/requests/question_request_spec.rb
+      it "removes an answer on save" do
         find("#table-answers tbody tr:last-of-type .btn-danger").click
-        expect(page).to have_css("#table-answers tbody tr", count: 1)
+        click_button("Save Question")
+        expect(page).to have_css(".alert-info", text: "Question successfully updated")
+          .and have_css("#table-answers tbody tr", count: 1, visible: :all)
       end
     end
   end

@@ -1,4 +1,4 @@
-tr
+tr hidden=f.object.marked_for_destruction?
   td
     = f.text_field(:text, id: "answer-text-#{f.index}",
                     placeholder: "Click here to add answer",
@@ -12,7 +12,9 @@ tr
           class: 'form-check-input')
   - unless @question.boolean?
     td
-      - if @question.persisted?
+      - if f.object.persisted?
+        - if f.object.marked_for_destruction?
+          = f.hidden_field(:_destroy)
         = link_to 'Remove', '#',
           class: 'btn btn-danger',
           data: { object_name: f.object_name, action: 'click->nested-fields#removeRecord' }

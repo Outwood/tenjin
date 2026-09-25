@@ -194,6 +194,11 @@ RSpec.describe "questions controller", :default_creates do
       it "shows a remove link for each answer" do
         expect(Capybara.string(response.body)).to have_link("Remove", count: 3)
       end
+
+      it "lets an added answer leave the form without a save" do
+        template = Capybara.string(response.body).find("[data-action='click->nested-fields#add']")["data-fields"]
+        expect(Capybara.string(template)).to have_css("[data-action='click->nested-fields#removeRow']")
+      end
     end
   end
 
@@ -237,6 +242,18 @@ RSpec.describe "questions controller", :default_creates do
           patch question_path(question),
             params: {question: {answers_attributes: {"0" => {id: incorrect_answer.id, _destroy: "true"}}}}
         end.to change { Answer.exists?(incorrect_answer.id) }.from(true).to(false)
+      end
+
+      context "when the save fails" do
+        before do
+          removal = {"0" => {id: incorrect_answer.id, _destroy: "true"}}
+          patch question_path(question), params: {question: {question_text: "", answers_attributes: removal}}
+        end
+
+        it "keeps the answer hidden and marked for deletion" do
+          expect(Capybara.string(response.body))
+            .to have_css("#table-answers tbody tr[hidden] input[name$='[_destroy]'][value='true']", visible: :all, count: 1)
+        end
       end
     end
 
