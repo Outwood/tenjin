@@ -70,7 +70,8 @@
         tbody
           - @students.each do |s|
             tr.student-data data-id=s.id
-              td = link_to s.forename, user_path(s)
+              / Visible as the first name, which its column heads; spoken as the full name
+              td = link_to s.forename, user_path(s), aria: { label: "#{s.forename} #{s.surname}" }
               td = s.surname
               td = s.username
               td = homework_strip(@recent_homeworks, @recent_progress.fetch(s.id, {}))
