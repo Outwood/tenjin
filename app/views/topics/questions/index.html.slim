@@ -38,11 +38,13 @@
       = link_to 'Import Questions',
           new_topic_import_path(@topic),
           class:'btn btn-primary w-100'
-
-  .row.my-5
-    .col
-      = button_to 'Delete Topic',
-        topic_path(@topic),
-        method: :delete,
-        class: 'btn btn-danger w-100',
-        form: { data: { turbo: true, turbo_confirm: 'Are you sure?  This cannot be undone' } }
+  section.mt-5.mb-5 aria-labelledby='danger-zone-heading'
+    h2#danger-zone-heading Danger Zone
+    p
+      | Deleting this topic also deletes its questions, lessons, quizzes and challenges,
+        any homework set on it, and students' scores for it.
+    = button_to 'Delete Topic',
+      topic_path(@topic),
+      method: :delete,
+      class: 'btn btn-danger',
+      form: { data: { turbo: true, turbo_confirm: "Delete #{@topic.name} and everything in it? This cannot be undone." } }
