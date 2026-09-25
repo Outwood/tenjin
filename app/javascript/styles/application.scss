@@ -300,3 +300,29 @@ body {
 .error {
   @extend .text-danger;
 }
+
+// Answers stack at phone width, so a long answer keeps the full row
+#table-answers {
+  @include media-breakpoint-down(sm) {
+    thead {
+      @include visually-hidden;
+    }
+
+    // A row removed until the next save carries [hidden], which display would override
+    tr:not([hidden]) {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+    }
+
+    td {
+      border-bottom-width: 0;
+    }
+
+    td:first-child {
+      flex-basis: 100%;
+    }
+  }
+}

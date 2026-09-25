@@ -15,10 +15,12 @@ tr hidden=f.object.marked_for_destruction?
       - if @question.boolean?
         = radio_button_tag('question[correct_answer]', f.object.text, f.object.text == chosen_boolean_label(@question),
             id: "answer-check-#{f.index}",
-            class: 'form-check-input',
+            class: 'form-check-input mt-0',
             aria: correct_label)
       - else
-        = f.check_box(:correct, id: "answer-check-#{f.index}", class: 'form-check-input', aria: correct_label)
+        = f.check_box(:correct, id: "answer-check-#{f.index}", class: 'form-check-input mt-0', aria: correct_label)
+      / The column header is hidden at phone width
+      label.form-check-label.d-sm-none.ms-2 for="answer-check-#{f.index}" Correct
   - unless @question.boolean?
     td
       - remove = { type: 'button', id: "answer-remove-#{f.index}", class: 'btn btn-danger',

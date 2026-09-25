@@ -50,3 +50,8 @@
 trix-editor.is-invalid {
   border-color: var(--bs-form-invalid-border-color);
 }
+
+// Authors write left-aligned; the quiz still centres the question
+trix-editor.trix-content {
+  text-align: start;
+}

@@ -51,7 +51,7 @@ RSpec.describe "Author edits a question", :default_creates do
 
     # turbo_confirm smoke; QuestionsController#destroy is covered in spec/requests/question_request_spec.rb
     it "deletes the question", :js do
-      page.accept_confirm { click_button("Delete Question") }
+      page.accept_confirm("Delete this question? Students will no longer be asked it.") { click_button("Delete Question") }
       expect(page).to have_current_path(topic_questions_path(topic))
     end
 

@@ -24,7 +24,7 @@
     .col-sm-9
       = f.select( :lesson_id,
           options_from_collection_for_select(@question.topic.lessons, :id, :title, selected: @question.lesson_id),
-          { include_blank: 'Select Lesson' },
+          { include_blank: 'No lesson' },
           class: 'form-select')
   - if @question.persisted?
     .row.my-2
@@ -37,7 +37,7 @@
             {},
             class: 'form-select',
             data: { action: 'change->reload-form#reload' })
-  table.table#table-answers
+  table.table.align-middle#table-answers
     thead
       tr
         th#answer-text-header Answer Text
@@ -50,9 +50,7 @@
       = f.fields_for :answers do |a|
         = render 'questions/answer', f: a
   - unless @question.boolean?
-    .row.my-2
-      .col
-        = add_row_button('Add Answer', f, :answers, partial: 'questions/answer', class: 'btn btn-primary w-100')
-  .row.my-2
-    .col
-      = f.submit("Save Question", class: 'btn w-100 btn-success')
+    = add_row_button('Add Answer', f, :answers, partial: 'questions/answer', class: 'btn btn-outline-primary')
+  .d-flex.flex-wrap.gap-2.mt-4
+    = f.submit('Save Question', class: 'btn btn-primary')
+    = link_to 'Cancel', topic_questions_path(@question.topic), class: 'btn btn-outline-secondary'
