@@ -274,6 +274,13 @@ RSpec.describe "lessons controller", :default_creates do
           .and have_css(".invalid-feedback", text: "too short")
       end
 
+      it "marks only the invalid field" do
+        patch lesson_path(lesson), params: {lesson: {title: "ab"}}
+        expect(Capybara.string(response.body))
+          .to have_css("#lesson_title.is-invalid")
+          .and have_no_css(".is-valid")
+      end
+
       it "offers the subject's active topics in the re-rendered form" do
         patch lesson_path(lesson), params: {lesson: {title: "ab"}}
         expect(Capybara.string(response.body))
