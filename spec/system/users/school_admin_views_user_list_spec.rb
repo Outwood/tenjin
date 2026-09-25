@@ -41,7 +41,7 @@ RSpec.describe "School admin views user list", :default_creates, :js do
         within ".table-responsive:has(#students-table)" do
           # Also waits for Tabulator to build, so the filter input is not dropped
           expect(page).to have_css(".student-row", count: 10)
-          fill_in "Search…", with: student.surname
+          fill_in "Search students…", with: student.surname
           expect(page).to have_css(".student-row", count: 1)
             .and have_css(".student-row[data-id='#{student.id}']")
         end
