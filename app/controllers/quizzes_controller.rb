@@ -72,7 +72,7 @@ class QuizzesController < ApplicationController
     in {success: true, payload: Quiz::CheckAnswerOutcome => outcome}
       render json: Quiz::AnswerOutcomeSerializer.new(outcome)
     in {success: false, error: :no_answer_provided}
-      render json: {error: "No answer provided"}, status: :unprocessable_entity
+      render json: {error: "No answer provided"}, status: :unprocessable_content
     end
   end
 
