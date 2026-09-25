@@ -1,7 +1,12 @@
 - content_for :title
   title = "Classroom - #{@classroom.name}"
 .container
-  .mt-3.mb-4
+  / The dashboard lists a teacher's own classes and the school's others, so it is the way back from either
+  nav.mt-3.breadcrumb-chevron aria-label='Breadcrumb'
+    ol.breadcrumb.mb-1
+      li.breadcrumb-item = link_to 'My Classes', dashboard_path
+      li.breadcrumb-item.active aria-current='page' = @classroom.name
+  .mb-4
     h1.mb-0 = @classroom.name
     - if @classroom.subject
       p.lead.mb-0#classroom-subject = @classroom.subject.name

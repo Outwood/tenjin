@@ -200,6 +200,11 @@ hr.small {
   }
 }
 
+// Class names carry slashes (9X/Sc), so a breadcrumb that ends in one divides with a chevron
+.breadcrumb-chevron {
+  --bs-breadcrumb-divider: "›";
+}
+
 // Tabulator's empty-table message is #ccc on white, about 1.6:1; secondary text reads at body size.
 // body outranks the theme's four-class selector, whose sheet loads after this one
 body .tabulator .tabulator-tableholder .tabulator-placeholder .tabulator-placeholder-contents {
