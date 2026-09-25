@@ -8,8 +8,10 @@
       { title: 'Times asked', field: 'times_asked', minWidth: 160, responsive: 2, **number },
       { title: 'Flags', field: 'flags', minWidth: 90, responsive: 1, **number },
       { title: 'Percent correct', field: 'percent_correct', minWidth: 170, responsive: 2, **number, sorter: 'percent' }] }
-/ A topic with no lessons would fill the column with dashes
-- lesson_column = @lessons.any?
+ruby:
+  questions = @questions.order(:created_at).to_a
+  # Shown only when a listed question has a lesson, since otherwise every cell is a dash
+  lesson_column = questions.any?(&:lesson_id)
 - if lesson_column
   - table_options[:columns] << { title: 'Lesson', field: 'lesson', minWidth: 160, widthGrow: 2, cssClass: 'text-wrap', responsive: 3 }
 .question-table data-controller='datatable' data-datatable-options-value=table_options.to_json
@@ -26,7 +28,7 @@
         - if lesson_column
           th Lesson
     tbody
-      - @questions.order(:created_at).each_with_index do |q, index|
+      - questions.each_with_index do |q, index|
         tr id="question-#{q.id}"
           td = index + 1
           td.question-text = link_to q.question_text.blank? ? 'Click here to edit' : q.question_text, edit_question_path(q)

@@ -89,6 +89,18 @@ RSpec.describe "topic questions controller", :default_creates do
       end
     end
 
+    context "with a lesson no question is in" do
+      let!(:lesson) { create(:lesson, topic: topic, title: "Leaf structure") }
+
+      before { get topic_questions_path(topic) }
+
+      it "leaves out the lesson column but offers the lesson as the default" do
+        expect(Capybara.string(response.body))
+          .to have_no_css("#questionTable th", exact_text: "Lesson")
+          .and have_select("Default lesson", options: ["No default lesson", "Leaf structure"])
+      end
+    end
+
     context "with no lessons for the topic" do
       before { get topic_questions_path(topic) }
 
