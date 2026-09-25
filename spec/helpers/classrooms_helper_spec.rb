@@ -54,4 +54,56 @@ RSpec.describe ClassroomsHelper do
       it { is_expected.to eq("Last sync timed out.") }
     end
   end
+
+  describe "#homework_slot" do
+    include ActiveSupport::Testing::TimeHelpers
+
+    subject(:slot) { Capybara.string(helper.homework_slot(homework, progress)) }
+
+    let(:topic) { build_stubbed(:topic, name: "Storage") }
+    let(:homework) { build_stubbed(:homework, topic: topic, due_date: Time.zone.local(2026, 9, 27, 9)) }
+
+    before { travel_to Time.zone.local(2026, 9, 25, 12) }
+
+    context "with the homework completed" do
+      let(:progress) { build_stubbed(:homework_progress, homework: homework, completed: true) }
+
+      it "shows a tick labelled done" do
+        expect(slot).to have_css("i.fa-check")
+          .and have_css(".visually-hidden", exact_text: "Storage, due 27 Sep: done")
+      end
+    end
+
+    context "with the homework not completed and not yet due" do
+      let(:progress) { build_stubbed(:homework_progress, homework: homework, completed: false) }
+
+      it "shows an open circle labelled not yet due" do
+        expect(slot).to have_css("i.fa-circle")
+          .and have_css(".visually-hidden", exact_text: "Storage, due 27 Sep: not yet due")
+      end
+    end
+
+    context "with the homework not completed and past its due date" do
+      let(:homework) { build_stubbed(:homework, topic: topic, due_date: Time.zone.local(2026, 9, 24, 9)) }
+      let(:progress) { build_stubbed(:homework_progress, homework: homework, completed: false) }
+
+      it "shows an exclamation mark labelled overdue" do
+        expect(slot).to have_css("i.fa-exclamation")
+          .and have_css(".visually-hidden", exact_text: "Storage, due 24 Sep: overdue")
+      end
+    end
+
+    context "with the homework set before the pupil joined" do
+      let(:progress) { nil }
+
+      it "shows a dash labelled as set before they joined" do
+        expect(slot).to have_css("i.fa-minus")
+          .and have_css(".visually-hidden", exact_text: "Storage, due 27 Sep: set before they joined")
+      end
+
+      it "titles the slot with its label and hides the icon from screen readers" do
+        expect(slot).to have_css(".homework-slot[title='Storage, due 27 Sep: set before they joined'] i[aria-hidden='true']")
+      end
+    end
+  end
 end

@@ -19,9 +19,36 @@ module ClassroomsHelper
     end
   end
 
-  def student_homeworks(student, homework_progress)
-    entries = homework_progress.select { |hp| hp.user_id == student.id }
-    safe_join(entries.take(5).map { |e| boolean_icon(e.completed?) })
+  # The icon and wording for each state a pupil's homework can be in
+  HOMEWORK_SLOTS = {
+    done: {icon: "fas fa-check text-success", text: "done"},
+    overdue: {icon: "fas fa-exclamation text-danger", text: "overdue"},
+    not_due: {icon: "far fa-circle text-secondary", text: "not yet due"},
+    not_set: {icon: "fas fa-minus text-body-tertiary", text: "set before they joined"}
+  }.freeze
+
+  # One slot per homework in the order given, so each homework's slots line up down the class;
+  # progress maps a homework's id to the pupil's row on it
+  def homework_strip(homeworks, progress)
+    safe_join(homeworks.map { |homework| homework_slot(homework, progress[homework.id]) }, " ")
+  end
+
+  # The icon says the state at a glance; the title and hidden text name the homework
+  def homework_slot(homework, progress)
+    slot = HOMEWORK_SLOTS.fetch(homework_state(homework, progress))
+    label = "#{homework.topic.name}, due #{homework.due_date.strftime("%-d %b")}: #{slot[:text]}"
+    content_tag(:span, class: "homework-slot", title: label, data: {homework: homework.id}) do
+      content_tag(:i, nil, class: "#{slot[:icon]} fa-fw", aria: {hidden: true}) +
+        content_tag(:span, label, class: "visually-hidden")
+    end
+  end
+
+  # No row means the homework was set before the pupil joined the class
+  def homework_state(homework, progress)
+    return :not_set if progress.nil?
+    return :done if progress.completed?
+
+    homework.due_date.past? ? :overdue : :not_due
   end
 
   # Leads with the percentage, which the classroom page sorts the column by
