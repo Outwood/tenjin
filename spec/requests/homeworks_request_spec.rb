@@ -104,7 +104,7 @@ RSpec.describe "homeworks controller", :default_creates do
       end
 
       it "reports the class completion percentage" do
-        expect(Capybara.string(response.body)).to have_css(".display-4", exact_text: "10% (1 of 10)")
+        expect(Capybara.string(response.body)).to have_css("#homework-completion", exact_text: "10% (1 of 10)")
       end
 
       it "names each pupil's status beside its icon" do
@@ -126,7 +126,7 @@ RSpec.describe "homeworks controller", :default_creates do
       end
 
       it "counts only the pupils still in the class" do
-        expect(Capybara.string(response.body)).to have_css(".display-4", exact_text: "10% (1 of 10)")
+        expect(Capybara.string(response.body)).to have_css("#homework-completion", exact_text: "10% (1 of 10)")
       end
 
       it "leaves the mover out of the pupil list" do
@@ -153,7 +153,7 @@ RSpec.describe "homeworks controller", :default_creates do
 
       it "says the homework has no pupils" do
         get homework_path(homework)
-        expect(Capybara.string(response.body)).to have_css(".display-4", exact_text: "No pupils")
+        expect(Capybara.string(response.body)).to have_css("#homework-completion", exact_text: "No pupils")
       end
     end
 
@@ -161,10 +161,17 @@ RSpec.describe "homeworks controller", :default_creates do
       let(:lesson) { create(:lesson, topic: topic) }
       let(:homework) { create(:homework, classroom: classroom, topic: topic, lesson: lesson) }
 
-      it "shows the lesson and topic the homework was set for" do
+      it "heads the page with the lesson and names its topic" do
         get homework_path(homework)
-        expect(response.body).to include(lesson.title).and include(topic.name)
+        expect(Capybara.string(response.body)).to have_css("h1", exact_text: lesson.title)
+          .and have_text(topic.name)
       end
+    end
+
+    it "links back to the class in the breadcrumb" do
+      get homework_path(homework)
+      expect(Capybara.string(response.body))
+        .to have_css("nav[aria-label='Breadcrumb'] a[href='#{classroom_path(classroom)}']", exact_text: classroom.name)
     end
 
     it "asks for confirmation before deleting the homework" do
