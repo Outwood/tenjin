@@ -158,6 +158,19 @@ RSpec.describe "classrooms controller", :default_creates do
       end
     end
 
+    describe "a pupil's actions menu" do
+      let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
+
+      before { get classroom_path(classroom) }
+
+      it "is named for the pupil and resets their password" do
+        row = Capybara.string(response.body).find("#students-table tr[data-id='#{student.id}']")
+        expect(row).to have_button("Actions for #{student.forename} #{student.surname}", enable_aria_label: true)
+          .and have_button("Reset password")
+          .and have_css("button[data-password-reset-url-param='#{user_password_reset_path(student)}']")
+      end
+    end
+
     describe "a pupil's homework strip" do
       # Enrolled after the homeworks above, so the pupil has progress only on those set below
       let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }

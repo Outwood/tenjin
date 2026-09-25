@@ -1,6 +1,13 @@
 h2.page-section-header.text-uppercase Employees
 ==render_small_separator
-.col.table-responsive data-controller='datatable' data-datatable-options-value=({ paginationSize: 10 }.to_json)
+- employees_table_options = { paginationSize: 10,
+    searchFields: %w[name username classes],
+    columns: [{ title: 'Name', field: 'name' },
+      { title: 'Username', field: 'username' },
+      { title: 'Classes', field: 'classes' },
+      { title: 'Actions', field: 'actions', width: 64, headerSort: false,
+        cssClass: 'actions-column', clipboard: false, download: false }] }.to_json
+.col.table-responsive data-controller='datatable password-reset' data-datatable-options-value=employees_table_options
   = render 'shared/table_search', label: 'Search employees'
   .mb-2
     button.btn.btn-secondary.btn-sm.me-2 type='button' data-action='click->datatable#copy' Copy
@@ -11,7 +18,7 @@ h2.page-section-header.text-uppercase Employees
         th Name
         th Username
         th.d-none.d-lg-table-cell Classes
-        th Reset Password?
+        th Actions
     tbody
       - @employees.each do |e|
         tr.employee-row data-id=e.id
@@ -20,6 +27,5 @@ h2.page-section-header.text-uppercase Employees
             = e.surname
           td = e.username
           td.d-none.d-lg-table-cell = user_class_names(e)
-          td = link_to('Reset Password', user_password_reset_path(e),
-            class: 'btn btn-dark reset-password reset-password-student',
-            data: { controller: 'password-reset', action: 'click->password-reset#reset' })
+          td = render('users/actions_menu', user: e)
+  = render('users/password_reset_modal', id: 'employee-password-reset')

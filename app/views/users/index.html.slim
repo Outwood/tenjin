@@ -4,13 +4,14 @@ section.page-section.text-center.pt-2#Users
     h2.page-section-header.text-uppercase Students
     ==render_small_separator
     - students_table_options = { paginationSize: 10,
-        initialSort: [{ column: 'reset_password', dir: 'asc' },
-          { column: 'name', dir: 'asc' }],
+        searchFields: %w[name username classes],
+        initialSort: [{ column: 'name', dir: 'asc' }],
         columns: [{ title: 'Name', field: 'name' },
           { title: 'Username', field: 'username' },
           { title: 'Classes', field: 'classes' },
-          { title: 'Reset Password?', field: 'reset_password' }] }.to_json
-    .col.table-responsive data-controller='datatable' data-datatable-options-value=students_table_options
+          { title: 'Actions', field: 'actions', width: 64, headerSort: false,
+            cssClass: 'actions-column', clipboard: false, download: false }] }.to_json
+    .col.table-responsive data-controller='datatable password-reset' data-datatable-options-value=students_table_options
       = render 'shared/table_search', label: 'Search students'
       .mb-2
         button.btn.btn-secondary.btn-sm.me-2 type='button' data-action='click->datatable#copy' Copy
@@ -21,7 +22,7 @@ section.page-section.text-center.pt-2#Users
             th Name
             th Username
             th.d-none.d-lg-table-cell Classes
-            th Reset Password?
+            th Actions
         tbody
           - @students.each do |s|
             tr.student-row data-id=s.id
@@ -30,8 +31,7 @@ section.page-section.text-center.pt-2#Users
                 = s.surname
               td = s.username
               td.d-none.d-lg-table-cell = user_class_names(s)
-              td = link_to('Reset Password', user_password_reset_path(s),
-                class: 'btn btn-dark reset-password reset-password-student',
-                data: { controller: 'password-reset', action: 'click->password-reset#reset' })
+              td = render('users/actions_menu', user: s)
+      = render('users/password_reset_modal', id: 'student-password-reset')
     - if current_user.has_role? :school_admin
       = render('users/employee_table')
