@@ -130,15 +130,37 @@ RSpec.describe "classrooms controller", :default_creates do
     end
 
     context "with some of a homework completed" do
+      # Enrolled before the homework is set, so each pupil has a progress row on it
+      let!(:pupil_enrollments) { create_list(:enrollment, 5, classroom: classroom) }
+      let!(:homework) { create(:homework, classroom: classroom, topic: topic) }
+
       before do
-        create_list(:homework_progress, 2, homework: homeworks.first, completed: false)
-        create_list(:homework_progress, 3, homework: homeworks.first, completed: true)
+        pupil_enrollments.first(3).each { |e| homework.homework_progresses.find_by!(user: e.user).update!(completed: true) }
         get classroom_path(classroom)
       end
 
       it "reports the share completed" do
         expect(Capybara.string(response.body))
-          .to have_css("#homework-table tr[data-id='#{homeworks.first.id}'] td", exact_text: "60% (3 of 5)")
+          .to have_css("#homework-table tr[data-id='#{homework.id}'] td", exact_text: "60% (3 of 5)")
+      end
+    end
+
+    context "with a pupil who has moved to another class" do
+      let!(:pupil_enrollments) { create_list(:enrollment, 3, classroom: classroom) }
+      let!(:homework) { create(:homework, classroom: classroom, topic: topic) }
+      let(:mover_enrollment) { pupil_enrollments.last }
+
+      # The move comes after the homework, as a sync would make it, so the mover keeps a completed row on it
+      before do
+        [pupil_enrollments.first, mover_enrollment].each { |e| homework.homework_progresses.find_by!(user: e.user).update!(completed: true) }
+        mover_enrollment.destroy!
+        create(:enrollment, classroom: create(:classroom, school: school), user: mover_enrollment.user)
+        get classroom_path(classroom)
+      end
+
+      it "counts only the pupils still in the class" do
+        expect(Capybara.string(response.body))
+          .to have_css("#homework-table tr[data-id='#{homework.id}'] td", exact_text: "50% (1 of 2)")
       end
     end
 

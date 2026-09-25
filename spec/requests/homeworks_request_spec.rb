@@ -108,6 +108,28 @@ RSpec.describe "homeworks controller", :default_creates do
       end
     end
 
+    context "with a pupil who has moved to another class" do
+      let!(:mover_enrollment) { create(:enrollment, classroom: classroom, user: student) }
+
+      # The move comes after the homework, as a sync would make it, so the mover keeps a completed row on it
+      before do
+        [enrollments.first.user, student].each { |pupil| homework.homework_progresses.find_by!(user: pupil).update!(completed: true) }
+        mover_enrollment.destroy!
+        create(:enrollment, classroom: create(:classroom, school: school), user: student)
+        get homework_path(homework)
+      end
+
+      it "counts only the pupils still in the class" do
+        expect(Capybara.string(response.body)).to have_css(".display-4", exact_text: "10% (1 of 10)")
+      end
+
+      it "leaves the mover out of the pupil list" do
+        expect(Capybara.string(response.body))
+          .to have_css("tr.student-row", count: 10)
+          .and have_no_css("tr.student-row[data-user='#{student.id}']")
+      end
+    end
+
     context "when a student has partial progress" do
       before do
         homework.homework_progresses.first.update!(progress: 50)
