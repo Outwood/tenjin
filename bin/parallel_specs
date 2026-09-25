@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Run the spec suite across cores with parallel_tests. A whole-suite run
+# records per-file runtimes, which parallel_tests uses to balance workers once
+# they cover most spec files; runs given arguments pass them to parallel_rspec
+# and leave the log alone, so a subset never shrinks it.
+#
+# PARALLEL_TEST_PROCESSORS sets the worker count. Each worker needs its own
+# database: bin/rails parallel:create parallel:load_schema
+set -euo pipefail
+
+# Apple Silicon: one worker per performance core, as workers on efficiency
+# cores finish last. Elsewhere parallel_tests starts one per core.
+if [ -z "${PARALLEL_TEST_PROCESSORS:-}" ]; then
+  performance_cores=$(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null || true)
+  if [ -n "$performance_cores" ]; then
+    export PARALLEL_TEST_PROCESSORS=$performance_cores
+  fi
+fi
+
+if [ $# -gt 0 ]; then
+  exec bundle exec parallel_rspec "$@"
+fi
+
+exec bundle exec parallel_rspec spec \
+  -o "--format progress --format ParallelTests::RSpec::RuntimeLogger --out tmp/parallel_runtime_rspec.log"

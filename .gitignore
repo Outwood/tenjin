@@ -44,7 +44,7 @@ yarn-debug.log*
 
 ## Ruby
 /spec/reports/
-/spec/examples.txt
+/spec/examples*.txt
 
 ## Documentation cache and generated files:
 /.yardoc/
