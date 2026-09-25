@@ -32,6 +32,14 @@ export default class extends Controller {
     const { searchFields, ...opts } = this.optionsValue;
     this.searchFields = searchFields;
     this.searchText = new WeakMap();
+    // Tabulator shows its placeholder whenever no rows show, and asks for it
+    // afresh each time, so a search that finds nothing says so rather than
+    // repeating the page's message for an empty table
+    if (opts.placeholder) {
+      const { placeholder } = opts;
+      opts.placeholder = () =>
+        this.searching ? "Nothing matches your search." : placeholder;
+    }
     if (Array.isArray(opts.columns)) {
       opts.columns = opts.columns.map((col) =>
         typeof col.sorter === "string" && namedSorters[col.sorter]
@@ -87,6 +95,7 @@ export default class extends Controller {
 
   filter(event) {
     const needle = event.target.value.toLowerCase();
+    this.searching = Boolean(needle);
     if (needle) {
       this.tabulator.setFilter((row) => this.#textOf(row).includes(needle));
     } else {

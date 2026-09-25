@@ -200,6 +200,14 @@ hr.small {
   }
 }
 
+// Tabulator's empty-table message is #ccc on white, about 1.6:1; secondary text reads at body size.
+// body outranks the theme's four-class selector, whose sheet loads after this one
+body .tabulator .tabulator-tableholder .tabulator-placeholder .tabulator-placeholder-contents {
+  color: var(--bs-secondary-color);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
 // A row's ⋮ button explains itself, so its column's heading is for screen readers only
 .tabulator .tabulator-col.actions-column .tabulator-col-title {
   @include visually-hidden;
