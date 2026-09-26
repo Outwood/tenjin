@@ -1,17 +1,27 @@
 - content_for :title
   title = "Questions - #{@lesson.title}"
 .container
-  h1.h1.mt-3.text-center = "Questions for #{@lesson.title}"
+  h1.mt-3.text-center = "Questions for #{@lesson.title}"
   ==render_small_separator
 
-  - @questions.order(:created_at).each_with_index do |q, index|
-    .card
-      .col-12
-        p == q.question_text
-      - q.answers.each do |a|
-        .col
-          - if a.correct?
-            p
-              strong = a.text
-          - else
-            p = a.text
+  ol.list-unstyled.d-grid.gap-3.mb-5#lesson-questions
+    - @questions.each.with_index(1) do |q, number|
+      li.card id=dom_id(q)
+        .card-body
+          .d-flex.flex-wrap.align-items-center.gap-2.mb-2
+            h2.h5.mb-0 = "Question #{number}"
+            span.badge.rounded-pill.text-bg-light.border.question-type = question_type_label(q)
+          / Rich text renders its own block element, so it cannot sit in a paragraph
+          .question-text.mb-3
+            - if q.question_text.blank?
+              p.fst-italic.text-body-secondary.mb-0 = "(no question text)"
+            - else
+              == q.question_text
+          / Every answer to a short-answer question is accepted, so none is singled out
+          p.small.text-body-secondary.mb-1 = q.short_answer? ? 'Accepted answers' : 'Answers'
+          ul.list-unstyled.mb-0.answers
+            - listed_answers(q).each do |a|
+              li.answer.py-1 id=dom_id(a)
+                => a.text
+                - if a.correct? && !q.short_answer?
+                  span.badge.text-bg-success.ms-1 Correct
