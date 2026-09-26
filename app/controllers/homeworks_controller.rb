@@ -22,7 +22,7 @@ class HomeworksController < ApplicationController
     @classroom = find_classroom
     @homework = authorize @classroom.homeworks.new(homework_params)
     if @homework.save
-      flash[:notice] = homework_notice(@homework)
+      flash[:notice] = "#{@homework.title} homework set"
       redirect_to @homework
     else
       @lessons = lessons_for_classroom(@classroom)
@@ -34,7 +34,7 @@ class HomeworksController < ApplicationController
     homework = authorize find_homework
     classroom = homework.classroom
     homework.destroy
-    redirect_to classroom_path(classroom)
+    redirect_to classroom_path(classroom), notice: "#{homework.title} homework deleted", status: :see_other
   end
 
   private
@@ -45,14 +45,6 @@ class HomeworksController < ApplicationController
 
   def find_homework
     Homework.find(params[:id])
-  end
-
-  def homework_notice(homework)
-    if homework.lesson.blank?
-      "#{homework.topic.name} homework set"
-    else
-      "#{homework.lesson.title} homework set"
-    end
   end
 
   def homework_params

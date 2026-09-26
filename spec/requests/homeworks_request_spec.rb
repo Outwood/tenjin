@@ -169,6 +169,12 @@ RSpec.describe "homeworks controller", :default_creates do
       expect { delete homework_path(homework) }
         .to change { Homework.count }.by(-1)
       expect(response).to redirect_to(classroom_path(classroom))
+      expect(response).to have_http_status(:see_other)
+    end
+
+    it "names the deleted homework in the notice" do
+      delete homework_path(homework)
+      expect(flash[:notice]).to eq("#{homework.topic.name} homework deleted")
     end
   end
 end

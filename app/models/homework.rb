@@ -15,6 +15,11 @@ class Homework < ApplicationRecord
 
   after_create :create_homework_progresses
 
+  # Names the homework by what was set: a lesson, or else its whole topic
+  def title
+    lesson&.title || topic.name
+  end
+
   private
 
   def due_date_cannot_be_in_the_past
