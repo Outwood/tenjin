@@ -259,6 +259,20 @@ RSpec.describe "dashboard controller", :default_creates do
           end
         end
 
+        context "when the homework was completed after its due time" do
+          let!(:homework) { create(:homework, :overdue, classroom: classroom, topic: topic) }
+
+          before do
+            homework.homework_progresses.find_by!(user: student).update!(completed_at: Time.current)
+            get dashboard_path
+          end
+
+          it "shows an amber tick named Complete, late" do
+            expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-check.text-warning")
+              .and have_css(status_cell, exact_text: "Complete, late")
+          end
+        end
+
         context "when the homework was completed more than a week ago" do
           let!(:homework) { create(:homework, :overdue, classroom: classroom, topic: topic, due_date: 2.weeks.ago) }
 
