@@ -9,7 +9,6 @@ class Homework < ApplicationRecord
   has_many :users, through: :classroom
 
   validates :due_date, presence: true
-  validates :topic, presence: true
   validates :required, presence: true
   validate :due_date_cannot_be_in_the_past
 

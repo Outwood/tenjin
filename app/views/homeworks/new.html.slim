@@ -16,7 +16,9 @@
     = f.input :required, label: 'Required %', collection: (0..100).step(10),
       full_error_html: { id: 'homework_required_error' },
       input_html: { aria: { describedby: error_id[:required] } }
+    / The belongs_to check carries a condition, so simple_form would read the topic as optional
     = f.association :topic, collection: @classroom.subject.topics.order(:name),
+      required: true,
       full_error_html: { id: 'homework_topic_error' },
       input_html: { aria: { describedby: error_id[:topic] }, data: { action: 'change->homework#loadLessons' } }
     / A re-rendered form already has a topic, and no change event will fill its lessons

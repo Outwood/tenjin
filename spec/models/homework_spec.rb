@@ -15,11 +15,20 @@ RSpec.describe Homework do
     let(:due_on) { 1.week.from_now }
 
     it { is_expected.to validate_presence_of(:due_date) }
-    it { is_expected.to validate_presence_of(:topic) }
+    it { is_expected.to belong_to(:topic).required }
     it { is_expected.to validate_presence_of(:required) }
 
     it "is valid with a future due_date" do
       expect(subject).to be_valid
+    end
+
+    context "without a topic" do
+      subject { build(:homework, topic: nil) }
+
+      it "reports the missing topic once" do
+        subject.validate
+        expect(subject.errors.full_messages_for(:topic)).to contain_exactly("Topic can't be blank")
+      end
     end
 
     context "when due_date is in the past" do
