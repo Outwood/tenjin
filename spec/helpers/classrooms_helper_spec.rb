@@ -55,6 +55,31 @@ RSpec.describe ClassroomsHelper do
     end
   end
 
+  describe "#homework_status" do
+    subject(:status) { Capybara.string(helper.homework_status(homework, progress)) }
+
+    let(:homework) { build_stubbed(:homework, due_date: Time.zone.local(2026, 9, 24, 9)) }
+
+    context "with the homework completed after its due time" do
+      let(:progress) do
+        build_stubbed(:homework_progress, homework: homework, completed: true, completed_at: Time.zone.local(2026, 9, 24, 9, 1))
+      end
+
+      it "says done late beside an amber tick hidden from screen readers" do
+        expect(status).to have_css("i.fa-check.text-warning-emphasis[aria-hidden='true']")
+          .and have_text("Done late", exact: true)
+      end
+    end
+
+    context "with the homework set before the pupil joined" do
+      let(:progress) { nil }
+
+      it "says so beside a dash" do
+        expect(status).to have_css("i.fa-minus").and have_text("Set before they joined", exact: true)
+      end
+    end
+  end
+
   describe "#homework_slot" do
     include ActiveSupport::Testing::TimeHelpers
 
@@ -80,8 +105,8 @@ RSpec.describe ClassroomsHelper do
         build_stubbed(:homework_progress, homework: homework, completed: true, completed_at: Time.zone.local(2026, 9, 24, 9, 1))
       end
 
-      it "shows a tick labelled done late" do
-        expect(slot).to have_css("i.fa-check")
+      it "shows an amber tick labelled done late" do
+        expect(slot).to have_css("i.fa-check.text-warning-emphasis")
           .and have_css(".visually-hidden", exact_text: "Storage, due 24 Sep: done late")
       end
     end
@@ -91,8 +116,9 @@ RSpec.describe ClassroomsHelper do
         build_stubbed(:homework_progress, homework: homework, completed: true, completed_at: Time.zone.local(2026, 9, 27, 9))
       end
 
-      it "shows a tick labelled done" do
-        expect(slot).to have_css(".visually-hidden", exact_text: "Storage, due 27 Sep: done")
+      it "shows a green tick labelled done" do
+        expect(slot).to have_css("i.fa-check.text-success")
+          .and have_css(".visually-hidden", exact_text: "Storage, due 27 Sep: done")
       end
     end
 

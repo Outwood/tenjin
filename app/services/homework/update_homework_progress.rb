@@ -30,16 +30,20 @@ class Homework::UpdateHomeworkProgress < ApplicationCommand
     check_progress_percentage(@quiz.answered_correct.to_f / @quiz.num_questions_asked, progress)
   end
 
+  # The row lock reloads the row, so of two quizzes finishing together the second sees the
+  # first's score and completion, and the first completion keeps its time
   def check_progress_percentage(percentage, progress)
-    percentage *= 100
-    progress.progress = percentage if percentage > progress.progress
-    if progress.progress >= progress.homework.required && !progress.completed
-      progress.completed = true
-      progress.completed_at = Time.current
-      @completed_homework = true
-    end
-    return unless progress.changed?
+    progress.with_lock do
+      percentage *= 100
+      progress.progress = percentage if percentage > progress.progress
+      if progress.progress >= progress.homework.required && !progress.completed
+        progress.completed = true
+        progress.completed_at = Time.current
+        @completed_homework = true
+      end
+      next unless progress.changed?
 
-    @save_errors << progress.errors.full_messages.join(", ") unless progress.save
+      @save_errors << progress.errors.full_messages.join(", ") unless progress.save
+    end
   end
 end
