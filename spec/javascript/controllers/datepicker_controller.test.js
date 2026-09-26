@@ -102,3 +102,36 @@ describe("datepicker sent back with a past due date", () => {
     expect(picker.isEnabled(new Date(Date.now() + day), true)).toBe(true);
   });
 });
+
+describe("datepicker on a phone, sent back with a past due date", () => {
+  let application;
+  const desktopAgent = navigator.userAgent;
+
+  beforeEach(async () => {
+    Object.defineProperty(navigator, "userAgent", {
+      value: "Mozilla/5.0 (iPhone)",
+      configurable: true,
+    });
+    application = await mountControllers(
+      `<label for="homework_due_date">Due date</label>
+       <input id="homework_due_date" type="text" name="homework[due_date]"
+              value="2020-01-01 10:00" data-controller="datepicker">`,
+      { datepicker: DatepickerController },
+    );
+  });
+
+  afterEach(() => {
+    unmount(application);
+    Object.defineProperty(navigator, "userAgent", {
+      value: desktopAgent,
+      configurable: true,
+    });
+  });
+
+  it("shows the date in the native picker the label names", () => {
+    const shown = document.getElementById("homework_due_date");
+
+    expect(shown.type).toBe("datetime-local");
+    expect(shown.value).toBe("2020-01-01T10:00");
+  });
+});

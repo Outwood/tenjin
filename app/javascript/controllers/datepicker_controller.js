@@ -27,11 +27,14 @@ export default class extends Controller {
 
   // flatpickr blanks a date before minDate, which the hidden input still submits
   showPastValue() {
-    const { altInput, config, selectedDates } = this.instance;
-    if (!altInput || selectedDates.length > 0 || !this.element.value) return;
+    const { config, mobileInput, mobileFormatStr, selectedDates } =
+      this.instance;
+    const shown = this.visibleInput;
+    if (!shown || selectedDates.length > 0 || !this.element.value) return;
 
     const date = this.instance.parseDate(this.element.value, config.dateFormat);
-    if (date) altInput.value = this.instance.formatDate(date, config.altFormat);
+    const format = mobileInput ? mobileFormatStr : config.altFormat;
+    if (date) shown.value = this.instance.formatDate(date, format);
   }
 
   // A phone shows a native picker in place of the alt input
