@@ -51,7 +51,7 @@ module ClassroomsHelper
   end
 
   # No row means the homework was set before the pupil joined the class, and a completion with no
-  # time reads as on time. Due times are clock times stored as UTC (#369), so in summer a
+  # time reads as on time. Due times are clock times stored as UTC, so in summer a
   # completion up to an hour late also reads as on time.
   def homework_state(homework, progress)
     return :not_set if progress.nil?

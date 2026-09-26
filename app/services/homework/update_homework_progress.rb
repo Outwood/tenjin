@@ -22,7 +22,6 @@ class Homework::UpdateHomeworkProgress < ApplicationCommand
 
   def homework_progresses
     HomeworkProgress.joins(:homework)
-      .includes(:homework)
       .where(user: @quiz.user, homework: {topic_id: @quiz.topic})
   end
 
