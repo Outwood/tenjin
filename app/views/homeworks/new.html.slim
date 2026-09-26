@@ -8,10 +8,17 @@
       li.breadcrumb-item.active aria-current='page' Set homework
   h1.mb-3 Set homework
   = simple_form_for [@classroom, @homework], wrapper: :horizontal_form, wrapper_mappings: { select: :horizontal_select } do |f|
-    = f.input :due_date, as: :string, label: 'Due date', input_html: { data: { controller: 'datepicker' } }
-    = f.input :required, label: 'Required %', collection: (0..100).step(10)
+    / simple_form renders an error without linking it to its field
+    - error_id = ->(attribute) { "homework_#{attribute}_error" if @homework.errors[attribute].any? }
+    = f.input :due_date, as: :string, label: 'Due date',
+      full_error_html: { id: 'homework_due_date_error' },
+      input_html: { aria: { describedby: error_id[:due_date] }, data: { controller: 'datepicker' } }
+    = f.input :required, label: 'Required %', collection: (0..100).step(10),
+      full_error_html: { id: 'homework_required_error' },
+      input_html: { aria: { describedby: error_id[:required] } }
     = f.association :topic, collection: @classroom.subject.topics.order(:name),
-      input_html: { data: { action: 'change->homework#loadLessons' } }
+      full_error_html: { id: 'homework_topic_error' },
+      input_html: { aria: { describedby: error_id[:topic] }, data: { action: 'change->homework#loadLessons' } }
     / A re-rendered form already has a topic, and no change event will fill its lessons
     - topic_lessons = @lessons.select { |lesson| lesson.topic_id == @homework.topic_id }
     = f.input :lesson_id, as: :select, collection: topic_lessons, label_method: :title, label: 'Lesson (Optional)',
