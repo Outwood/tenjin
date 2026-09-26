@@ -24,6 +24,7 @@ class DashboardsController < ApplicationController
     HomeworkProgress.includes(:homework, homework: [{topic: :subject}])
       .where(user: current_user)
       .where("homework_progresses.completed_at IS NULL OR homeworks.due_date > ?", 1.week.ago)
+      .references(:homeworks)
       .order("homeworks.due_date")
       .limit(15)
   end

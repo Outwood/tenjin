@@ -26,6 +26,11 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
       expect(progress.reload).to be_completed
     end
 
+    it "keeps the completed flag in step with the completion time" do
+      described_class.call(quiz: quiz_full_marks)
+      expect(progress.reload).to have_attributes(completed: true, completed_at: be_present)
+    end
+
     it "records when the homework was completed" do
       described_class.call(quiz: quiz_full_marks)
       expect(progress.reload.completed_at).to be_within(1.minute).of(Time.current)
@@ -35,7 +40,7 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
       result = described_class.call(quiz: quiz_7_out_of_10)
       expect(result).to be_success
       expect(result.payload).to eq(completed: false)
-      expect(progress.reload).to have_attributes(completed: false, progress: 70)
+      expect(progress.reload).to have_attributes(completed_at: nil, progress: 70)
     end
 
     it "ignores progress that is less than current progress" do
