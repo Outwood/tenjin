@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_26_140000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_26_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -390,7 +390,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_26_140000) do
   create_table "usage_statistics", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "topic_id"
-    t.datetime "date", precision: nil
+    t.date "date"
     t.integer "quizzes_started"
     t.integer "questions_answered"
     t.datetime "created_at", null: false
@@ -398,7 +398,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_26_140000) do
     t.bigint "lesson_id"
     t.index ["lesson_id"], name: "index_usage_statistics_on_lesson_id"
     t.index ["topic_id"], name: "index_usage_statistics_on_topic_id"
-    t.index ["user_id"], name: "index_usage_statistics_on_user_id"
+    t.index ["user_id", "topic_id", "lesson_id", "date"], name: "index_usage_statistics_on_pupil_and_day", unique: true, nulls_not_distinct: true
   end
 
   create_table "user_statistics", force: :cascade do |t|

@@ -6,6 +6,10 @@ class UsageStatistic < ApplicationRecord
   belongs_to :topic, optional: true
   belongs_to :lesson, optional: true
 
-  # date is a datetime column, which a Date would match only at UTC midnight
-  scope :on_day_of, ->(time) { where(date: time.all_day) }
+  # Counts a quiz start today in one statement, so two quizzes starting at once add to the same row
+  def self.count_start(user_id:, topic_id:, lesson_id:)
+    upsert({user_id:, topic_id:, lesson_id:, date: Date.current, quizzes_started: 1},
+      unique_by: :index_usage_statistics_on_pupil_and_day,
+      on_duplicate: Arel.sql("quizzes_started = usage_statistics.quizzes_started + 1, updated_at = EXCLUDED.updated_at"))
+  end
 end

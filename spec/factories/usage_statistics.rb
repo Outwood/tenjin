@@ -5,7 +5,7 @@ FactoryBot.define do
     user
     topic
     lesson { nil }
-    date { Time.current }
+    date { Date.current }
     quizzes_started { rand(0..20) }
     questions_answered { quizzes_started * rand(8..10) }
   end
