@@ -27,7 +27,7 @@ class School::Statistics
 
   def homeworks_completed_weekly
     @homeworks_completed_weekly ||= school_scope(
-      HomeworkProgress.where(completed_at: Time.current.all_week)
+      HomeworkProgress.where(completed_at: this_week)
     ).count
   end
 
@@ -39,7 +39,7 @@ class School::Statistics
 
   def customisation_unlocks_weekly
     @customisation_unlocks_weekly ||= school_scope(
-      CustomisationUnlock.where(updated_at: Date.current.beginning_of_week..Time.current)
+      CustomisationUnlock.where(updated_at: this_week)
     ).count
   end
 
@@ -49,6 +49,10 @@ class School::Statistics
   # so every window here aligns to a week boundary rather than a rolling 30 days.
   def four_weeks_start
     3.weeks.ago.to_date.beginning_of_week
+  end
+
+  def this_week
+    Date.current.beginning_of_week..Time.current
   end
 
   def school_scope(relation)

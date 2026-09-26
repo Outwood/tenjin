@@ -84,7 +84,7 @@ RSpec.describe School::Statistics, :default_creates do
       end
 
       it "dates a homework by its completion, not a later score rise" do
-        create(:homework_progress, user: student, completed: true, completed_at: 2.months.ago, updated_at: Time.current)
+        create(:homework_progress, user: student, completed_at: 2.months.ago, updated_at: Time.current)
 
         expect(stats.homeworks_completed_last_four_weeks).to eq 0
       end
