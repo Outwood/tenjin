@@ -10,13 +10,14 @@ module DashboardHelper
     challenge_progress.first.progress.to_s
   end
 
-  # Homework#state_for's states, with icons for this table's dark background; a pupil's own table
-  # has a row for every homework, so none is unset
+  # Homework#state_for's states, in the class page's shapes with colours for this table's dark tint
+  # (the status classes are in dashboard.scss); a pupil's own table has a row for every homework, so
+  # none is unset
   PUPIL_HOMEWORK_ICONS = {
-    done: {icon: "fas fa-check text-success", text: "Complete"},
+    done: {icon: "fas fa-check status-done", text: "Complete"},
     done_late: {icon: "fas fa-check text-warning", text: "Complete, late"},
-    overdue: {icon: "fas fa-exclamation text-warning", text: "Overdue"},
-    not_due: {icon: "fas fa-times text-danger", text: "Not complete"}
+    overdue: {icon: "fas fa-exclamation status-overdue", text: "Overdue"},
+    not_due: {icon: "far fa-circle", text: "Not complete"}
   }.freeze
 
   def homework_status_icon(homework_progress)
