@@ -1,6 +1,6 @@
 - content_for :title
   title = "Set Homework - #{@classroom.name}"
-.container data-controller='homework' data-homework-lessons-value=@lessons.to_json
+.container data-controller='homework' data-homework-lessons-value=@lessons.to_json(only: %i[id topic_id title])
   nav.mt-3.breadcrumb-chevron aria-label='Breadcrumb'
     ol.breadcrumb.mb-1
       li.breadcrumb-item = link_to 'My Classes', dashboard_path

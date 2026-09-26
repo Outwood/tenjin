@@ -21,9 +21,9 @@ RSpec.describe "homeworks controller", :default_creates do
         expect(page).to have_select("Lesson (Optional)", disabled: true, options: [""])
       end
 
-      it "offers only lessons with at least ten questions" do
+      it "embeds only the picker fields of lessons with at least ten questions" do
         lessons = JSON.parse(page.find("[data-homework-lessons-value]")["data-homework-lessons-value"])
-        expect(lessons).to contain_exactly(a_hash_including("id" => full_lesson.id))
+        expect(lessons).to contain_exactly({"id" => full_lesson.id, "topic_id" => topic.id, "title" => full_lesson.title})
       end
     end
   end
