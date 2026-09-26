@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# A topic, or one of its lessons, set for a class to complete by a due time
 class Homework < ApplicationRecord
   belongs_to :classroom
   belongs_to :topic
