@@ -13,9 +13,12 @@
     = f.input :due_date, as: :string, label: 'Due date',
       full_error_html: { id: 'homework_due_date_error' },
       input_html: { aria: { describedby: error_id[:due_date] }, data: { controller: 'datepicker' } }
-    = f.input :required, label: 'Required %', collection: (0..100).step(10),
+    - pass_marks = (0..100).step(10).map { |mark| [mark.zero? ? '0% (any finished quiz)' : "#{mark}%", mark] }
+    = f.input :required, label: 'Pass mark', collection: pass_marks, include_blank: false,
+      hint: 'The score a pupil needs in one quiz to complete the homework.',
+      hint_html: { id: 'homework_required_hint' },
       full_error_html: { id: 'homework_required_error' },
-      input_html: { aria: { describedby: error_id[:required] } }
+      input_html: { aria: { describedby: ['homework_required_hint', error_id[:required]].compact.join(' ') } }
     / The belongs_to check carries a condition, so simple_form would read the topic as optional
     = f.association :topic, collection: @classroom.subject.topics.order(:name), prompt: 'Choose a topic',
       required: true,

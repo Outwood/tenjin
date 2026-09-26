@@ -95,8 +95,8 @@ RSpec.describe "homeworks controller", :default_creates do
           .and have_css("##{topic_error}", exact_text: "Topic can't be blank")
       end
 
-      it "leaves a field without an error undescribed" do
-        expect(page).to have_css("#homework_required:not([aria-describedby])")
+      it "describes a field without an error by its hint alone" do
+        expect(page).to have_css("#homework_required[aria-describedby='homework_required_hint']")
       end
     end
 
