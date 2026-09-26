@@ -59,9 +59,8 @@ module ClassroomsHelper
     "#{percent} (#{homework.completed_count} of #{count})"
   end
 
-  # The due time is the clock time the teacher entered, stored without a zone, so the datetime carries none
   def homework_due_time(homework)
-    tag.time(homework.due_date.strftime("%-d %b %Y, %H:%M"), datetime: homework.due_date.strftime("%Y-%m-%dT%H:%M"))
+    tag.time(homework.due_date.strftime("%-d %b %Y, %H:%M"), datetime: homework.due_date.strftime("%Y-%m-%dT%H:%M%:z"))
   end
 
   private

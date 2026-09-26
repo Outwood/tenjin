@@ -63,8 +63,9 @@ RSpec.describe "homeworks controller", :default_creates do
     context "when the form opens between the picker's five-minute steps" do
       include ActiveSupport::Testing::TimeHelpers
 
+      # 14:08:24 on the teacher's clock, in British Summer Time
       before do
-        travel_to Time.zone.local(2030, 10, 1, 14, 8, 24)
+        travel_to Time.utc(2030, 10, 1, 13, 8, 24)
         get new_classroom_homework_path(classroom)
       end
 
@@ -76,6 +77,14 @@ RSpec.describe "homeworks controller", :default_creates do
 
   describe "POST /classrooms/:classroom_id/homeworks" do
     let(:homework_params) { {topic_id: topic.id, due_date: 1.week.from_now, required: 70} }
+
+    context "with a due time typed in British Summer Time" do
+      before { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(due_date: "2030-07-01 09:00")} }
+
+      it "sets it due at that time on UK clocks" do
+        expect(Homework.sole.due_date).to eq Time.utc(2030, 7, 1, 8)
+      end
+    end
 
     context "with a topic homework" do
       before { post classroom_homeworks_path(classroom), params: {homework: homework_params} }
@@ -313,7 +322,7 @@ RSpec.describe "homeworks controller", :default_creates do
           .to have_css("dd", exact_text: topic.name)
           .and have_css("dd", exact_text: "Whole topic")
           .and have_css("dd", exact_text: "70% in one quiz")
-          .and have_css("dd time[datetime='2030-10-05T09:00']", exact_text: "5 Oct 2030, 09:00")
+          .and have_css("dd time[datetime='2030-10-05T09:00+01:00']", exact_text: "5 Oct 2030, 09:00")
       end
     end
 

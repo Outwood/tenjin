@@ -41,7 +41,9 @@ class Quiz < ApplicationRecord
   private
 
   def update_usage_statistics
-    s = UsageStatistic.where(user: user, topic: topic, lesson: lesson, date: Date.current).first_or_create!
+    # The date column is a datetime, which a Date would match only at UTC midnight
+    s = UsageStatistic.where(user: user, topic: topic, lesson: lesson, date: Time.current.all_day)
+      .first_or_create!(date: Time.current.beginning_of_day)
     s.increment!(:quizzes_started)
   end
 end

@@ -61,6 +61,17 @@ RSpec.describe Homework do
       end
     end
 
+    context "when due earlier today on a summer day" do
+      include ActiveSupport::Testing::TimeHelpers
+
+      subject { build(:homework, classroom: classroom, due_date: "2030-07-01 09:00") }
+
+      # 09:30 on UK clocks
+      before { travel_to Time.utc(2030, 7, 1, 8, 30) }
+
+      it { is_expected.not_to be_valid }
+    end
+
     context "when due_date is in the past" do
       let(:due_on) { 1.day.ago }
 

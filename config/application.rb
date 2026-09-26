@@ -18,6 +18,8 @@ module Csquiz
 
     config.autoload_lib(ignore: %w[assets tasks])
 
+    config.time_zone = "London"
+
     config.action_mailer.delivery_method = :ses
     config.action_mailer.asset_host = ENV["ASSET_HOST"]
   end

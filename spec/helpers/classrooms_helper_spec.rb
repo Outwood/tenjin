@@ -55,6 +55,26 @@ RSpec.describe ClassroomsHelper do
     end
   end
 
+  describe "#homework_due_time" do
+    subject(:due_time) { Capybara.string(helper.homework_due_time(build_stubbed(:homework, due_date: due))) }
+
+    context "when due in British Summer Time" do
+      let(:due) { Time.utc(2030, 7, 1, 8) }
+
+      it "shows the time on UK clocks, with its offset" do
+        expect(due_time).to have_css("time[datetime='2030-07-01T09:00+01:00']", exact_text: "1 Jul 2030, 09:00")
+      end
+    end
+
+    context "when due in winter" do
+      let(:due) { Time.utc(2030, 1, 6, 9) }
+
+      it "shows the time on UK clocks, with its offset" do
+        expect(due_time).to have_css("time[datetime='2030-01-06T09:00+00:00']", exact_text: "6 Jan 2030, 09:00")
+      end
+    end
+  end
+
   describe "#homework_status" do
     subject(:status) { Capybara.string(helper.homework_status(homework, progress)) }
 
