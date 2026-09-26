@@ -26,7 +26,7 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
                 | Styles
               a.dropdown-item href=customisations_path(anchor: 'icons')
                 | Leaderboard Icons
-        li.nav-item = nav_link 'Lessons', lessons_path, current: controller_name == 'lessons'
+        li.nav-item = nav_link 'Lessons', lessons_path, current: controller_path.in?(%w[lessons lessons/questions])
         - if current_user.employee?
           li.nav-item = nav_link 'My Classes', dashboard_path, current: controller_name == 'dashboards'
           - if current_user.has_role? :school_admin
@@ -41,7 +41,8 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
                 - school_pages.each do |label, path|
                   li = nav_link label, path, current: current_page?(path), css_class: 'dropdown-item'
           - if current_user.has_role? :question_author, :any
-            li.nav-item = nav_link 'Questions', questions_path, current: controller_name == 'questions'
+            - question_pages = %w[questions topics/questions topics/imports subjects/topics subjects/flagged_questions]
+            li.nav-item = nav_link 'Questions', questions_path, current: controller_path.in?(question_pages)
 
       - if current_user.student?
         a.d-inline-flex.align-items-center.me-3 href=customisations_path
