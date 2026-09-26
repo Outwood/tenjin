@@ -47,6 +47,20 @@ RSpec.describe Homework do
     end
   end
 
+  describe "#assign_to" do
+    let!(:homework) { create(:homework, classroom: classroom) }
+    let(:enrolled) { classroom.users.first }
+    let(:newcomer) { create(:student, school: classroom.school) }
+
+    before { homework.homework_progresses.find_by!(user: enrolled).update!(progress: 60) }
+
+    it "sets the homework for a pupil without it and keeps an existing pupil's row" do
+      expect { homework.assign_to([enrolled.id, newcomer.id]) }.to change(HomeworkProgress, :count).by(1)
+      expect(homework.homework_progresses.find_by!(user: enrolled).progress).to eq 60
+      expect(homework.homework_progresses.find_by!(user: newcomer)).to have_attributes(progress: 0, completed_at: nil)
+    end
+  end
+
   describe "#state_for" do
     include ActiveSupport::Testing::TimeHelpers
 
