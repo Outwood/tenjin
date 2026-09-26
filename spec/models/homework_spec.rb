@@ -31,6 +31,36 @@ RSpec.describe Homework do
       end
     end
 
+    context "with a topic from another subject" do
+      subject { build(:homework, classroom: classroom, topic: create(:topic)) }
+
+      it "names the topic as outside the class" do
+        subject.validate
+        expect(subject.errors.full_messages_for(:topic)).to contain_exactly("Topic isn't one of this class's topics")
+      end
+    end
+
+    context "with a lesson" do
+      subject { build(:homework, classroom: classroom, topic: topic, lesson: lesson) }
+
+      let(:topic) { create(:topic, subject: classroom.subject) }
+
+      context "when the lesson is in the topic" do
+        let(:lesson) { create(:lesson, topic: topic) }
+
+        it { is_expected.to be_valid }
+      end
+
+      context "when the lesson is in another topic" do
+        let(:lesson) { create(:lesson, topic: create(:topic, subject: classroom.subject)) }
+
+        it "names the lesson as outside the topic" do
+          subject.validate
+          expect(subject.errors.full_messages_for(:lesson_id)).to contain_exactly("Lesson isn't in the chosen topic")
+        end
+      end
+    end
+
     context "when due_date is in the past" do
       let(:due_on) { 1.day.ago }
 
