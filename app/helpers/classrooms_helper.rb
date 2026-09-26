@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Words and markup for a class's pages: sync notices, homework states and due times
 module ClassroomsHelper
   # The page flips to this sentence itself the moment a subject changes
   SYNC_NEEDED_NOTICE = "Sync needed: pupils join a mapped class on the next sync."
@@ -59,9 +60,8 @@ module ClassroomsHelper
     "#{percent} (#{homework.completed_count} of #{count})"
   end
 
-  # The due time is the clock time the teacher entered, stored without a zone, so the datetime carries none
   def homework_due_time(homework)
-    tag.time(homework.due_date.strftime("%-d %b %Y, %H:%M"), datetime: homework.due_date.strftime("%Y-%m-%dT%H:%M"))
+    time_tag(homework.due_date, homework.due_date.strftime("%-d %b %Y, %H:%M"))
   end
 
   private

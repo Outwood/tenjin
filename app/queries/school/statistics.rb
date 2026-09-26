@@ -47,12 +47,13 @@ class School::Statistics
 
   # user_statistics is a weekly rollup (one row per user per week_beginning),
   # so every window here aligns to a week boundary rather than a rolling 30 days.
+  # Times rather than dates: a Date bounding a datetime column starts at UTC midnight, not the school's
   def four_weeks_start
-    3.weeks.ago.to_date.beginning_of_week
+    3.weeks.ago.beginning_of_week
   end
 
   def this_week
-    Date.current.beginning_of_week..Time.current
+    Time.current.beginning_of_week..Time.current
   end
 
   def school_scope(relation)

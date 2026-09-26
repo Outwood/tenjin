@@ -29,7 +29,7 @@ RSpec.describe UsersHelper do
 
       it "gives how long ago it was, and when" do
         expect(Capybara.string(helper.last_sign_in(user)))
-          .to have_css("time[datetime='2026-09-14T09:12:00Z']", exact_text: "3 days ago")
+          .to have_css("time[datetime='2026-09-14T09:12:00+01:00']", exact_text: "3 days ago")
           .and have_css("small", exact_text: "14 Sep 2026 09:12")
       end
     end

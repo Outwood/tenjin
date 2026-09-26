@@ -72,10 +72,24 @@ RSpec.describe Quiz, :default_creates do
 
   context "when a quiz is created" do
     let!(:quiz) { create(:quiz, user: student, topic: topic) }
-    let(:usage_statistic) { UsageStatistic.find_by!(user: student, date: Date.current) }
+    let(:usage_statistic) { UsageStatistic.on_day_of(Time.current).find_by!(user: student) }
 
     it "creates a usage statistic for today" do
       expect(usage_statistic.quizzes_started).to eq(1)
+    end
+
+    context "with a second quiz on the same topic that day" do
+      include ActiveSupport::Testing::TimeHelpers
+
+      # In summer the UK day starts at 23:00 UTC, which a lookup by Date would miss
+      before do
+        travel_to Time.utc(2030, 7, 1, 12)
+        create_list(:quiz, 2, user: student, topic: topic)
+      end
+
+      it "counts both in one statistic" do
+        expect(UsageStatistic.on_day_of(Time.current).where(user: student).sole.quizzes_started).to eq(2)
+      end
     end
 
     context "with an existing statistic from a previous day" do
