@@ -1,8 +1,14 @@
 - content_for :title
   title = "Questions - #{@lesson.title}"
+/ A lesson's questions share its topic, so one check covers adding and editing them all
+- author = policy(Question.new(topic: @lesson.topic)).create?
 .container
   = render "lessons/breadcrumbs", subject: @lesson.subject, topic: @lesson.topic, current: @lesson.title
-  h1.mb-3 = "Questions for #{@lesson.title}"
+  .d-flex.flex-wrap.align-items-center.justify-content-between.gap-2.mb-3
+    h1.mb-0 = "Questions for #{@lesson.title}"
+    - if author
+      = link_to "Add Question", new_topic_question_path(@lesson.topic, question: { lesson_id: @lesson.id }),
+        class: "btn btn-primary"
 
   - if @questions.blank?
     p.text-body-secondary#no-questions This lesson has no questions yet.
@@ -14,6 +20,9 @@
             .d-flex.flex-wrap.align-items-center.gap-2.mb-2
               h2.h5.mb-0 = "Question #{number}"
               span.badge.rounded-pill.text-bg-light.border.question-type = question_type_label(q)
+              - if author
+                = link_to "Edit", edit_question_path(q), class: "btn btn-sm btn-outline-primary ms-auto",
+                  aria: { label: "Edit question #{number}" }
             / Rich text renders its own block element, so it cannot sit in a paragraph
             .question-text.mb-3
               - if q.question_text.blank?
