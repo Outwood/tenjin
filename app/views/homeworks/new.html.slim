@@ -12,7 +12,8 @@
     - error_id = ->(attribute) { "homework_#{attribute}_error" if @homework.errors[attribute].any? }
     = f.input :due_date, as: :string, label: 'Due date',
       full_error_html: { id: 'homework_due_date_error' },
-      input_html: { aria: { describedby: error_id[:due_date] }, data: { controller: 'datepicker' } }
+      input_html: { value: @homework.due_date&.strftime('%Y-%m-%d %H:%M'), aria: { describedby: error_id[:due_date] },
+        data: { controller: 'datepicker' } }
     - pass_marks = (0..100).step(10).map { |mark| [mark.zero? ? '0% (any finished quiz)' : "#{mark}%", mark] }
     = f.input :required, label: 'Pass mark', collection: pass_marks, include_blank: false,
       hint: 'The score a pupil needs in one quiz to complete the homework.',

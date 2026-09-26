@@ -31,6 +31,19 @@ RSpec.describe "homeworks controller", :default_creates do
         expect(lessons).to contain_exactly({"id" => full_lesson.id, "topic_id" => topic.id, "title" => full_lesson.title})
       end
     end
+
+    context "when the form opens between the picker's five-minute steps" do
+      include ActiveSupport::Testing::TimeHelpers
+
+      before do
+        travel_to Time.zone.local(2030, 10, 1, 14, 8, 24)
+        get new_classroom_homework_path(classroom)
+      end
+
+      it "sets it due a week on, to the nearest five minutes" do
+        expect(Capybara.string(response.body)).to have_field("homework[due_date]", with: "2030-10-08 14:10")
+      end
+    end
   end
 
   describe "POST /classrooms/:classroom_id/homeworks" do
