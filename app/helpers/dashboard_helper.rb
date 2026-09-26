@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+# Formats the challenge and homework tables on a pupil's dashboard and user page
 module DashboardHelper
+  include ClassroomsHelper
+
   def challenge_progress_display(challenge, challenge_progresses)
     challenge_progress = challenge_progresses.select { |cp| cp.challenge_id == challenge.id }
     return "0%" if challenge_progress.empty?
