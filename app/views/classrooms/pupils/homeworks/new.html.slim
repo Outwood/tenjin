@@ -14,8 +14,7 @@
   - else
     p
       | Choose the homework that applies to them. Each keeps the class's due date, so one already
-        due shows as overdue until they complete it. Setting it doesn't tell them: let them know,
-        with their login if they need it.
+        due shows as overdue until they complete it.
     = form_with url: classroom_pupil_homework_path(@classroom, @pupil), method: :post do
       fieldset.mb-3
         legend.fs-5 Homework not yet set for them
