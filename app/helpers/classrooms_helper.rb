@@ -19,7 +19,7 @@ module ClassroomsHelper
     end
   end
 
-  # The icon and wording for each state a pupil's homework can be in
+  # The icon and wording for each state Homework#state_for gives
   HOMEWORK_SLOTS = {
     done: {icon: "fas fa-check text-success", text: "done"},
     done_late: {icon: "fas fa-check text-warning-emphasis", text: "done late"},
@@ -36,7 +36,7 @@ module ClassroomsHelper
 
   # The icon says the state at a glance; the title and hidden text name the homework
   def homework_slot(homework, progress)
-    slot = HOMEWORK_SLOTS.fetch(homework_state(homework, progress))
+    slot = HOMEWORK_SLOTS.fetch(homework.state_for(progress))
     label = "#{homework.topic.name}, due #{homework.due_date.strftime("%-d %b")}: #{slot[:text]}"
     content_tag(:span, class: "homework-slot", title: label, data: {homework: homework.id}) do
       content_tag(:i, nil, class: "#{slot[:icon]} fa-fw", aria: {hidden: true}) +
@@ -46,19 +46,8 @@ module ClassroomsHelper
 
   # A pupil's state on the homework, in words beside its icon
   def homework_status(homework, progress)
-    slot = HOMEWORK_SLOTS.fetch(homework_state(homework, progress))
+    slot = HOMEWORK_SLOTS.fetch(homework.state_for(progress))
     content_tag(:i, nil, class: "#{slot[:icon]} fa-fw me-1", aria: {hidden: true}) + slot[:text].upcase_first
-  end
-
-  # No row means the homework was set before the pupil joined the class. Due times are clock
-  # times stored as UTC, so in summer a completion up to an hour late reads as on time.
-  def homework_state(homework, progress)
-    return :not_set if progress.nil?
-    if progress.completed?
-      return progress.completed_at.after?(homework.due_date) ? :done_late : :done
-    end
-
-    homework.due_date.past? ? :overdue : :not_due
   end
 
   # Leads with the percentage, which the classroom page sorts the column by

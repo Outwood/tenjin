@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Formats the challenge and homework tables on a pupil's dashboard and user page
 module DashboardHelper
   def challenge_progress_display(challenge, challenge_progresses)
     challenge_progress = challenge_progresses.select { |cp| cp.challenge_id == challenge.id }
@@ -9,12 +10,18 @@ module DashboardHelper
     challenge_progress.first.progress.to_s
   end
 
-  def homework_status_icon(homework_progress)
-    if homework_progress.homework.due_date.past? && !homework_progress.completed?
-      return status_icon("fas fa-exclamation text-warning", "Overdue")
-    end
+  # Homework#state_for's states, with icons for this table's dark background; a pupil's own table
+  # has a row for every homework, so none is unset
+  PUPIL_HOMEWORK_ICONS = {
+    done: {icon: "fas fa-check text-success", text: "Complete"},
+    done_late: {icon: "fas fa-check text-warning", text: "Complete, late"},
+    overdue: {icon: "fas fa-exclamation text-warning", text: "Overdue"},
+    not_due: {icon: "fas fa-times text-danger", text: "Not complete"}
+  }.freeze
 
-    boolean_icon(homework_progress.completed?, yes: "Complete", no: "Not complete")
+  def homework_status_icon(homework_progress)
+    state = PUPIL_HOMEWORK_ICONS.fetch(homework_progress.homework.state_for(homework_progress))
+    status_icon(state[:icon], state[:text])
   end
 
   def challenge_time_left(challenge)
