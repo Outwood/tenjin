@@ -33,6 +33,11 @@ RSpec.describe "lesson questions controller", :default_creates do
             .and have_no_css("#no-questions")
         end
 
+        it "offers no way to add or edit questions" do
+          expect(Capybara.string(response.body)).to have_no_link("Add Question")
+            .and have_no_link(href: edit_question_path(question))
+        end
+
         it "marks the correct answer" do
           glucose = question.answers.find_by!(text: "Glucose")
           oxygen = question.answers.find_by!(text: "Oxygen")
@@ -113,6 +118,7 @@ RSpec.describe "lesson questions controller", :default_creates do
 
     describe "as a question author" do
       let(:author) { create(:question_author, subject: quiz_subject) }
+      let!(:question) { create(:question, lesson: lesson, topic: topic) }
 
       before do
         sign_in author
@@ -123,6 +129,16 @@ RSpec.describe "lesson questions controller", :default_creates do
         expect(Capybara.string(response.body))
           .to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{lessons_path}']", exact_text: "Lessons")
           .and have_no_css("#navbar-main .nav-link.active[href='#{questions_path}']")
+      end
+
+      it "links each question to its editor" do
+        expect(Capybara.string(response.body))
+          .to have_css("a[href='#{edit_question_path(question)}'][aria-label='Edit question 1']", exact_text: "Edit")
+      end
+
+      it "adds new questions to this lesson" do
+        expect(Capybara.string(response.body))
+          .to have_link("Add Question", href: new_topic_question_path(topic, question: {lesson_id: lesson.id}))
       end
     end
   end
