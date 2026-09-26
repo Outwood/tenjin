@@ -21,22 +21,41 @@
       dd.col-sm-9#homework-completion = report_progress(@homework_counts)
   section.mb-5#pupils aria-labelledby='pupils-heading'
     h2.mb-3#pupils-heading Pupils
-    table.table
-      thead
-        tr
-          th Name
-          th Complete?
-          th Progress
-      tbody
-        - @homework_progress.each do |h|
-          tr.student-row data-user=h.user.id
-            td
-              => h.user.forename[0]
-              = h.user.surname
-            td = boolean_icon(h.completed?, yes: "Complete", no: "Not complete")
-            td
-              = h.progress.to_s
-              | %
+    / Names stay put on a narrow screen and the rest fold under each row, still copying and downloading
+    - export = { clipboard: true, download: true }
+    - pupils_table_options = { pagination: false,
+        placeholder: 'No pupils are enrolled in this class.',
+        searchFields: %w[first_name last_name],
+        responsiveLayout: 'collapse',
+        columns: [{ title: 'First name', field: 'first_name', minWidth: 120, responsive: 0 },
+          { title: 'Last name', field: 'last_name', minWidth: 120, responsive: 0 },
+          { title: 'Status', field: 'status', minWidth: 140, responsive: 1, **export },
+          { title: 'Best score', field: 'best_score', minWidth: 120, sorter: 'percent',
+            hozAlign: 'right', headerHozAlign: 'right', responsive: 2, **export }] }.to_json
+    div[data-controller='datatable'
+      data-datatable-options-value=pupils_table_options
+      data-datatable-filename-value=csv_filename("#{@homework.classroom.name} #{@homework.title} pupils")]
+      .d-flex.flex-wrap.gap-2
+        .flex-grow-1 = render 'shared/table_search', label: 'Search pupils'
+        .d-flex.gap-2.mb-2
+          button.btn.btn-outline-secondary type='button' data-action='click->datatable#copy' Copy
+          button.btn.btn-outline-secondary type='button' data-action='click->datatable#downloadCsv' CSV
+      / Each heading must match its column's title above, which Tabulator pairs it by
+      table.table#pupils-table data-datatable-target='table'
+        thead
+          tr
+            th First name
+            th Last name
+            th Status
+            th Best score
+        tbody
+          - @homework_progress.each do |h|
+            tr.student-row data-user=h.user.id
+              / Visible as the first name, which its column heads; spoken as the full name
+              td = link_to h.user.forename, user_path(h.user), aria: { label: "#{h.user.forename} #{h.user.surname}" }
+              td = h.user.surname
+              td = boolean_icon(h.completed?, yes: 'Complete', no: 'Not complete')
+              td = number_to_percentage(h.progress, precision: 0)
   section.mb-5 aria-labelledby='danger-zone-heading'
     h2#danger-zone-heading Danger Zone
     = button_to 'Delete Homework', homework_path(@homework),

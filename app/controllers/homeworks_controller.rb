@@ -8,7 +8,7 @@ class HomeworksController < ApplicationController
     # Matches the class's completion figure, which leaves out pupils who have left or moved class
     @homework_progress = HomeworkProgress.includes(:user)
       .where(homework: @homework, user_id: @homework.classroom.enrollments.select(:user_id))
-      .order("users.surname")
+      .order("users.surname", "users.forename")
     @homework_counts = @homework.classroom.homework_counts.find_by(id: @homework)
   end
 
