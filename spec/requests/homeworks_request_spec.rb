@@ -21,6 +21,11 @@ RSpec.describe "homeworks controller", :default_creates do
         expect(page).to have_select("Lesson (Optional)", disabled: true, options: [""])
       end
 
+      it "says which lessons can be set" do
+        hint = page.find("#homework_lesson_id")["aria-describedby"]
+        expect(page).to have_css("##{hint}", exact_text: "Only lessons with at least 10 questions can be set.")
+      end
+
       it "embeds only the picker fields of lessons with at least ten questions" do
         lessons = JSON.parse(page.find("[data-homework-lessons-value]")["data-homework-lessons-value"])
         expect(lessons).to contain_exactly({"id" => full_lesson.id, "topic_id" => topic.id, "title" => full_lesson.title})

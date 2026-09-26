@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+# One pupil's run through the questions of a topic, a lesson or a lucky dip
 class Quiz < ApplicationRecord
   LUCKY_DIP = "Lucky Dip"
+  # The most questions one quiz asks
+  QUESTION_COUNT = 10
 
   belongs_to :user
   belongs_to :subject
