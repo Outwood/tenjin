@@ -60,8 +60,8 @@ RSpec.describe School::Statistics, :default_creates do
     describe "#homeworks_completed_last_four_weeks" do
       context "with completed homeworks in and outside the school" do
         before do
-          create(:homework_progress, user: student, completed: true)
-          create(:homework_progress, user: other_school_user, completed: true)
+          create(:homework_progress, user: student, completed_at: Time.current)
+          create(:homework_progress, user: other_school_user, completed_at: Time.current)
         end
 
         it "counts only the school's completed homeworks" do
@@ -70,21 +70,27 @@ RSpec.describe School::Statistics, :default_creates do
       end
 
       context "with an incomplete homework" do
-        before { create(:homework_progress, user: student, completed: false) }
+        before { create(:homework_progress, user: student) }
 
         it "excludes it from the count" do
           expect(stats.homeworks_completed_last_four_weeks).to eq 0
         end
       end
 
-      it "counts a homework updated at the start of the four-week window" do
-        create(:homework_progress, user: student, completed: true, updated_at: four_weeks_start)
+      it "counts a homework completed at the start of the four-week window" do
+        create(:homework_progress, user: student, completed_at: four_weeks_start)
 
         expect(stats.homeworks_completed_last_four_weeks).to eq 1
       end
 
-      it "excludes a homework updated before the four-week window" do
-        create(:homework_progress, user: student, completed: true, updated_at: four_weeks_start - 1.second)
+      it "dates a homework by its completion, not a later score rise" do
+        create(:homework_progress, user: student, completed_at: 2.months.ago, updated_at: Time.current)
+
+        expect(stats.homeworks_completed_last_four_weeks).to eq 0
+      end
+
+      it "excludes a homework completed before the four-week window" do
+        create(:homework_progress, user: student, completed_at: four_weeks_start - 1.second)
 
         expect(stats.homeworks_completed_last_four_weeks).to eq 0
       end
@@ -92,11 +98,11 @@ RSpec.describe School::Statistics, :default_creates do
 
     describe "#homeworks_completed_weekly" do
       before do
-        create(:homework_progress, user: student, completed: true, updated_at: Time.current)
-        create(:homework_progress, user: student, completed: true, updated_at: 2.weeks.ago)
+        create(:homework_progress, user: student, completed_at: Time.current)
+        create(:homework_progress, user: student, completed_at: 2.weeks.ago)
       end
 
-      it "counts completed homeworks updated this week" do
+      it "counts homeworks completed this week" do
         expect(stats.homeworks_completed_weekly).to eq 1
       end
     end
@@ -152,8 +158,8 @@ RSpec.describe School::Statistics, :default_creates do
 
     describe "#homeworks_completed_last_four_weeks" do
       before do
-        create(:homework_progress, completed: true)
-        create(:homework_progress, completed: true)
+        create(:homework_progress, completed_at: Time.current)
+        create(:homework_progress, completed_at: Time.current)
       end
 
       it "counts homeworks across all schools" do

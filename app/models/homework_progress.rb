@@ -8,6 +8,6 @@ class HomeworkProgress < ApplicationRecord
   has_one :topic, through: :homework
 
   # Completion is read from completed_at; the completed column is kept in step for a rollback, and
-  # read only by School::Statistics
+  # no app code reads it
   def completed? = completed_at.present?
 end
