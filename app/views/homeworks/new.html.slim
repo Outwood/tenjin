@@ -24,7 +24,7 @@
     / A re-rendered form already has a topic, and no change event will fill its lessons
     - topic_lessons = @lessons.select { |lesson| lesson.topic_id == @homework.topic_id }
     = f.input :lesson_id, as: :select, collection: topic_lessons, label_method: :title, label: 'Lesson (Optional)',
-      hint: "Only lessons with at least #{Homework::LESSON_QUESTIONS} questions can be set.",
+      hint: "Only lessons with at least #{Quiz::QUESTION_COUNT} questions can be set.",
       hint_html: { id: 'homework_lesson_id_hint' },
       input_html: { disabled: topic_lessons.empty?, aria: { describedby: 'homework_lesson_id_hint' },
         data: { homework_target: 'lessonSelect' } }

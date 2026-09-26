@@ -2,9 +2,6 @@
 
 # A topic, or one of its lessons, set for a class to complete by a due time
 class Homework < ApplicationRecord
-  # A lesson can be set once it fills a quiz: Quiz::CreateQuiz asks ten questions
-  LESSON_QUESTIONS = 10
-
   belongs_to :classroom
   belongs_to :topic
   belongs_to :lesson, optional: true

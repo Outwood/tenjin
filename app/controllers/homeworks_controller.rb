@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Sets homework for a class, and shows or deletes it
 class HomeworksController < ApplicationController
   before_action :authenticate_user!
 
@@ -53,6 +54,6 @@ class HomeworksController < ApplicationController
   end
 
   def lessons_for_classroom(classroom)
-    Lesson.where(topic: classroom.subject.topics).where(questions_count: Homework::LESSON_QUESTIONS..)
+    Lesson.where(topic: classroom.subject.topics).where(questions_count: Quiz::QUESTION_COUNT..)
   end
 end

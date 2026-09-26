@@ -77,16 +77,16 @@ class Quiz::CreateQuiz < ApplicationCommand
     # We want an even distribution of topics where possible
     question_array = []
 
-    # Keep getting random questions, one from each topic until we have at least 10 questions
+    # Keep getting random questions, one from each topic until we have a full quiz
     question_array += topic_questions
 
-    if question_array.length < 10
-      # There are not 10 or more topics so try without getting one from each topic
+    if question_array.length < Quiz::QUESTION_COUNT
+      # There are fewer topics than a quiz asks questions, so try without getting one from each topic
       question_array += additional_topic_questions
     end
 
-    # Get maximum of 10 questions only; the additional questions include the one-per-topic picks
-    question_array.uniq.sample(10)
+    # A full quiz at most; the additional questions include the one-per-topic picks
+    question_array.uniq.sample(Quiz::QUESTION_COUNT)
   end
 
   def additional_topic_questions
@@ -110,14 +110,14 @@ class Quiz::CreateQuiz < ApplicationCommand
       .includes(:lesson)
       .where(lesson: @lesson)
       .order(Arel.sql("RANDOM()"))
-      .take(10)
+      .take(Quiz::QUESTION_COUNT)
   end
 
   def subject_questions
     Question.where(active: true, topic: @topic)
       .includes(:topic)
       .order(Arel.sql("RANDOM()"))
-      .take(10)
+      .take(Quiz::QUESTION_COUNT)
   end
 
   def check_if_quiz_counts_for_leaderboard
