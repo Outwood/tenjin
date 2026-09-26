@@ -218,6 +218,23 @@ RSpec.describe "dashboard controller", :default_creates do
         let(:name_cell) { "#{homework_row} td:nth-child(2)" }
         let(:status_cell) { "#{homework_row} td:last-child" }
 
+        context "with homework set for two lessons" do
+          let!(:lesson_homeworks) do
+            create_list(:lesson, 2, topic: topic).map { |lesson| create(:homework, classroom: classroom, topic: topic, lesson: lesson) }
+          end
+
+          # Each row reads its homework's lesson, which would otherwise load one lesson per row
+          it "loads the lessons at most once" do
+            lesson_queries = []
+            recorder = ->(*, payload) { lesson_queries << payload[:sql] if payload[:sql].include?('FROM "lessons"') }
+            ActiveSupport::Notifications.subscribed(recorder, "sql.active_record") do
+              get dashboard_path
+            end
+
+            expect(lesson_queries.size).to be <= 1
+          end
+        end
+
         context "with an active homework" do
           before { get dashboard_path }
 

@@ -21,7 +21,7 @@ class DashboardsController < ApplicationController
   private
 
   def student_homework_progress
-    HomeworkProgress.includes(:homework, homework: [{topic: :subject}])
+    HomeworkProgress.includes(homework: [:lesson, {topic: :subject}])
       .where(user: current_user)
       .where("homework_progresses.completed_at IS NULL OR homeworks.due_date > ?", 1.week.ago)
       .references(:homeworks)
