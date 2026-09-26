@@ -22,6 +22,7 @@ module ClassroomsHelper
   # The icon and wording for each state a pupil's homework can be in
   HOMEWORK_SLOTS = {
     done: {icon: "fas fa-check text-success", text: "done"},
+    done_late: {icon: "fas fa-check text-warning-emphasis", text: "done late"},
     overdue: {icon: "fas fa-exclamation text-danger", text: "overdue"},
     not_due: {icon: "far fa-circle text-secondary", text: "not yet due"},
     not_set: {icon: "fas fa-minus text-body-tertiary", text: "set before they joined"}
@@ -49,10 +50,14 @@ module ClassroomsHelper
     content_tag(:i, nil, class: "#{slot[:icon]} fa-fw me-1", aria: {hidden: true}) + slot[:text].upcase_first
   end
 
-  # No row means the homework was set before the pupil joined the class
+  # No row means the homework was set before the pupil joined the class, and a completion with no
+  # time reads as on time. Due times are clock times stored as UTC, so in summer a
+  # completion up to an hour late also reads as on time.
   def homework_state(homework, progress)
     return :not_set if progress.nil?
-    return :done if progress.completed?
+    if progress.completed?
+      return progress.completed_at&.after?(homework.due_date) ? :done_late : :done
+    end
 
     homework.due_date.past? ? :overdue : :not_due
   end
