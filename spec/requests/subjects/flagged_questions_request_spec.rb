@@ -19,6 +19,11 @@ RSpec.describe "subject flagged questions controller", :default_creates do
 
     it "does not list unflagged questions"
 
+    it "marks Questions as the current section" do
+      expect(Capybara.string(response.body))
+        .to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{questions_path}']", exact_text: "Questions")
+    end
+
     context "with a flagged question in a lesson" do
       let(:lesson) { create(:lesson, topic: topic, title: "Leaf structure") }
       let!(:flagged_question) { create(:question, topic: topic, lesson: lesson, flagged_questions_count: 5) }
