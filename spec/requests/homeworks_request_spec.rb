@@ -115,6 +115,15 @@ RSpec.describe "homeworks controller", :default_creates do
       end
     end
 
+    context "with another subject's topic" do
+      it "sets no homework and says the topic is outside the class" do
+        expect { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(topic_id: create(:topic).id)} }
+          .not_to change(Homework, :count)
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(Capybara.string(response.body)).to have_css("#homework_topic_error", exact_text: "Topic isn't one of this class's topics")
+      end
+    end
+
     context "with a due date in the past" do
       it "sets no homework and re-renders the form with the error" do
         expect { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(due_date: 1.day.ago)} }

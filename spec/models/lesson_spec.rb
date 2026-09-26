@@ -225,7 +225,7 @@ RSpec.describe Lesson do
       end
 
       context "when set as homework" do
-        before { create(:homework, topic: lesson.topic, lesson: lesson) }
+        before { create(:homework, classroom: create(:classroom, subject: lesson.topic.subject), topic: lesson.topic, lesson: lesson) }
 
         include_examples "a refused delete"
       end

@@ -12,6 +12,8 @@ class Homework < ApplicationRecord
   validates :due_date, presence: true
   validates :required, presence: true
   validate :due_date_cannot_be_in_the_past
+  validate :topic_in_class_subject
+  validate :lesson_in_topic
 
   after_create -> { assign_to(users.where(role: :student).ids) }
 
@@ -37,6 +39,18 @@ class Homework < ApplicationRecord
   end
 
   private
+
+  # The form offers only the class's subject's topics; one from another subject would score points there
+  def topic_in_class_subject
+    return if topic.nil? || classroom.nil? || topic.subject_id == classroom.subject_id
+
+    errors.add(:topic, "isn't one of this class's topics")
+  end
+
+  # Quiz::CreateQuiz refuses a lesson outside the topic, so the homework could never be started
+  def lesson_in_topic
+    errors.add(:lesson_id, "isn't in the chosen topic") if lesson && lesson.topic_id != topic_id
+  end
 
   def due_date_cannot_be_in_the_past
     errors.add(:due_date, "can't be in the past") if due_date.present? && due_date.past?

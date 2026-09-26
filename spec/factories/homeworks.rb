@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :homework do
     classroom
-    topic
+    topic { association :topic, subject: classroom.subject }
     due_date { rand((1.day.from_now)..(1.week.from_now)) }
     required { rand(0..100) }
 

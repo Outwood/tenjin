@@ -186,7 +186,7 @@ RSpec.describe "user controller", :default_creates do
       end
 
       context "when the student is enrolled in a second classroom" do
-        let(:second_classroom) { create(:classroom, school: school) }
+        let(:second_classroom) { create(:classroom, school: school, subject: quiz_subject) }
         let!(:second_enrollment) { create(:enrollment, user: student, classroom: second_classroom) }
         let!(:homework_different_class) { create(:homework, classroom: second_classroom, topic: topic) }
 
