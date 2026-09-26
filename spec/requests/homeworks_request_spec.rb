@@ -13,6 +13,10 @@ RSpec.describe "homeworks controller", :default_creates do
 
       before { get new_classroom_homework_path(classroom) }
 
+      it "marks the topic required" do
+        expect(page).to have_css("label[for='homework_topic_id'] abbr[title='required']")
+      end
+
       it "lists no lessons before a topic is chosen" do
         expect(page).to have_select("Lesson (Optional)", disabled: true, options: [""])
       end
@@ -83,7 +87,7 @@ RSpec.describe "homeworks controller", :default_creates do
         due_error = page.find("#homework_due_date")["aria-describedby"]
         topic_error = page.find("#homework_topic_id")["aria-describedby"]
         expect(page).to have_css("##{due_error}", exact_text: "Due date can't be in the past")
-          .and have_css("##{topic_error}", text: "Topic can't be blank")
+          .and have_css("##{topic_error}", exact_text: "Topic can't be blank")
       end
 
       it "leaves a field without an error undescribed" do

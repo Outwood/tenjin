@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# A topic, or one of its lessons, set for a class to complete by a due time
 class Homework < ApplicationRecord
   belongs_to :classroom
   belongs_to :topic
@@ -9,7 +10,6 @@ class Homework < ApplicationRecord
   has_many :users, through: :classroom
 
   validates :due_date, presence: true
-  validates :topic, presence: true
   validates :required, presence: true
   validate :due_date_cannot_be_in_the_past
 

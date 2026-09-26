@@ -49,6 +49,11 @@ en:
         client_id: Client ID
     errors:
       models:
+        homework:
+          attributes:
+            topic:
+              # A blank select means none was chosen; "must exist" reads as a deleted topic
+              required: "can't be blank"
         school:
           wonde_unavailable: "Wonde could not supply this school. Check the Client ID and token, or try again later."
           attributes:
