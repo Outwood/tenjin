@@ -3,7 +3,7 @@
 require "rails_helper"
 
 RSpec.describe "Teacher sets homework", :default_creates, :js do
-  let!(:lesson) { create(:lesson, topic: topic, questions_count: 10) }
+  let!(:lesson) { create(:lesson, :fills_a_quiz, topic: topic) }
   let!(:student_enrollment) { create(:enrollment, classroom: classroom, user: student) }
 
   before do

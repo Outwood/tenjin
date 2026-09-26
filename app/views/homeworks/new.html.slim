@@ -21,7 +21,7 @@
       full_error_html: { id: 'homework_required_error' },
       input_html: { aria: { describedby: ['homework_required_hint', error_id[:required]].compact.join(' ') } }
     / The belongs_to check carries a condition, so simple_form would read the topic as optional
-    = f.association :topic, collection: @classroom.subject.topics.order(:name), prompt: 'Choose a topic',
+    = f.association :topic, collection: @topics, prompt: 'Choose a topic',
       required: true,
       full_error_html: { id: 'homework_topic_error' },
       input_html: { aria: { describedby: error_id[:topic] }, data: { action: 'change->homework#loadLessons' } }
