@@ -109,8 +109,27 @@ RSpec.describe "homeworks controller", :default_creates do
 
       it "names each pupil's status beside its icon" do
         expect(Capybara.string(response.body))
-          .to have_css("tr.student-row td:nth-child(3)", exact_text: "Complete", count: 1)
-          .and have_css("tr.student-row td:nth-child(3)", exact_text: "Not complete", count: 9)
+          .to have_css("tr.student-row td:nth-child(3) i.fa-check", count: 1)
+          .and have_css("tr.student-row td:nth-child(3)", exact_text: "Done", count: 1)
+          .and have_css("tr.student-row td:nth-child(3)", exact_text: "Not yet due", count: 9)
+      end
+    end
+
+    context "with a pupil who joined after the homework was set" do
+      let!(:homework) { super() }
+      let!(:late_enrollment) { create(:enrollment, classroom: classroom, user: student) }
+      let(:late_row) { "tr.student-row[data-user='#{student.id}']" }
+
+      before { get homework_path(homework) }
+
+      it "lists them as set before they joined, with no score" do
+        expect(Capybara.string(response.body))
+          .to have_css("#{late_row} td:nth-child(3)", exact_text: "Set before they joined")
+          .and have_css("#{late_row} td:nth-child(4)", exact_text: "")
+      end
+
+      it "leaves them out of the completion count" do
+        expect(Capybara.string(response.body)).to have_css("#homework-completion", exact_text: "0% (0 of 10)")
       end
     end
 
