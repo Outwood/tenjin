@@ -1,40 +1,41 @@
 - content_for :title
-  title Homework
-section.page-section.text-center.pt-2#HomeworkTitle
-  .container
-    h1.page-section-header.text-uppercase Homework
-    p.lead = link_to(@homework.classroom.name, @homework.classroom)
-    p.lead
-      => @homework.topic.name
-      - if @homework.lesson
-        ' -
-        => @homework.lesson.title
+  title = "Homework - #{@homework.title} - #{@homework.classroom.name}"
+.container
+  nav.mt-3.breadcrumb-chevron aria-label='Breadcrumb'
+    ol.breadcrumb.mb-1
+      li.breadcrumb-item = link_to 'My Classes', dashboard_path
+      li.breadcrumb-item = link_to @homework.classroom.name, @homework.classroom
+      li.breadcrumb-item.active aria-current='page' = @homework.title
+  .mb-4
+    h1.mb-0 = @homework.title
+    / The h1 names the lesson, or the topic when there is none, so this line carries the other
+    p.lead.mb-0
+      => @homework.lesson ? @homework.topic.name : 'Whole topic'
       ' -
       => number_to_percentage(@homework.required, precision: 0)
       | required
-    ==render_small_separator
-    p.display-4 = report_progress(@homework_counts)
-section.page-section.text-center.pt-2#StudentProgress
-  .container
-    .row.col
-      table.table
-        thead
-          tr
-            th Name
-            th Complete?
-            th Progress
-        tbody
-          - @homework_progress.each do |h|
-            tr.student-row data-user=h.user.id
-              td
-                => h.user.forename[0]
-                = h.user.surname
-              td = boolean_icon(h.completed?, yes: "Complete", no: "Not complete")
-              td
-                = h.progress.to_s
-                | %
-    .row.col.mt-5
-      = button_to 'Delete Homework', homework_path(@homework),
-        method: :delete,
-        class: 'btn w-100 btn-danger',
-        form: { data: { turbo: true, turbo_confirm: "Delete this homework? Every pupil's progress on it will be lost." } }
+    p.lead.mb-0#homework-completion = report_progress(@homework_counts)
+  section.mb-5#pupils aria-labelledby='pupils-heading'
+    h2.mb-3#pupils-heading Pupils
+    table.table
+      thead
+        tr
+          th Name
+          th Complete?
+          th Progress
+      tbody
+        - @homework_progress.each do |h|
+          tr.student-row data-user=h.user.id
+            td
+              => h.user.forename[0]
+              = h.user.surname
+            td = boolean_icon(h.completed?, yes: "Complete", no: "Not complete")
+            td
+              = h.progress.to_s
+              | %
+  section.mb-5 aria-labelledby='danger-zone-heading'
+    h2#danger-zone-heading Danger Zone
+    = button_to 'Delete Homework', homework_path(@homework),
+      method: :delete,
+      class: 'btn btn-danger',
+      form: { data: { turbo: true, turbo_confirm: "Delete this homework? Every pupil's progress on it will be lost." } }
