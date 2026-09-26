@@ -220,6 +220,11 @@ RSpec.describe "classrooms controller", :default_creates do
           .and have_button("Reset password")
           .and have_css("button[data-password-reset-url-param='#{user_password_reset_path(student)}']")
       end
+
+      it "links to setting the class's homework for them" do
+        row = Capybara.string(response.body).find("#students-table tr[data-id='#{student.id}']")
+        expect(row).to have_link("Set homework", href: new_classroom_pupil_homework_path(classroom, student))
+      end
     end
 
     describe "a pupil's homework strip" do

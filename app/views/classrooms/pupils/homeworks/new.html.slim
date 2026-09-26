@@ -1,0 +1,36 @@
+- name = "#{@pupil.forename} #{@pupil.surname}"
+- content_for :title
+  title = "Set Homework - #{name} - #{@classroom.name}"
+.container
+  nav.mt-3.breadcrumb-chevron aria-label='Breadcrumb'
+    ol.breadcrumb.mb-1
+      li.breadcrumb-item = link_to 'My Classes', dashboard_path
+      li.breadcrumb-item = link_to @classroom.name, @classroom
+      li.breadcrumb-item.active aria-current='page' = "Set homework for #{name}"
+  h1.mb-3 = "Set homework for #{name}"
+  - if @homeworks.empty?
+    p = "#{name} already has every homework set for this class."
+    = link_to "Back to #{@classroom.name}", @classroom
+  - else
+    p
+      | Choose the homework that applies to them. Each keeps the class's due date, so one already
+        due shows as overdue until they complete it. Setting it doesn't tell them: let them know,
+        with their login if they need it.
+    = form_with url: classroom_pupil_homework_path(@classroom, @pupil), method: :post do
+      fieldset.mb-3
+        legend.fs-5 Homework not yet set for them
+        - if @error
+          p.text-danger role='alert' = @error
+        - @homeworks.each do |homework|
+          .form-check
+            = check_box_tag 'homework_ids[]', homework.id, false, id: "homework_#{homework.id}", class: 'form-check-input'
+            label.form-check-label for="homework_#{homework.id}"
+              => homework.title
+              | (due
+              =< homework_due_time(homework)
+              | )
+              - if homework.due_date.past?
+                span.badge.text-bg-warning.ms-2 Overdue
+      .d-flex.gap-2
+        = submit_tag 'Set Homework', class: 'btn btn-primary'
+        = link_to 'Cancel', @classroom, class: 'btn btn-outline-secondary'

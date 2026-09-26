@@ -1,5 +1,6 @@
-/ A row's actions, for a table inside the password-reset controller. Fixed positioning lets
-  the menu escape Tabulator's cells, which clip what overflows them.
+/ A row's actions, for a table inside the password-reset controller; given a classroom, the user
+  is a pupil in it. Fixed positioning lets the menu escape Tabulator's cells, which clip what
+  overflows them.
 - name = "#{user.forename} #{user.surname}"
 .dropdown
   button.btn.btn-sm.btn-light.row-actions[type='button'
@@ -14,3 +15,5 @@
         data-action='password-reset#confirm'
         data-password-reset-url-param=user_password_reset_path(user)
         data-password-reset-name-param=name] Reset password
+    - if local_assigns[:classroom]
+      li = link_to "Set homework", new_classroom_pupil_homework_path(classroom, user), class: "dropdown-item"

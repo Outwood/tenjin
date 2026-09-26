@@ -80,5 +80,5 @@
               td = s.surname
               td = s.username
               td = homework_strip(@recent_homeworks, @recent_progress.fetch(s.id, {}))
-              td = render('users/actions_menu', user: s)
+              td = render('users/actions_menu', user: s, classroom: @classroom)
       = render('users/password_reset_modal', id: 'password-reset')

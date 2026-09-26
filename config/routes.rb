@@ -49,6 +49,9 @@ Rails.application.routes.draw do
   resources :leaderboards, only: [:index]
   resources :classrooms, only: %i[show index update] do
     resources :homeworks, only: %i[new create]
+    resources :pupils, only: [], module: :classrooms do
+      resource :homework, only: %i[new create], module: :pupils
+    end
   end
   resources :questions, only: %i[index edit update destroy] do
     scope module: :questions do
