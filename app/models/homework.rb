@@ -13,11 +13,17 @@ class Homework < ApplicationRecord
   validates :required, presence: true
   validate :due_date_cannot_be_in_the_past
 
-  after_create :create_homework_progresses
+  after_create -> { assign_to(users.where(role: :student).ids) }
 
   # Names the homework by what was set: a lesson, or else its whole topic
   def title
     lesson&.title || topic.name
+  end
+
+  # Sets this homework for the given pupils in one insert; a pupil who already has it keeps their row
+  def assign_to(pupil_ids)
+    rows = pupil_ids.map { |pupil_id| {homework_id: id, user_id: pupil_id, progress: 0, completed: false} }
+    HomeworkProgress.insert_all(rows, unique_by: %i[homework_id user_id]) if rows.any?
   end
 
   # A pupil's state from their progress row, missing if they joined after this was set; each state needs
@@ -34,11 +40,5 @@ class Homework < ApplicationRecord
 
   def due_date_cannot_be_in_the_past
     errors.add(:due_date, "can't be in the past") if due_date.present? && due_date.past?
-  end
-
-  def create_homework_progresses
-    users.where(role: :student).find_each do |u|
-      homework_progresses.create(user: u, progress: 0, completed: false)
-    end
   end
 end

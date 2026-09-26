@@ -8,7 +8,8 @@ RSpec.describe Admin::ResetYear do
   let!(:homework) { create(:homework, classroom: first_enrollment.classroom) }
   let!(:topic_score) { create(:topic_score, subject: first_enrollment.classroom.subject) }
   let!(:all_time_topic_score) { create(:all_time_topic_score, subject: second_enrollment.classroom.subject) }
-  let!(:homework_progress) { create(:homework_progress, homework: homework, user: first_enrollment.user) }
+  # Setting the homework made the pupil's row; finding it proves there is one to purge
+  let!(:homework_progress) { homework.homework_progresses.find_by!(user: first_enrollment.user) }
   let!(:challenge_progress) { create(:challenge_progress, user: first_enrollment.user) }
   let!(:leaderboard_award) do
     create(:leaderboard_award, user: first_enrollment.user, subject: first_enrollment.classroom.subject)
