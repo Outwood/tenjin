@@ -106,6 +106,12 @@ RSpec.describe "homeworks controller", :default_creates do
       it "reports the class completion percentage" do
         expect(Capybara.string(response.body)).to have_css(".display-4", exact_text: "10% (1 of 10)")
       end
+
+      it "names each pupil's status beside its icon" do
+        expect(Capybara.string(response.body))
+          .to have_css("tr.student-row td:nth-child(2)", exact_text: "Complete", count: 1)
+          .and have_css("tr.student-row td:nth-child(2)", exact_text: "Not complete", count: 9)
+      end
     end
 
     context "with a pupil who has moved to another class" do

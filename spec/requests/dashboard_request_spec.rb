@@ -193,8 +193,9 @@ RSpec.describe "dashboard controller", :default_creates do
 
           before { get dashboard_path }
 
-          it "shows a tick" do
+          it "shows a tick named Complete" do
             expect(Capybara.string(response.body)).to have_css("#{progress_cell} i.fa-check")
+              .and have_css(progress_cell, exact_text: "Complete")
           end
         end
 
@@ -224,8 +225,9 @@ RSpec.describe "dashboard controller", :default_creates do
             expect(Capybara.string(response.body)).to have_css(name_cell, exact_text: topic.name)
           end
 
-          it "shows a cross icon" do
+          it "shows a cross named Not complete" do
             expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-times")
+              .and have_css(status_cell, exact_text: "Not complete")
               .and have_no_css("#{status_cell} i.fa-exclamation")
           end
 
@@ -240,8 +242,9 @@ RSpec.describe "dashboard controller", :default_creates do
             get dashboard_path
           end
 
-          it "shows a tick icon" do
+          it "shows a tick named Complete" do
             expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-check")
+              .and have_css(status_cell, exact_text: "Complete")
           end
         end
 
@@ -250,8 +253,9 @@ RSpec.describe "dashboard controller", :default_creates do
 
           before { get dashboard_path }
 
-          it "shows an exclamation icon" do
+          it "shows an exclamation named Overdue" do
             expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-exclamation")
+              .and have_css(status_cell, exact_text: "Overdue")
           end
         end
 
