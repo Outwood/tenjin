@@ -137,6 +137,14 @@ RSpec.describe "homeworks controller", :default_creates do
       end
     end
 
+    context "with a topic that has lost its questions and a due date in the past" do
+      before { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(due_date: 1.day.ago)} }
+
+      it "keeps the chosen topic on offer" do
+        expect(Capybara.string(response.body)).to have_select("Topic", selected: topic.name)
+      end
+    end
+
     context "with a lesson homework and a due date in the past" do
       let(:lesson) { create(:lesson, :fills_a_quiz, topic: topic, title: "Equivalent fractions") }
       let!(:sibling_lesson) { create(:lesson, :fills_a_quiz, topic: topic, title: "Mixed numbers") }

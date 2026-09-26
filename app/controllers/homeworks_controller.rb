@@ -62,9 +62,12 @@ class HomeworksController < ApplicationController
   # What a homework quiz can be built from: Quiz::CreateQuiz asks only active questions, so a topic
   # needs one and a lesson a quiz's worth. An inactive topic stays on offer to teachers.
   def load_choices
-    active_questions = Question.where(active: true)
-    @topics = @classroom.subject.topics.where(id: active_questions.select(:topic_id)).order(:name)
-    @lessons = Lesson.where(topic: @topics).where(id: active_questions.group(:lesson_id)
+    topics = @classroom.subject.topics
+    active_questions = Question.where(active: true, topic: topics)
+    # A re-rendered form keeps the topic it was sent, even one that has since lost its questions
+    @topics = topics.where(id: active_questions.select(:topic_id)).or(topics.where(id: @homework.topic_id))
+      .order(:name).to_a
+    @lessons = Lesson.where(topic_id: @topics.map(&:id)).where(id: active_questions.group(:lesson_id)
       .having("COUNT(*) >= ?", Quiz::QUESTION_COUNT).select(:lesson_id))
   end
 end
