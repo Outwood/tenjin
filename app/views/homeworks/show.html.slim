@@ -8,11 +8,9 @@
       li.breadcrumb-item.active aria-current='page' = @homework.title
   .mb-4
     h1.mb-0 = @homework.title
+    / The h1 names the lesson, or the topic when there is none, so this line carries the other
     p.lead.mb-0
-      => @homework.topic.name
-      - if @homework.lesson
-        ' -
-        => @homework.lesson.title
+      => @homework.lesson ? @homework.topic.name : 'Whole topic'
       ' -
       => number_to_percentage(@homework.required, precision: 0)
       | required

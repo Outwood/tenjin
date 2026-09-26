@@ -159,12 +159,22 @@ RSpec.describe "homeworks controller", :default_creates do
 
     context "with a lesson homework" do
       let(:lesson) { create(:lesson, topic: topic) }
-      let(:homework) { create(:homework, classroom: classroom, topic: topic, lesson: lesson) }
+      let(:homework) { create(:homework, classroom: classroom, topic: topic, lesson: lesson, required: 70) }
 
-      it "heads the page with the lesson and names its topic" do
+      it "heads the page with the lesson and names its topic beneath" do
         get homework_path(homework)
         expect(Capybara.string(response.body)).to have_css("h1", exact_text: lesson.title)
-          .and have_text(topic.name)
+          .and have_css("h1 + p.lead", exact_text: "#{topic.name} - 70% required")
+      end
+    end
+
+    context "with a whole-topic homework" do
+      let(:homework) { create(:homework, classroom: classroom, topic: topic, required: 70) }
+
+      it "heads the page with the topic, without repeating it beneath" do
+        get homework_path(homework)
+        expect(Capybara.string(response.body)).to have_css("h1", exact_text: topic.name)
+          .and have_css("h1 + p.lead", exact_text: "Whole topic - 70% required")
       end
     end
 
