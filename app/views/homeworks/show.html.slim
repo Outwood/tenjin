@@ -7,14 +7,18 @@
       li.breadcrumb-item = link_to @homework.classroom.name, @homework.classroom
       li.breadcrumb-item.active aria-current='page' = @homework.title
   .mb-4
-    h1.mb-0 = @homework.title
-    / The h1 names the lesson, or the topic when there is none, so this line carries the other
-    p.lead.mb-0
-      => @homework.lesson ? @homework.topic.name : 'Whole topic'
-      ' -
-      => number_to_percentage(@homework.required, precision: 0)
-      | required
-    p.lead.mb-0#homework-completion = report_progress(@homework_counts)
+    h1 = @homework.title
+    dl.row.mb-0#homework-details
+      dt.col-sm-3 Topic
+      dd.col-sm-9 = @homework.topic.name
+      dt.col-sm-3 Lesson
+      dd.col-sm-9 = @homework.lesson&.title || 'Whole topic'
+      dt.col-sm-3 Pass mark
+      dd.col-sm-9 = "#{number_to_percentage(@homework.required, precision: 0)} in one quiz"
+      dt.col-sm-3 Due
+      dd.col-sm-9 = homework_due_time(@homework)
+      dt.col-sm-3 Completion
+      dd.col-sm-9#homework-completion = report_progress(@homework_counts)
   section.mb-5#pupils aria-labelledby='pupils-heading'
     h2.mb-3#pupils-heading Pupils
     table.table

@@ -161,20 +161,29 @@ RSpec.describe "homeworks controller", :default_creates do
       let(:lesson) { create(:lesson, topic: topic) }
       let(:homework) { create(:homework, classroom: classroom, topic: topic, lesson: lesson, required: 70) }
 
-      it "heads the page with the lesson and names its topic beneath" do
+      it "heads the page with the lesson" do
         get homework_path(homework)
         expect(Capybara.string(response.body)).to have_css("h1", exact_text: lesson.title)
-          .and have_css("h1 + p.lead", exact_text: "#{topic.name} - 70% required")
       end
     end
 
     context "with a whole-topic homework" do
-      let(:homework) { create(:homework, classroom: classroom, topic: topic, required: 70) }
+      let(:homework) do
+        create(:homework, classroom: classroom, topic: topic, required: 70, due_date: Time.zone.local(2030, 10, 5, 9, 0))
+      end
 
-      it "heads the page with the topic, without repeating it beneath" do
-        get homework_path(homework)
+      before { get homework_path(homework) }
+
+      it "heads the page with the topic" do
         expect(Capybara.string(response.body)).to have_css("h1", exact_text: topic.name)
-          .and have_css("h1 + p.lead", exact_text: "Whole topic - 70% required")
+      end
+
+      it "lists its topic, pass mark and due time" do
+        expect(Capybara.string(response.body).find("#homework-details"))
+          .to have_css("dd", exact_text: topic.name)
+          .and have_css("dd", exact_text: "Whole topic")
+          .and have_css("dd", exact_text: "70% in one quiz")
+          .and have_css("dd time[datetime='2030-10-05T09:00']", exact_text: "5 Oct 2030, 09:00")
       end
     end
 
