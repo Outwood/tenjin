@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module QuestionsHelper
+  # One label per Question.question_types value
+  QUESTION_TYPE_LABELS = {"short_answer" => "Short answer", "boolean" => "True or false", "multiple" => "Multiple choice"}.freeze
+
   def flag_icon
     if @flagged_question.present? && @flagged_question.persisted?
       "<i class='fas fa-flag' style='color: red'></i>".html_safe
@@ -13,6 +16,13 @@ module QuestionsHelper
   def chosen_boolean_label(question)
     correct = question.answers.reject(&:marked_for_destruction?).select(&:correct)
     correct.first.text if correct.one?
+  end
+
+  # True before False, as a quiz offers them; other answers in the order they were written
+  def listed_answers(question)
+    return question.answers.sort_by { |answer| answer.text.downcase }.reverse if question.boolean?
+
+    question.answers.sort_by(&:id)
   end
 
   # Whether the answer table has a Correct column, in its header and in every row
@@ -36,6 +46,10 @@ module QuestionsHelper
     return "Not asked yet" if asked.zero?
 
     number_to_percentage(question.question_statistic.number_correct.to_f / asked * 100, precision: 0)
+  end
+
+  def question_type_label(question)
+    QUESTION_TYPE_LABELS.fetch(question.question_type)
   end
 
   def times_asked(question)

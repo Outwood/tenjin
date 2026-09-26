@@ -12,6 +12,7 @@ module Lessons
       @questions = Question.with_rich_text_question_text_and_embeds
         .includes(:answers)
         .where(lesson: @lesson, active: true)
+        .order(:created_at, :id)
     end
   end
 end
