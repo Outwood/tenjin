@@ -53,6 +53,6 @@ class HomeworksController < ApplicationController
   end
 
   def lessons_for_classroom(classroom)
-    Lesson.where(topic: classroom.subject.topics).where(questions_count: 10..)
+    Lesson.where(topic: classroom.subject.topics).where(questions_count: Homework::LESSON_QUESTIONS..)
   end
 end
