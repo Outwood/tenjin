@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Words and markup for a class's pages: sync notices, homework states and due times
 module ClassroomsHelper
   # The page flips to this sentence itself the moment a subject changes
   SYNC_NEEDED_NOTICE = "Sync needed: pupils join a mapped class on the next sync."
