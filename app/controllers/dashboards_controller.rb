@@ -22,7 +22,8 @@ class DashboardsController < ApplicationController
 
   def student_homework_progress
     HomeworkProgress.includes(:homework, homework: [{topic: :subject}])
-      .where("user_id = ? AND ( completed = false OR ( completed = true AND homeworks.due_date > ? )) ", current_user, 1.week.ago)
+      .where(user: current_user)
+      .where("homework_progresses.completed_at IS NULL OR homeworks.due_date > ?", 1.week.ago)
       .order("homeworks.due_date")
       .limit(15)
   end

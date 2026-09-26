@@ -5,6 +5,6 @@ FactoryBot.define do
     homework
     user
     progress { rand(0..100) }
-    completed { [true, false].sample }
+    completed { false }
   end
 end

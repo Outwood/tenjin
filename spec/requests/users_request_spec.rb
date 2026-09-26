@@ -137,7 +137,7 @@ RSpec.describe "user controller", :default_creates do
 
       context "when the homework is completed" do
         before do
-          homework.homework_progresses.find_by!(user: student).update!(completed: true)
+          homework.homework_progresses.find_by!(user: student).update!(completed_at: Time.current)
           get user_path(student)
         end
 

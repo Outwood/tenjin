@@ -60,7 +60,7 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
 
     context "with the homework already completed" do
       let(:completed_at) { 2.days.ago.round }
-      before { progress.update!(progress: 40, completed: true, completed_at: completed_at) }
+      before { progress.update!(progress: 40, completed_at: completed_at) }
 
       it "raises the score but keeps the completion time" do
         described_class.call(quiz: quiz_full_marks)
@@ -74,7 +74,7 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
       let(:completed_at) { 2.days.ago.round }
 
       before do
-        progress.update!(progress: 40, completed: true, completed_at: completed_at)
+        progress.update!(progress: 40, completed_at: completed_at)
         rows = double(:rows)
         allow(rows).to receive(:find_each).and_yield(stale_progress)
         allow_any_instance_of(described_class).to receive(:homework_progresses).and_return(rows)

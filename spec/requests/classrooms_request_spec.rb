@@ -147,7 +147,7 @@ RSpec.describe "classrooms controller", :default_creates do
       let!(:homework) { create(:homework, classroom: classroom, topic: topic) }
 
       before do
-        pupil_enrollments.first(3).each { |e| homework.homework_progresses.find_by!(user: e.user).update!(completed: true) }
+        pupil_enrollments.first(3).each { |e| homework.homework_progresses.find_by!(user: e.user).update!(completed_at: Time.current) }
         get classroom_path(classroom)
       end
 
@@ -164,7 +164,7 @@ RSpec.describe "classrooms controller", :default_creates do
 
       # The move comes after the homework, as a sync would make it, so the mover keeps a completed row on it
       before do
-        [pupil_enrollments.first, mover_enrollment].each { |e| homework.homework_progresses.find_by!(user: e.user).update!(completed: true) }
+        [pupil_enrollments.first, mover_enrollment].each { |e| homework.homework_progresses.find_by!(user: e.user).update!(completed_at: Time.current) }
         mover_enrollment.destroy!
         create(:enrollment, classroom: create(:classroom, school: school), user: mover_enrollment.user)
         get classroom_path(classroom)
@@ -236,7 +236,7 @@ RSpec.describe "classrooms controller", :default_creates do
         end
 
         before do
-          pupil_homeworks[2].homework_progresses.find_by!(user: student).update!(completed: true)
+          pupil_homeworks[2].homework_progresses.find_by!(user: student).update!(completed_at: Time.current)
           get classroom_path(classroom)
         end
 

@@ -62,7 +62,7 @@ RSpec.describe ClassroomsHelper do
 
     context "with the homework completed after its due time" do
       let(:progress) do
-        build_stubbed(:homework_progress, homework: homework, completed: true, completed_at: Time.zone.local(2026, 9, 24, 9, 1))
+        build_stubbed(:homework_progress, homework: homework, completed_at: Time.zone.local(2026, 9, 24, 9, 1))
       end
 
       it "says done late beside an amber tick hidden from screen readers" do
@@ -91,7 +91,7 @@ RSpec.describe ClassroomsHelper do
     before { travel_to Time.zone.local(2026, 9, 25, 12) }
 
     context "with the homework completed" do
-      let(:progress) { build_stubbed(:homework_progress, homework: homework, completed: true) }
+      let(:progress) { build_stubbed(:homework_progress, homework: homework, completed_at: Time.zone.local(2026, 9, 25, 12)) }
 
       it "shows a tick labelled done" do
         expect(slot).to have_css("i.fa-check")
@@ -102,7 +102,7 @@ RSpec.describe ClassroomsHelper do
     context "with the homework completed after its due time" do
       let(:homework) { build_stubbed(:homework, topic: topic, due_date: Time.zone.local(2026, 9, 24, 9)) }
       let(:progress) do
-        build_stubbed(:homework_progress, homework: homework, completed: true, completed_at: Time.zone.local(2026, 9, 24, 9, 1))
+        build_stubbed(:homework_progress, homework: homework, completed_at: Time.zone.local(2026, 9, 24, 9, 1))
       end
 
       it "shows an amber tick labelled done late" do
@@ -113,7 +113,7 @@ RSpec.describe ClassroomsHelper do
 
     context "with the homework completed by its due time" do
       let(:progress) do
-        build_stubbed(:homework_progress, homework: homework, completed: true, completed_at: Time.zone.local(2026, 9, 27, 9))
+        build_stubbed(:homework_progress, homework: homework, completed_at: Time.zone.local(2026, 9, 27, 9))
       end
 
       it "shows a green tick labelled done" do
@@ -123,7 +123,7 @@ RSpec.describe ClassroomsHelper do
     end
 
     context "with the homework not completed and not yet due" do
-      let(:progress) { build_stubbed(:homework_progress, homework: homework, completed: false) }
+      let(:progress) { build_stubbed(:homework_progress, homework: homework) }
 
       it "shows an open circle labelled not yet due" do
         expect(slot).to have_css("i.fa-circle")
@@ -133,7 +133,7 @@ RSpec.describe ClassroomsHelper do
 
     context "with the homework not completed and past its due date" do
       let(:homework) { build_stubbed(:homework, topic: topic, due_date: Time.zone.local(2026, 9, 24, 9)) }
-      let(:progress) { build_stubbed(:homework_progress, homework: homework, completed: false) }
+      let(:progress) { build_stubbed(:homework_progress, homework: homework) }
 
       it "shows an exclamation mark labelled overdue" do
         expect(slot).to have_css("i.fa-exclamation")

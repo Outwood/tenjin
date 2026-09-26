@@ -35,8 +35,8 @@ class Homework::UpdateHomeworkProgress < ApplicationCommand
     progress.with_lock do
       percentage *= 100
       progress.progress = percentage if percentage > progress.progress
-      if progress.progress >= progress.homework.required && !progress.completed
-        progress.completed = true
+      if progress.progress >= progress.homework.required && !progress.completed?
+        progress.completed = true # kept in step with completed_at until the column is dropped
         progress.completed_at = Time.current
         @completed_homework = true
       end
