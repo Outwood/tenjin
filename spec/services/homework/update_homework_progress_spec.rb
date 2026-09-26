@@ -6,14 +6,13 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
   let!(:enrollment) { create(:enrollment, classroom: classroom, user: student) }
   let!(:homework) { create(:homework, topic: topic, classroom: classroom, required: mark_required) }
   let(:progress) { HomeworkProgress.find_by(homework: homework) }
+  let(:quiz_full_marks) do
+    create(:quiz, subject: quiz_subject, topic: topic, num_questions_asked: 10,
+      answered_correct: 10, active: false, user: student)
+  end
 
   context "when the required mark is 100" do
     let(:mark_required) { 100 }
-
-    let(:quiz_full_marks) do
-      create(:quiz, subject: quiz_subject, topic: topic, num_questions_asked: 10,
-        answered_correct: 10, active: false, user: student)
-    end
 
     let(:quiz_7_out_of_10) do
       create(:quiz, subject: quiz_subject, topic: topic, num_questions_asked: 10,
@@ -61,11 +60,6 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
 
     context "with the homework already completed" do
       let(:completed_at) { 2.days.ago.round }
-      let(:quiz_full_marks) do
-        create(:quiz, subject: quiz_subject, topic: topic, num_questions_asked: 10,
-          answered_correct: 10, active: false, user: student)
-      end
-
       before { progress.update!(progress: 40, completed: true, completed_at: completed_at) }
 
       it "raises the score but keeps the completion time" do
@@ -95,11 +89,6 @@ RSpec.describe Homework::UpdateHomeworkProgress, :default_creates do
 
   context "when a homework progress record cannot be saved" do
     let(:mark_required) { 100 }
-
-    let(:quiz_full_marks) do
-      create(:quiz, subject: quiz_subject, topic: topic, num_questions_asked: 10,
-        answered_correct: 10, active: false, user: student)
-    end
 
     before do
       errors_double = instance_double(ActiveModel::Errors, full_messages: ["Progress is invalid"])

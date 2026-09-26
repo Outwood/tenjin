@@ -2,12 +2,13 @@
 
 # Records when a pupil completed a homework, so a completion after the due time shows as late.
 class AddCompletedAtToHomeworkProgresses < ActiveRecord::Migration[7.2]
-  # Progress is updated when a quiz finishes, its last write, so a completion is dated by the first quiz
-  # on the topic to finish at the pass mark after the homework was set. A quiz closed early, abandoned
-  # or replaced, has not asked every question it started with, so does not count.
+  # Progress is updated when a quiz finishes, its last write, so a completion is dated by the first
+  # quiz on the topic to finish at the pass mark after the homework was set, capped at the row's own
+  # last update. A quiz closed early has not asked every question it started with; one whose question
+  # was since deleted may pass anyway, which errs early, as every uncertain time here does.
   QUIZ_BACKFILL = <<~SQL
     UPDATE homework_progresses
-    SET completed_at = crossing.completed_at
+    SET completed_at = LEAST(crossing.completed_at, homework_progresses.updated_at)
     FROM (
       SELECT homework_progresses.id, MIN(quizzes.updated_at) AS completed_at
       FROM homework_progresses
@@ -24,9 +25,14 @@ class AddCompletedAtToHomeworkProgresses < ActiveRecord::Migration[7.2]
     WHERE homework_progresses.id = crossing.id
   SQL
 
-  # A completion no quiz accounts for takes its last update, which a later score rise also moves
+  # A completion no quiz dates happened by the row's last update, which a later score rise also moves;
+  # in doubt it reads as on time
   UPDATED_AT_BACKFILL = <<~SQL
-    UPDATE homework_progresses SET completed_at = updated_at WHERE completed AND completed_at IS NULL
+    UPDATE homework_progresses
+    SET completed_at = LEAST(homework_progresses.updated_at, homeworks.due_date)
+    FROM homeworks
+    WHERE homeworks.id = homework_progresses.homework_id
+      AND homework_progresses.completed AND homework_progresses.completed_at IS NULL
   SQL
 
   def up
