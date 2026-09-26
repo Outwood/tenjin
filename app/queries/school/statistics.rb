@@ -21,13 +21,13 @@ class School::Statistics
 
   def homeworks_completed_last_four_weeks
     @homeworks_completed_last_four_weeks ||= school_scope(
-      HomeworkProgress.where(completed: true, updated_at: four_weeks_start..)
+      HomeworkProgress.where(completed_at: four_weeks_start..)
     ).count
   end
 
   def homeworks_completed_weekly
     @homeworks_completed_weekly ||= school_scope(
-      HomeworkProgress.where(completed: true, updated_at: Date.current.beginning_of_week..Time.current)
+      HomeworkProgress.where(completed_at: Time.current.all_week)
     ).count
   end
 

@@ -33,21 +33,21 @@ RSpec.describe "Super views the overview", :default_creates, :js do
 
   describe "viewing completed homework" do
     before do
-      create(:homework_progress, user: student, completed: true, updated_at: this_week)
-      create(:homework_progress, user: student, completed: true, updated_at: two_weeks_ago)
-      create(:homework_progress, user: other_school_student, completed: true, updated_at: this_week)
-      create(:homework_progress, user: other_school_student, completed: true, updated_at: two_weeks_ago)
+      create(:homework_progress, user: student, completed_at: this_week)
+      create(:homework_progress, user: student, completed_at: two_weeks_ago)
+      create(:homework_progress, user: other_school_student, completed_at: this_week)
+      create(:homework_progress, user: other_school_student, completed_at: two_weeks_ago)
       visit(system_root_path)
     end
 
     it "shows homeworks completed in the last four weeks" do
       expect(page).to have_css("#homeworks_completed_last_four_weeks",
-        exact_text: HomeworkProgress.where(completed: true, updated_at: four_weeks_start..).count.to_s)
+        exact_text: HomeworkProgress.where(completed_at: four_weeks_start..).count.to_s)
     end
 
     it "shows this week's completed homeworks" do
       expect(page).to have_css("#homeworks_completed_weekly",
-        exact_text: HomeworkProgress.where(completed: true, updated_at: this_week..).count.to_s)
+        exact_text: HomeworkProgress.where(completed_at: this_week..).count.to_s)
     end
   end
 end
