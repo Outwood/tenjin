@@ -47,6 +47,40 @@ RSpec.describe Homework do
     end
   end
 
+  describe "#state_for" do
+    include ActiveSupport::Testing::TimeHelpers
+
+    let(:homework) { build_stubbed(:homework, due_date: Time.zone.local(2026, 9, 24, 9)) }
+
+    before { travel_to Time.zone.local(2026, 9, 23, 12) }
+
+    it "is not set without a progress row" do
+      expect(homework.state_for(nil)).to eq :not_set
+    end
+
+    it "is done for a completion by the due time" do
+      progress = build_stubbed(:homework_progress, homework: homework, completed_at: Time.zone.local(2026, 9, 24, 9))
+      expect(homework.state_for(progress)).to eq :done
+    end
+
+    it "is done late for a completion after the due time" do
+      progress = build_stubbed(:homework_progress, homework: homework, completed_at: Time.zone.local(2026, 9, 24, 9, 1))
+      expect(homework.state_for(progress)).to eq :done_late
+    end
+
+    it "is not yet due before the due time" do
+      expect(homework.state_for(build_stubbed(:homework_progress, homework: homework))).to eq :not_due
+    end
+
+    context "when the due time has passed" do
+      before { travel_to Time.zone.local(2026, 9, 24, 9, 1) }
+
+      it "is overdue without a completion" do
+        expect(homework.state_for(build_stubbed(:homework_progress, homework: homework))).to eq :overdue
+      end
+    end
+  end
+
   describe "#destroy" do
     let!(:homework) { create(:homework, classroom: classroom) }
 

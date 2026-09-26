@@ -147,6 +147,20 @@ RSpec.describe "user controller", :default_creates do
         end
       end
 
+      context "when the homework was completed after its due time" do
+        let(:homework) { create(:homework, :overdue, classroom: classroom, topic: topic) }
+
+        before do
+          homework.homework_progresses.find_by!(user: student).update!(completed_at: Time.current)
+          get user_path(student)
+        end
+
+        it "shows an amber tick named Complete, late" do
+          expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-check.text-warning")
+            .and have_css(status_cell, exact_text: "Complete, late")
+        end
+      end
+
       context "when the student is enrolled in a second classroom" do
         let(:second_classroom) { create(:classroom, school: school) }
         let!(:second_enrollment) { create(:enrollment, user: student, classroom: second_classroom) }

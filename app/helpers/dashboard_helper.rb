@@ -2,8 +2,6 @@
 
 # Formats the challenge and homework tables on a pupil's dashboard and user page
 module DashboardHelper
-  include ClassroomsHelper
-
   def challenge_progress_display(challenge, challenge_progresses)
     challenge_progress = challenge_progresses.select { |cp| cp.challenge_id == challenge.id }
     return "0%" if challenge_progress.empty?
@@ -12,8 +10,8 @@ module DashboardHelper
     challenge_progress.first.progress.to_s
   end
 
-  # The states are the class page's (ClassroomsHelper#homework_state), with icons for this
-  # table's dark background; a pupil's own table has a row for every homework, so none is unset
+  # Homework#state_for's states, with icons for this table's dark background; a pupil's own table
+  # has a row for every homework, so none is unset
   PUPIL_HOMEWORK_ICONS = {
     done: {icon: "fas fa-check text-success", text: "Complete"},
     done_late: {icon: "fas fa-check text-warning", text: "Complete, late"},
@@ -22,7 +20,7 @@ module DashboardHelper
   }.freeze
 
   def homework_status_icon(homework_progress)
-    state = PUPIL_HOMEWORK_ICONS.fetch(homework_state(homework_progress.homework, homework_progress))
+    state = PUPIL_HOMEWORK_ICONS.fetch(homework_progress.homework.state_for(homework_progress))
     status_icon(state[:icon], state[:text])
   end
 

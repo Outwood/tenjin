@@ -20,6 +20,16 @@ class Homework < ApplicationRecord
     lesson&.title || topic.name
   end
 
+  # A pupil's state from their progress row, missing if they joined after this was set; each state needs
+  # an entry in ClassroomsHelper::HOMEWORK_SLOTS and DashboardHelper::PUPIL_HOMEWORK_ICONS. Due times
+  # are clock times stored as UTC, so in summer a completion up to an hour late reads as on time.
+  def state_for(progress)
+    return :not_set if progress.nil?
+    return progress.completed_at.after?(due_date) ? :done_late : :done if progress.completed?
+
+    due_date.past? ? :overdue : :not_due
+  end
+
   private
 
   def due_date_cannot_be_in_the_past
