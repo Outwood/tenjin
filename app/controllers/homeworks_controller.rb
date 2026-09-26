@@ -16,7 +16,7 @@ class HomeworksController < ApplicationController
 
   def new
     @classroom = find_classroom
-    @homework = authorize @classroom.homeworks.new(due_date: 1.week.from_now, required: 70)
+    @homework = authorize @classroom.homeworks.new(due_date: default_due_date, required: 70)
     @lessons = lessons_for_classroom(@classroom)
   end
 
@@ -47,6 +47,12 @@ class HomeworksController < ApplicationController
 
   def find_homework
     Homework.find(params[:id])
+  end
+
+  # A week on, to the nearest five minutes: the date picker steps minutes in fives
+  def default_due_date
+    step = 5.minutes.to_i
+    Time.zone.at((1.week.from_now.to_f / step).round * step)
   end
 
   def homework_params
