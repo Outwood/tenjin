@@ -62,7 +62,7 @@ RSpec.describe ClassroomsHelper do
       let(:due) { Time.utc(2030, 7, 1, 8) }
 
       it "shows the time on UK clocks, with its offset" do
-        expect(due_time).to have_css("time[datetime='2030-07-01T09:00+01:00']", exact_text: "1 Jul 2030, 09:00")
+        expect(due_time).to have_css("time[datetime='2030-07-01T09:00:00+01:00']", exact_text: "1 Jul 2030, 09:00")
       end
     end
 
@@ -70,7 +70,7 @@ RSpec.describe ClassroomsHelper do
       let(:due) { Time.utc(2030, 1, 6, 9) }
 
       it "shows the time on UK clocks, with its offset" do
-        expect(due_time).to have_css("time[datetime='2030-01-06T09:00+00:00']", exact_text: "6 Jan 2030, 09:00")
+        expect(due_time).to have_css("time[datetime='2030-01-06T09:00:00+00:00']", exact_text: "6 Jan 2030, 09:00")
       end
     end
   end

@@ -60,7 +60,7 @@ module ClassroomsHelper
   end
 
   def homework_due_time(homework)
-    tag.time(homework.due_date.strftime("%-d %b %Y, %H:%M"), datetime: homework.due_date.strftime("%Y-%m-%dT%H:%M%:z"))
+    time_tag(homework.due_date, homework.due_date.strftime("%-d %b %Y, %H:%M"))
   end
 
   private

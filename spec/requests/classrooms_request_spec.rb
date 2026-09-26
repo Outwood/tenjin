@@ -114,7 +114,7 @@ RSpec.describe "classrooms controller", :default_creates do
 
       it "reads with the month as a word and a full year, and carries the datetime the column sorts by" do
         expect(Capybara.string(response.body))
-          .to have_css("#homework-table tr[data-id='#{dated_homework.id}'] time[datetime='2030-10-05T09:00+01:00']",
+          .to have_css("#homework-table tr[data-id='#{dated_homework.id}'] time[datetime='2030-10-05T09:00:00+01:00']",
             exact_text: "5 Oct 2030, 09:00")
       end
     end

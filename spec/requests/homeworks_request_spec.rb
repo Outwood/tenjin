@@ -322,7 +322,7 @@ RSpec.describe "homeworks controller", :default_creates do
           .to have_css("dd", exact_text: topic.name)
           .and have_css("dd", exact_text: "Whole topic")
           .and have_css("dd", exact_text: "70% in one quiz")
-          .and have_css("dd time[datetime='2030-10-05T09:00+01:00']", exact_text: "5 Oct 2030, 09:00")
+          .and have_css("dd time[datetime='2030-10-05T09:00:00+01:00']", exact_text: "5 Oct 2030, 09:00")
       end
     end
 

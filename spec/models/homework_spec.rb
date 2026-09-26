@@ -69,7 +69,10 @@ RSpec.describe Homework do
       # 09:30 on UK clocks
       before { travel_to Time.utc(2030, 7, 1, 8, 30) }
 
-      it { is_expected.not_to be_valid }
+      it "refuses the time as past" do
+        subject.validate
+        expect(subject.errors.full_messages_for(:due_date)).to contain_exactly("Due date can't be in the past")
+      end
     end
 
     context "when due_date is in the past" do
