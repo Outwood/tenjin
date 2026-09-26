@@ -11,6 +11,12 @@ RSpec.describe "classrooms controller", :default_creates do
       get classrooms_path
     end
 
+    it "marks School > Classrooms as the current page, not My Classes" do
+      expect(Capybara.string(response.body))
+        .to have_css("#school-menu .dropdown-item.active[href='#{classrooms_path}']")
+        .and have_no_css("#navbar-main .nav-link.active[href='#{dashboard_path}']")
+    end
+
     # The wording of every sync state is covered in spec/helpers/classrooms_helper_spec.rb
     it "points to the school page for the sync instead of offering it" do
       expect(Capybara.string(response.body))
@@ -76,6 +82,12 @@ RSpec.describe "classrooms controller", :default_creates do
     end
 
     before { sign_in school_admin }
+
+    it "marks My Classes as the current page" do
+      get classroom_path(classroom)
+      expect(Capybara.string(response.body))
+        .to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{dashboard_path}']", exact_text: "My Classes")
+    end
 
     it "names every homework's topic" do
       get classroom_path(classroom)

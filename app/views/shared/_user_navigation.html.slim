@@ -28,7 +28,9 @@ nav#navbar-main.navbar.navbar-expand-md.justify-content-between.bg-black data-bs
                 | Leaderboard Icons
         li.nav-item = nav_link 'Lessons', lessons_path, current: controller_path.in?(%w[lessons lessons/questions])
         - if current_user.employee?
-          li.nav-item = nav_link 'My Classes', dashboard_path, current: controller_name == 'dashboards'
+          / A class's pages sit under My Classes, as their breadcrumbs do; the classroom list is the School menu's
+          - class_pages = %w[dashboards classrooms homeworks classrooms/pupils/homeworks]
+          li.nav-item = nav_link 'My Classes', dashboard_path, current: controller_path.in?(class_pages) && action_name != 'index'
           - if current_user.has_role? :school_admin
             - school_pages = [['Overview', school_path(current_user.school)], ['Users', users_path], ['Classrooms', classrooms_path]]
             - on_school_page = school_pages.any? { |_, path| current_page?(path) }
