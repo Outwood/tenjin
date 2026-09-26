@@ -18,7 +18,7 @@ RSpec.describe "homeworks controller", :default_creates do
       end
 
       it "lists no lessons before a topic is chosen" do
-        expect(page).to have_select("Lesson (Optional)", disabled: true, options: [""])
+        expect(page).to have_select("Lesson (Optional)", disabled: true, options: ["Whole topic"])
       end
 
       it "says which lessons can be set" do
@@ -109,7 +109,7 @@ RSpec.describe "homeworks controller", :default_creates do
       it "keeps the chosen lesson among the topic's lessons" do
         expect(Capybara.string(response.body))
           .to have_select("Lesson (Optional)", disabled: false, selected: "Equivalent fractions",
-            options: ["", "Equivalent fractions", "Mixed numbers"])
+            options: ["Whole topic", "Equivalent fractions", "Mixed numbers"])
       end
     end
   end

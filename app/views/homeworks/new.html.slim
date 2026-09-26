@@ -17,13 +17,14 @@
       full_error_html: { id: 'homework_required_error' },
       input_html: { aria: { describedby: error_id[:required] } }
     / The belongs_to check carries a condition, so simple_form would read the topic as optional
-    = f.association :topic, collection: @classroom.subject.topics.order(:name),
+    = f.association :topic, collection: @classroom.subject.topics.order(:name), prompt: 'Choose a topic',
       required: true,
       full_error_html: { id: 'homework_topic_error' },
       input_html: { aria: { describedby: error_id[:topic] }, data: { action: 'change->homework#loadLessons' } }
     / A re-rendered form already has a topic, and no change event will fill its lessons
     - topic_lessons = @lessons.select { |lesson| lesson.topic_id == @homework.topic_id }
     = f.input :lesson_id, as: :select, collection: topic_lessons, label_method: :title, label: 'Lesson (Optional)',
+      include_blank: 'Whole topic',
       hint: "Only lessons with at least #{Quiz::QUESTION_COUNT} questions can be set.",
       hint_html: { id: 'homework_lesson_id_hint' },
       input_html: { disabled: topic_lessons.empty?, aria: { describedby: 'homework_lesson_id_hint' },
