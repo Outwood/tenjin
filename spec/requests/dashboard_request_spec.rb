@@ -225,8 +225,8 @@ RSpec.describe "dashboard controller", :default_creates do
             expect(Capybara.string(response.body)).to have_css(name_cell, exact_text: topic.name)
           end
 
-          it "shows a cross named Not complete" do
-            expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-times")
+          it "shows an open circle named Not complete" do
+            expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-circle")
               .and have_css(status_cell, exact_text: "Not complete")
               .and have_no_css("#{status_cell} i.fa-exclamation")
           end

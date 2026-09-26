@@ -129,8 +129,8 @@ RSpec.describe "user controller", :default_creates do
       context "when the homework is not completed" do
         before { get user_path(student) }
 
-        it "shows a cross icon" do
-          expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-times")
+        it "shows an open circle" do
+          expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-circle")
             .and have_no_css("#{status_cell} i.fa-check")
         end
       end
@@ -143,7 +143,7 @@ RSpec.describe "user controller", :default_creates do
 
         it "shows a check icon" do
           expect(Capybara.string(response.body)).to have_css("#{status_cell} i.fa-check")
-            .and have_no_css("#{status_cell} i.fa-times")
+            .and have_no_css("#{status_cell} i.fa-circle")
         end
       end
 
