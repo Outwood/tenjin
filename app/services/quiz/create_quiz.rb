@@ -131,13 +131,13 @@ class Quiz::CreateQuiz < ApplicationCommand
   end
 
   def check_lesson_attempts
-    !UsageStatistic.on_day_of(Time.current).where(user: @user, topic: @quiz.topic, lesson: @quiz.lesson)
+    !UsageStatistic.where(user: @user, topic: @quiz.topic, lesson: @quiz.lesson, date: Date.current)
       .where(quizzes_started: 1..)
       .exists?
   end
 
   def check_topic_attempts
-    !UsageStatistic.on_day_of(Time.current).where(user: @user, topic: @quiz.topic)
+    !UsageStatistic.where(user: @user, topic: @quiz.topic, date: Date.current)
       .where(quizzes_started: 3..)
       .exists?
   end

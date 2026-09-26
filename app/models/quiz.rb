@@ -41,9 +41,6 @@ class Quiz < ApplicationRecord
   private
 
   def update_usage_statistics
-    now = Time.current
-    s = UsageStatistic.on_day_of(now).where(user: user, topic: topic, lesson: lesson)
-      .first_or_create!(date: now.beginning_of_day)
-    s.increment!(:quizzes_started)
+    UsageStatistic.count_start(user_id:, topic_id:, lesson_id:)
   end
 end
