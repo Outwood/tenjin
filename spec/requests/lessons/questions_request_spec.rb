@@ -127,7 +127,7 @@ RSpec.describe "lesson questions controller", :default_creates do
 
       it "marks Lessons, not Questions, as the current section" do
         expect(Capybara.string(response.body))
-          .to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{lessons_path}']", exact_text: "Lessons")
+          .to have_css("#navbar-main .nav-link.active[aria-current='true'][href='#{lessons_path}']", exact_text: "Lessons")
           .and have_no_css("#navbar-main .nav-link.active[href='#{questions_path}']")
       end
 

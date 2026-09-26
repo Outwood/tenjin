@@ -24,9 +24,11 @@ module ApplicationHelper
     content_tag(:i, nil, class: icon, aria: {hidden: true}) + content_tag(:span, label, class: "visually-hidden")
   end
 
-  # Links a navigation item, marking the current page for both styling and screen readers; css_class is the base class
+  # Links a navigation item, marking the current section for both styling and screen readers; css_class is the base
+  # class. Only a link to the page itself is the current page: on a page nested under it, it is the current section.
   def nav_link(label, path, current:, css_class: "nav-link")
-    link_to label, path, class: [css_class, {active: current}], aria: {current: ("page" if current)}
+    aria_current = current_page?(path) ? "page" : "true" if current
+    link_to label, path, class: [css_class, {active: current}], aria: {current: aria_current}
   end
 
   # The rule under a section heading; pass dashboard_style to colour it with the user's own

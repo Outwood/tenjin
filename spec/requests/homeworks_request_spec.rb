@@ -19,8 +19,8 @@ RSpec.describe "homeworks controller", :default_creates do
 
       before { get new_classroom_homework_path(classroom) }
 
-      it "marks My Classes as the current page" do
-        expect(page).to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{dashboard_path}']", exact_text: "My Classes")
+      it "marks My Classes as the current section" do
+        expect(page).to have_css("#navbar-main .nav-link.active[aria-current='true'][href='#{dashboard_path}']", exact_text: "My Classes")
       end
 
       it "marks the topic required" do

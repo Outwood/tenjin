@@ -21,7 +21,7 @@ RSpec.describe "subject flagged questions controller", :default_creates do
 
     it "marks Questions as the current section" do
       expect(Capybara.string(response.body))
-        .to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{questions_path}']", exact_text: "Questions")
+        .to have_css("#navbar-main .nav-link.active[aria-current='true'][href='#{questions_path}']", exact_text: "Questions")
     end
 
     context "with a flagged question in a lesson" do

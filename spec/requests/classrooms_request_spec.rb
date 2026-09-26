@@ -83,10 +83,10 @@ RSpec.describe "classrooms controller", :default_creates do
 
     before { sign_in school_admin }
 
-    it "marks My Classes as the current page" do
+    it "marks My Classes as the current section" do
       get classroom_path(classroom)
       expect(Capybara.string(response.body))
-        .to have_css("#navbar-main .nav-link.active[aria-current='page'][href='#{dashboard_path}']", exact_text: "My Classes")
+        .to have_css("#navbar-main .nav-link.active[aria-current='true'][href='#{dashboard_path}']", exact_text: "My Classes")
     end
 
     it "names every homework's topic" do
