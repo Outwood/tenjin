@@ -17,7 +17,9 @@ const form = `
       <option value="7">Fractions</option>
       <option value="8">Plants</option>
     </select>
-    <select id="lesson" data-homework-target="lessonSelect" disabled></select>
+    <select id="lesson" data-homework-target="lessonSelect" disabled>
+      <option value="">Whole topic</option>
+    </select>
   </div>
 `;
 
@@ -44,6 +46,13 @@ describe("homework", () => {
 
     expect(lessonTitles()).toContain("Equivalent fractions");
     expect(lessonSelect().disabled).toBe(false);
+  });
+
+  it("keeps the whole-topic choice first, and chosen", async () => {
+    await selectTopic("7");
+
+    expect(lessonTitles()).toEqual(["Whole topic", "Equivalent fractions"]);
+    expect(lessonSelect().value).toBe("");
   });
 
   it("does not list another topic's lesson", async () => {

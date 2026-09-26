@@ -9,13 +9,16 @@ export default class extends Controller {
     const matching = this.lessonsValue.filter(
       (l) => String(l.topic_id) === String(topicId),
     );
-    this.lessonSelectTarget.innerHTML = '<option value=""></option>';
-    matching.forEach((l) => {
+    // The server renders the blank choice, which names what leaving it means
+    const blank = this.lessonSelectTarget.options[0];
+    const options = matching.map((l) => {
       const opt = document.createElement("option");
       opt.value = l.id;
       opt.textContent = l.title;
-      this.lessonSelectTarget.appendChild(opt);
+      return opt;
     });
+    this.lessonSelectTarget.replaceChildren(blank, ...options);
+    blank.selected = true;
     this.lessonSelectTarget.disabled = matching.length === 0;
   }
 }
