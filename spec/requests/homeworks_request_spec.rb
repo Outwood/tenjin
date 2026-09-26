@@ -160,6 +160,12 @@ RSpec.describe "homeworks controller", :default_creates do
         expect(response.body).to include(lesson.title).and include(topic.name)
       end
     end
+
+    it "asks for confirmation before deleting the homework" do
+      get homework_path(homework)
+      expect(Capybara.string(response.body))
+        .to have_css("form[action='#{homework_path(homework)}'][data-turbo-confirm*='progress']")
+    end
   end
 
   describe "DELETE /homeworks/:id" do

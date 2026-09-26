@@ -37,4 +37,4 @@ section.page-section.text-center.pt-2#StudentProgress
       = button_to 'Delete Homework', homework_path(@homework),
         method: :delete,
         class: 'btn w-100 btn-danger',
-        form: { data: { turbo: true } }
+        form: { data: { turbo: true, turbo_confirm: "Delete this homework? Every pupil's progress on it will be lost." } }
