@@ -7,8 +7,14 @@ RSpec.describe "homeworks controller", :default_creates do
 
   describe "GET /classrooms/:classroom_id/homeworks/new" do
     context "with a classroom" do
-      let!(:full_lesson) { create(:lesson, topic: topic, questions_count: 10) }
-      let!(:short_lesson) { create(:lesson, topic: topic, questions_count: 9) }
+      let!(:full_lesson) { create(:lesson, :fills_a_quiz, topic: topic) }
+      # Ten questions, one of them retired, so a quiz would come up short
+      let!(:short_lesson) do
+        create(:lesson, topic: topic).tap do |lesson|
+          create_list(:question, 9, lesson: lesson, topic: topic)
+          create(:question, lesson: lesson, topic: topic, active: false)
+        end
+      end
       let(:page) { Capybara.string(response.body) }
 
       before { get new_classroom_homework_path(classroom) }
@@ -29,6 +35,24 @@ RSpec.describe "homeworks controller", :default_creates do
       it "embeds only the picker fields of lessons with at least ten questions" do
         lessons = JSON.parse(page.find("[data-homework-lessons-value]")["data-homework-lessons-value"])
         expect(lessons).to contain_exactly({"id" => full_lesson.id, "topic_id" => topic.id, "title" => full_lesson.title})
+      end
+    end
+
+    context "with topics that differ in their questions" do
+      let!(:asked_topic) { create(:topic, subject: quiz_subject, name: "Fractions") }
+      let!(:retired_topic) { create(:topic, subject: quiz_subject, name: "Decimals") }
+      let!(:inactive_topic) { create(:topic, subject: quiz_subject, name: "Percentages", active: false) }
+
+      before do
+        create(:question, topic: asked_topic)
+        create(:question, topic: retired_topic, active: false)
+        create(:question, topic: inactive_topic)
+        get new_classroom_homework_path(classroom)
+      end
+
+      it "offers each topic with an active question, inactive or not" do
+        expect(Capybara.string(response.body))
+          .to have_select("Topic", options: ["Choose a topic", "Fractions", "Percentages"])
       end
     end
 
@@ -114,8 +138,8 @@ RSpec.describe "homeworks controller", :default_creates do
     end
 
     context "with a lesson homework and a due date in the past" do
-      let(:lesson) { create(:lesson, topic: topic, title: "Equivalent fractions", questions_count: 10) }
-      let!(:sibling_lesson) { create(:lesson, topic: topic, title: "Mixed numbers", questions_count: 10) }
+      let(:lesson) { create(:lesson, :fills_a_quiz, topic: topic, title: "Equivalent fractions") }
+      let!(:sibling_lesson) { create(:lesson, :fills_a_quiz, topic: topic, title: "Mixed numbers") }
 
       before { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(lesson_id: lesson.id, due_date: 1.day.ago)} }
 

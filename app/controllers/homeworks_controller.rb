@@ -17,7 +17,7 @@ class HomeworksController < ApplicationController
   def new
     @classroom = find_classroom
     @homework = authorize @classroom.homeworks.new(due_date: default_due_date, required: 70)
-    @lessons = lessons_for_classroom(@classroom)
+    load_choices
   end
 
   def create
@@ -27,7 +27,7 @@ class HomeworksController < ApplicationController
       flash[:notice] = "#{@homework.title} homework set"
       redirect_to @homework
     else
-      @lessons = lessons_for_classroom(@classroom)
+      load_choices
       render :new, status: :unprocessable_content
     end
   end
@@ -59,7 +59,12 @@ class HomeworksController < ApplicationController
     params.require(:homework).permit(:due_date, :required, :topic_id, :lesson_id)
   end
 
-  def lessons_for_classroom(classroom)
-    Lesson.where(topic: classroom.subject.topics).where(questions_count: Quiz::QUESTION_COUNT..)
+  # What a homework quiz can be built from: Quiz::CreateQuiz asks only active questions, so a topic
+  # needs one and a lesson a quiz's worth. An inactive topic stays on offer to teachers.
+  def load_choices
+    active_questions = Question.where(active: true)
+    @topics = @classroom.subject.topics.where(id: active_questions.select(:topic_id)).order(:name)
+    @lessons = Lesson.where(topic: @topics).where(id: active_questions.group(:lesson_id)
+      .having("COUNT(*) >= ?", Quiz::QUESTION_COUNT).select(:lesson_id))
   end
 end
