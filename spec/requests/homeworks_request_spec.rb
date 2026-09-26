@@ -74,6 +74,23 @@ RSpec.describe "homeworks controller", :default_creates do
       end
     end
 
+    context "with no topic and a due date in the past" do
+      let(:page) { Capybara.string(response.body) }
+
+      before { post classroom_homeworks_path(classroom), params: {homework: homework_params.merge(topic_id: "", due_date: 1.day.ago)} }
+
+      it "describes each field with its own error" do
+        due_error = page.find("#homework_due_date")["aria-describedby"]
+        topic_error = page.find("#homework_topic_id")["aria-describedby"]
+        expect(page).to have_css("##{due_error}", exact_text: "Due date can't be in the past")
+          .and have_css("##{topic_error}", text: "Topic can't be blank")
+      end
+
+      it "leaves a field without an error undescribed" do
+        expect(page).to have_css("#homework_required:not([aria-describedby])")
+      end
+    end
+
     context "with a lesson homework and a due date in the past" do
       let(:lesson) { create(:lesson, topic: topic, title: "Equivalent fractions", questions_count: 10) }
       let!(:sibling_lesson) { create(:lesson, topic: topic, title: "Mixed numbers", questions_count: 10) }
