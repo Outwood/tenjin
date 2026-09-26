@@ -58,6 +58,13 @@ RSpec.describe "user controller", :default_creates do
         .and have_no_css("#students-table .student-row[data-id='#{other_school_student.id}']")
     end
 
+    # Setting homework needs a class, which this list has none of
+    it "offers no homework setting in a pupil's actions" do
+      expect(Capybara.string(response.body).find("#students-table .student-row[data-id='#{student.id}']"))
+        .to have_button("Reset password")
+        .and have_no_link("Set homework")
+    end
+
     it "lists teachers and school admins as employees" do
       expect(Capybara.string(response.body))
         .to have_css("#employees-table .employee-row[data-id='#{other_teacher.id}']")

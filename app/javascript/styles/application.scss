@@ -44,8 +44,8 @@ a:hover {
 }
 
 // Links share the body colour, so a datatable underlines the links in its rows to set them apart;
-// a link drawn as a button carries its own border
-.tabulator .tabulator-tableholder a:not(.btn) {
+// a link drawn as a button carries its own border, and one in a menu is set apart by the menu
+.tabulator .tabulator-tableholder a:not(.btn, .dropdown-item) {
   text-decoration: underline;
   text-decoration-color: rgba(var(--bs-body-color-rgb), 0.35);
   text-underline-offset: 0.2em;
@@ -216,6 +216,12 @@ body .tabulator .tabulator-tableholder .tabulator-placeholder .tabulator-placeho
 // A row's ⋮ button explains itself, so its column's heading is for screen readers only
 .tabulator .tabulator-col.actions-column .tabulator-col-title {
   @include visually-hidden;
+}
+
+// The ⋮ menu is position: fixed to escape the table's overflow, which the theme's translateZ(0)
+// defeats by making the table its containing block, clipping menus on the last rows
+body .tabulator:has(.actions-column) {
+  transform: none;
 }
 
 // Clears the fixed navbar when a subject link or the reopened topic scrolls here
