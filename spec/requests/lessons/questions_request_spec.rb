@@ -30,6 +30,7 @@ RSpec.describe "lesson questions controller", :default_creates do
         it "lists the lesson's active questions" do
           expect(Capybara.string(response.body)).to have_text("What do plants make in daylight?")
             .and have_no_text("Which gas do leaves take in?")
+            .and have_no_css("#no-questions")
         end
 
         it "marks the correct answer" do
@@ -38,6 +39,19 @@ RSpec.describe "lesson questions controller", :default_creates do
           expect(Capybara.string(response.body))
             .to have_css("##{dom_id(glucose)} .badge", exact_text: "Correct")
             .and have_no_css("##{dom_id(oxygen)} .badge")
+        end
+      end
+
+      context "with no questions" do
+        before { get lesson_questions_path(lesson) }
+
+        it "says the lesson has none" do
+          expect(Capybara.string(response.body)).to have_css("#no-questions", text: "This lesson has no questions yet.")
+        end
+
+        it "links back to the lesson's topic on the Lessons page" do
+          expect(Capybara.string(response.body))
+            .to have_css("nav[aria-label='Breadcrumb'] a[href='#{lessons_path(open: topic.id)}']", exact_text: topic.name)
         end
       end
 
