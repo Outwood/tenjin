@@ -238,7 +238,7 @@ RSpec.describe "dashboard controller", :default_creates do
 
         context "when the homework is completed" do
           before do
-            homework.homework_progresses.find_by!(user: student).update!(completed: true)
+            homework.homework_progresses.find_by!(user: student).update!(completed_at: Time.current)
             get dashboard_path
           end
 
@@ -263,7 +263,7 @@ RSpec.describe "dashboard controller", :default_creates do
           let!(:homework) { create(:homework, :overdue, classroom: classroom, topic: topic, due_date: 2.weeks.ago) }
 
           before do
-            homework.homework_progresses.find_by!(user: student).update!(completed: true)
+            homework.homework_progresses.find_by!(user: student).update!(completed_at: Time.current)
             get dashboard_path
           end
 

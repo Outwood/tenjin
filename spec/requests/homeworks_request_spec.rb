@@ -99,7 +99,7 @@ RSpec.describe "homeworks controller", :default_creates do
 
     context "when a student has completed the homework" do
       before do
-        homework.homework_progresses.first.update!(completed: true)
+        homework.homework_progresses.first.update!(completed_at: Time.current)
         get homework_path(homework)
       end
 
@@ -138,7 +138,7 @@ RSpec.describe "homeworks controller", :default_creates do
 
       # The move comes after the homework, as a sync would make it, so the mover keeps a completed row on it
       before do
-        [enrollments.first.user, student].each { |pupil| homework.homework_progresses.find_by!(user: pupil).update!(completed: true) }
+        [enrollments.first.user, student].each { |pupil| homework.homework_progresses.find_by!(user: pupil).update!(completed_at: Time.current) }
         mover_enrollment.destroy!
         create(:enrollment, classroom: create(:classroom, school: school), user: student)
         get homework_path(homework)

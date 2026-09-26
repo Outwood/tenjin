@@ -50,13 +50,12 @@ module ClassroomsHelper
     content_tag(:i, nil, class: "#{slot[:icon]} fa-fw me-1", aria: {hidden: true}) + slot[:text].upcase_first
   end
 
-  # No row means the homework was set before the pupil joined the class, and a completion with no
-  # time reads as on time. Due times are clock times stored as UTC, so in summer a
-  # completion up to an hour late also reads as on time.
+  # No row means the homework was set before the pupil joined the class. Due times are clock
+  # times stored as UTC, so in summer a completion up to an hour late reads as on time.
   def homework_state(homework, progress)
     return :not_set if progress.nil?
     if progress.completed?
-      return progress.completed_at&.after?(homework.due_date) ? :done_late : :done
+      return progress.completed_at.after?(homework.due_date) ? :done_late : :done
     end
 
     homework.due_date.past? ? :overdue : :not_due

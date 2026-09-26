@@ -26,7 +26,9 @@ class Classroom < ApplicationRecord
   def homework_counts
     h_count = HomeworkProgress.arel_table[:id].count
 
-    Homework.select(:id, h_count, homework_count_completed.sum.as("completed_count"), :due_date, :topic_id, :lesson_id)
+    completed_count = HomeworkProgress.arel_table[:completed_at].count.as("completed_count")
+
+    Homework.select(:id, h_count, completed_count, :due_date, :topic_id, :lesson_id)
       .joins(current_pupil_progress_join)
       .group(:id)
       .where(classroom: self)
@@ -45,10 +47,5 @@ class Classroom < ApplicationRecord
     homeworks.join(progresses, Arel::Nodes::OuterJoin)
       .on(progresses[:homework_id].eq(homeworks[:id]).and(progresses[:user_id].in(current_pupils)))
       .join_sources
-  end
-
-  def homework_count_completed
-    h_count_completed = Arel::Nodes::Case.new HomeworkProgress.arel_table[:completed]
-    h_count_completed.when(true).then(1).else(0)
   end
 end
